@@ -177,11 +177,17 @@ class URLSearchParams implements IURLSearchParams {
   }
 
   append(name: USVString, value: USVString): void {
+    if(name === undefined || value === undefined) {
+      throw new TypeError("Not enough arguments to URLSearchParams.append.");
+    }
     this.list.push({ name: name, value: value });
     this.update();
   }
 
   delete(name: USVString): void {
+    if (name === undefined) {
+      throw new TypeError("Not enough arguments to URLSearchParams.delete.");
+    }
     this.list = this.list.filter(function(pair) {
       return pair.name !== name;
     });
@@ -189,10 +195,16 @@ class URLSearchParams implements IURLSearchParams {
   }
 
   get(name: USVString): USVString {
+    if (name === undefined) {
+      throw new TypeError("Not enough arguments to URLSearchParams.get.");
+    }
     return this.getAll(name).shift() || null;
   }
 
   getAll(name: USVString): USVString[] {
+    if (name === undefined) {
+      throw new TypeError("Not enough arguments to URLSearchParams.getAll.");
+    }
     return this.list.reduce(function(acc, pair) {
       if (pair.name === name) {
         acc.push(pair.value);
@@ -202,12 +214,18 @@ class URLSearchParams implements IURLSearchParams {
   }
 
   has(name: USVString): boolean {
+    if (name === undefined) {
+      throw new TypeError("Not enough arguments to URLSearchParams.has.");
+    }
     return this.list.some(function(pair) {
       return pair.name === name;
     });
   }
 
   set(name: USVString, value: USVString): void { // TODO: performance
+    if (name === undefined || value === undefined) {
+      throw new TypeError("Not enough arguments to URLSearchParams.set.");
+    }
     // if exists, this appended will remove in filter.
     this.list.push({ name: name, value: value });
 
@@ -346,19 +364,57 @@ function assert(actual, expected) {
 // tests
 (function test1() {
   var q = "a=b&c=d";
-  var usp = new URLSearchParams(q);
-  assert(usp.toString(), q);
+  var searchParams = new URLSearchParams(q);
+  assert(searchParams.toString(), q);
 })();
 
 (function test2() {
-  var q = "a=b&c=d";
-  var usp = new URLSearchParams();
-  usp.append('a', 'b');
-  usp.append('c', 'd');
-  assert(usp.toString(), q);
+  // append
+  var searchParams = new URLSearchParams();
+  searchParams.append("a", "b");
+  searchParams.append("c", "d");
+  assert(searchParams.toString(), "a=b&c=d");
+
+  // get
+  var searchParams = new URLSearchParams("a=b");
+  assert(searchParams.get("a"), "b");
+
+  var searchParams = new URLSearchParams("a=b&a=c");
+  assert(searchParams.get("a"), "b");
+  assert(searchParams.get("b"), null);
+
+  // getAll
+  var searchParams = new URLSearchParams("a=b&a=c");
+  var all = searchParams.getAll("a");
+  assert(all.length, 2);
+  assert(all[0], "b");
+  assert(all[1], "c");
+
+  // set
+  var searchParams = new URLSearchParams("a=b&a=c");
+  searchParams.set("a", "d");
+  var all = searchParams.getAll("a");
+  assert(all.length, 1);
+  assert(all[0], "d");
+
+  // delete
+  var searchParams = new URLSearchParams("a=b&a=c&x=y");
+  searchParams.delete("a");
+  var all = searchParams.getAll("a");
+  assert(all.length, 0);
+
+  searchParams.delete("z");
+  assert(searchParams.get("x"), "y");
+
+  // has
+  var searchParams = new URLSearchParams("a=b&a=c&x=y");
+  assert(searchParams.has("a"), true);
+  assert(searchParams.has("x"), true);
+  assert(searchParams.has("z"), false);
 })();
 
 (function test3() {
+  // from https://developer.mozilla.org/ja/docs/Web/API/URLSearchParams
   var paramsString = "q=URLUtils.searchParams&topic=api"
   var searchParams = new URLSearchParams(paramsString);
 
@@ -372,4 +428,51 @@ function assert(actual, expected) {
 
   searchParams.delete("topic");
   assert(searchParams.toString(), "q=URLUtils.searchParams");
+})();
+
+(function test4() {
+  var error_message = "Not enough arguments to URLSearchParams"
+  var searchParams = new URLSearchParams();
+
+  // append
+  try {
+    searchParams.append(undefined, undefined);
+  } catch(err) {
+    assert(err.message, error_message + ".append.");
+  }
+
+  // get
+  try {
+    searchParams.get(undefined);
+  } catch(err) {
+    assert(err.message, error_message + ".get.");
+  }
+
+  // getAll
+  try {
+    searchParams.getAll(undefined);
+  } catch(err) {
+    assert(err.message, error_message + ".getAll.");
+  }
+
+  // set
+  try {
+    searchParams.set(undefined, undefined);
+  } catch(err) {
+    assert(err.message, error_message + ".set.");
+  }
+
+  // has
+  try {
+    searchParams.has(undefined);
+  } catch(err) {
+    assert(err.message, error_message + ".has.");
+  }
+
+  // delete
+  try {
+    searchParams.delete(undefined);
+  } catch(err) {
+    assert(err.message, error_message + ".delete.");
+  }
 })();
