@@ -212,7 +212,7 @@ class URLSearchParams implements IURLSearchParams {
     this.list.push({ name: name, value: value });
 
     // update all pair
-    this.list.map(function(pair) {
+    this.list = this.list.map(function(pair) {
       if (pair.name === name) {
         pair.value = value;
       }
