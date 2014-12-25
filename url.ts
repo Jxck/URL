@@ -262,6 +262,6 @@ class URLSearchParams implements IURLSearchParams {
   }
 
   toString(): string {
-    return "";
+    return this.serialize(this.list);
   }
 }
