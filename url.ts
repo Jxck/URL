@@ -326,7 +326,7 @@ class URLSearchParams implements IURLSearchParams {
       return { name: name, value: value };
     });
 
-    return null;
+    return pairs;
   }
 
   private update(): void {
@@ -338,3 +338,38 @@ class URLSearchParams implements IURLSearchParams {
     return this.serialize(this.list);
   }
 }
+
+function assert(actual, expected) {
+  console.assert(actual === expected, '\nact: ' + actual + '\nexp: ' + expected);
+}
+
+// tests
+(function test1() {
+  var q = "a=b&c=d";
+  var usp = new URLSearchParams(q);
+  assert(usp.toString(), q);
+})();
+
+(function test2() {
+  var q = "a=b&c=d";
+  var usp = new URLSearchParams();
+  usp.append('a', 'b');
+  usp.append('c', 'd');
+  assert(usp.toString(), q);
+})();
+
+(function test3() {
+  var paramsString = "q=URLUtils.searchParams&topic=api"
+  var searchParams = new URLSearchParams(paramsString);
+
+  assert(searchParams.has("topic"), true);
+  assert(searchParams.get("topic"), "api");
+  assert(searchParams.getAll("topic")[0], "api");
+  assert(searchParams.get("foo"), null); // true
+
+  searchParams.append("topic", "webdev");
+  assert(searchParams.toString(), "q=URLUtils.searchParams&topic=api&topic=webdev");
+
+  searchParams.delete("topic");
+  assert(searchParams.toString(), "q=URLUtils.searchParams");
+})();
