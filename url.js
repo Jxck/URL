@@ -61,17 +61,14 @@ var URLSearchParams = (function () {
             return true;
         }, { emitted: false });
     };
-    URLSearchParams.prototype.byteSerialize = function (input) {
-        return null;
-    };
     URLSearchParams.prototype.serialize = function (pairs, encodingOverride) {
-        var _this = this;
         if (encodingOverride === undefined) {
             encodingOverride = "utf-8";
         }
         var output = pairs.reduce(function (_output, pair, index) {
-            var name = _this.byteSerialize(decodeURIComponent(pair.name));
-            var value = _this.byteSerialize(decodeURIComponent(pair.value));
+            // use encodeURIComponent as byte serializer
+            var name = encodeURIComponent(pair.name);
+            var value = encodeURIComponent(pair.value);
             if (index !== 0) {
                 _output = _output + "&";
             }

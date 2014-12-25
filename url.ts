@@ -162,18 +162,15 @@ class URLSearchParams implements IURLSearchParams {
     }, { emitted: false });
   }
 
-  private byteSerialize(input: string): string {
-    return null;
-  }
-
   private serialize(pairs: pair[], encodingOverride?: string): string {
     if (encodingOverride === undefined) {
       encodingOverride = "utf-8";
     }
 
-    var output = pairs.reduce((_output, pair, index) => {
-      var name  = this.byteSerialize(decodeURIComponent(pair.name));
-      var value = this.byteSerialize(decodeURIComponent(pair.value));
+    var output = pairs.reduce(function(_output, pair, index) {
+      // use encodeURIComponent as byte serializer
+      var name  = encodeURIComponent(pair.name);
+      var value = encodeURIComponent(pair.value);
       if (index !== 0) {
         _output = _output + "&";
       }
