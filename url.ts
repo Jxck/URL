@@ -357,66 +357,68 @@ class URLSearchParams implements IURLSearchParams {
   }
 }
 
+// tests
 function assert(actual, expected) {
+  console.log('.');
   console.assert(actual === expected, '\nact: ' + actual + '\nexp: ' + expected);
 }
 
-// tests
-(function test1() {
-  var q = "a=b&c=d";
-  var searchParams = new URLSearchParams(q);
-  assert(searchParams.toString(), q);
-})();
+(function TestURLSearchPrams() {
+  (function test1() {
+    var q = "a=b&c=d";
+    var searchParams = new URLSearchParams(q);
+    assert(searchParams.toString(), q);
+  })();
 
-(function test2() {
-  // append
-  var searchParams = new URLSearchParams();
-  searchParams.append("a", "b");
-  searchParams.append("c", "d");
-  assert(searchParams.toString(), "a=b&c=d");
+  (function test2() {
+    // append
+    var searchParams = new URLSearchParams();
+    searchParams.append("a", "b");
+    searchParams.append("c", "d");
+    assert(searchParams.toString(), "a=b&c=d");
 
-  // get
-  var searchParams = new URLSearchParams("a=b");
-  assert(searchParams.get("a"), "b");
+    // get
+    var searchParams = new URLSearchParams("a=b");
+    assert(searchParams.get("a"), "b");
 
-  var searchParams = new URLSearchParams("a=b&a=c");
-  assert(searchParams.get("a"), "b");
-  assert(searchParams.get("b"), null);
+    var searchParams = new URLSearchParams("a=b&a=c");
+    assert(searchParams.get("a"), "b");
+    assert(searchParams.get("b"), null);
 
-  // getAll
-  var searchParams = new URLSearchParams("a=b&a=c");
-  var all = searchParams.getAll("a");
-  assert(all.length, 2);
-  assert(all[0], "b");
-  assert(all[1], "c");
+    // getAll
+    var searchParams = new URLSearchParams("a=b&a=c");
+    var all = searchParams.getAll("a");
+    assert(all.length, 2);
+    assert(all[0], "b");
+    assert(all[1], "c");
 
-  // set
-  var searchParams = new URLSearchParams("a=b&a=c");
-  searchParams.set("a", "d");
-  var all = searchParams.getAll("a");
-  assert(all.length, 1);
-  assert(all[0], "d");
+    // set
+    var searchParams = new URLSearchParams("a=b&a=c");
+    searchParams.set("a", "d");
+    var all = searchParams.getAll("a");
+    assert(all.length, 1);
+    assert(all[0], "d");
 
-  // delete
-  var searchParams = new URLSearchParams("a=b&a=c&x=y");
-  searchParams.delete("a");
-  var all = searchParams.getAll("a");
-  assert(all.length, 0);
+    // delete
+    var searchParams = new URLSearchParams("a=b&a=c&x=y");
+    searchParams.delete("a");
+    var all = searchParams.getAll("a");
+    assert(all.length, 0);
 
-  searchParams.delete("z");
-  assert(searchParams.get("x"), "y");
+    searchParams.delete("z");
+    assert(searchParams.get("x"), "y");
 
-  // has
-  var searchParams = new URLSearchParams("a=b&a=c&x=y");
-  assert(searchParams.has("a"), true);
-  assert(searchParams.has("x"), true);
-  assert(searchParams.has("z"), false);
-})();
+    // has
+    var searchParams = new URLSearchParams("a=b&a=c&x=y");
+    assert(searchParams.has("a"), true);
+    assert(searchParams.has("x"), true);
+    assert(searchParams.has("z"), false);
+  })();
 
-(function test3() {
-  // from https://developer.mozilla.org/ja/docs/Web/API/URLSearchParams
-  var paramsString = "q=URLUtils.searchParams&topic=api"
-  var searchParams = new URLSearchParams(paramsString);
+  (function test3() {
+    // from https://developer.mozilla.org/ja/docs/Web/API/URLSearchParams
+    var paramsString = "q=URLUtils.searchParams&topic=api"
+    var searchParams = new URLSearchParams(paramsString);
 
   assert(searchParams.has("topic"), true);
   assert(searchParams.get("topic"), "api");
@@ -428,11 +430,11 @@ function assert(actual, expected) {
 
   searchParams.delete("topic");
   assert(searchParams.toString(), "q=URLUtils.searchParams");
-})();
+  })();
 
-(function test4() {
-  var error_message = "Not enough arguments to URLSearchParams"
-  var searchParams = new URLSearchParams();
+  (function test4() {
+    var error_message = "Not enough arguments to URLSearchParams"
+    var searchParams = new URLSearchParams();
 
   // append
   try {
@@ -475,4 +477,5 @@ function assert(actual, expected) {
   } catch(err) {
     assert(err.message, error_message + ".delete.");
   }
+  })();
 })();
