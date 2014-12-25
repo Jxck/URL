@@ -39,9 +39,82 @@ interface URLUtils {
   port:         USVString;
   pathname:     USVString;
   search:       USVString;
-  // searchParams: URLSearchParams;
+  searchParams: URLSearchParams;
   hash:         USVString;
 }
+
+// URL already in lib.d.ts
+class jURL {
+  private _origin:       USVString;
+  private _protocol:     USVString;
+  private _username:     USVString;
+  private _password:     USVString;
+  private _host:         USVString;
+  private _hostname:     USVString;
+  private _port:         USVString;
+  private _pathname:     USVString;
+  private _search:       USVString;
+  private _searchParams: URLSearchParams;
+  private _hash:         USVString;
+
+  get origin(): USVString {
+    return this._origin;
+  }
+
+  get protocol(): USVString {
+    return this._protocol;
+  }
+
+  get username(): USVString {
+    return this._username;
+  }
+
+  get password(): USVString {
+    return this._password;
+  }
+
+  get host(): USVString {
+    return this._host;
+  }
+
+  get hostname(): USVString {
+    return this._hostname;
+  }
+
+  get port(): USVString {
+    return this._port;
+  }
+
+  get pathname(): USVString {
+    return this._pathname;
+  }
+
+  get search(): USVString {
+    return this._search;
+  }
+
+  get searchParams(): URLSearchParams {
+    return this._searchParams;
+  }
+
+  get hash(): USVString {
+    return this._hash;
+  }
+}
+
+//class jURL implements URLUtils {
+//  private origin:       USVString;
+//  private protocol:     USVString;
+//  private username:     USVString;
+//  private password:     USVString;
+//  private host:         USVString;
+//  private hostname:     USVString;
+//  private port:         USVString;
+//  private pathname:     USVString;
+//  private search:       USVString;
+//  // searchParams: URLSearchParams;
+//  private hash:         USVString;
+//}
 
 //[NoInterfaceObject, Exposed=(Window,Worker)]
 // interface URLUtilsReadOnly {
