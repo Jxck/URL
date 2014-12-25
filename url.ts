@@ -162,6 +162,22 @@ class URLSearchParams implements IURLSearchParams {
     }, { emitted: false });
   }
 
+  private byteSerialize(input: string): string {
+    input = encodeURIComponent(input);
+
+    // revert space to '+'
+    input = input.replace("%20", "+");
+
+    // replace chars which encodeURIComponent dosen't cover
+    input = input.replace("!", "%21")
+                 .replace("~", "%7E")
+                 .replace("'", "%27")
+                 .replace("(", "%28")
+                 .replace(")", "%29")
+
+    return input
+  }
+
   private serialize(pairs: pair[], encodingOverride?: string): string {
     if (encodingOverride === undefined) {
       encodingOverride = "utf-8";
@@ -169,8 +185,8 @@ class URLSearchParams implements IURLSearchParams {
 
     var output = pairs.reduce(function(_output, pair, index) {
       // use encodeURIComponent as byte serializer
-      var name  = encodeURIComponent(pair.name);
-      var value = encodeURIComponent(pair.value);
+      var name  = byteSerialize(pair.name);
+      var value = byteSerialize(pair.value);
       if (index !== 0) {
         _output = _output + "&";
       }

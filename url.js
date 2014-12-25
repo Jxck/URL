@@ -61,6 +61,14 @@ var URLSearchParams = (function () {
             return true;
         }, { emitted: false });
     };
+    URLSearchParams.prototype.byteSerialize = function (input) {
+        input = encodeURIComponent(input);
+        // revert space to '+'
+        input = input.replace("%20", "+");
+        // replace chars which encodeURIComponent dosen't cover
+        input = input.replace("!", "%21").replace("~", "%7E").replace("'", "%27").replace("(", "%28").replace(")", "%29");
+        return input;
+    };
     URLSearchParams.prototype.serialize = function (pairs, encodingOverride) {
         if (encodingOverride === undefined) {
             encodingOverride = "utf-8";
