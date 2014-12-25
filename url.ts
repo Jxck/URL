@@ -257,6 +257,8 @@ class URLSearchParams implements IURLSearchParams {
   }
 
   private update(): void {
+    // TODO: implement me
+    // https://url.spec.whatwg.org/#concept-urlsearchparams-update
   }
 
   toString(): string {
