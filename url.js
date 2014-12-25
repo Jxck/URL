@@ -61,16 +61,24 @@ var URLSearchParams = (function () {
             return true;
         }, { emitted: false });
     };
-    URLSearchParams.prototype.parse = function (input, encoding, useCharset, isIndex) {
-        if (encoding !== "utf-8") {
-            encoding = "utf-8"; // TODO: currently only support utf-8
+    // https://url.spec.whatwg.org/#concept-urlencoded-parser
+    /**
+     * CAUTION
+     * this implementation currently support only UTF-8 encoding
+     * so ignore 'encodingOverride' and '_charset_' flag
+     */
+    URLSearchParams.prototype.parse = function (input, encodingOverride, useCharset, isIndex) {
+        if (encodingOverride !== undefined) {
+            encodingOverride = "utf-8";
         }
-        // TODO: check 0x7F
+        if (encodingOverride !== "utf-8") {
+            throw new Error("unsupported eocnding");
+        }
         var sequences = input.split('&');
         if (isIndex) {
-            var sequence = sequences[0];
-            if (sequence.indexOf("=") === -1) {
-                sequences[0] = "=" + sequence;
+            var head = sequences[0];
+            if (head.indexOf("=") === -1) {
+                sequences[0] = "=" + head;
             }
         }
         var pairs = sequences.map(function (bytes) {
@@ -81,7 +89,7 @@ var URLSearchParams = (function () {
             if (bytes.indexOf("=")) {
                 var b = bytes.split("=");
                 name = b.shift();
-                value = b.join("");
+                value = b.join("=");
             }
             else {
                 name = bytes;
@@ -92,8 +100,11 @@ var URLSearchParams = (function () {
             name.replace(/\+/g, c0x20);
             value.replace(/\+/g, c0x20);
             if (useCharset && name === "_charset_") {
-                throw new Error("not implemented yet");
+                throw new Error("unsupported flug _charset_");
             }
+            // parsent decode
+            name = decodeURIComponent(name);
+            value = decodeURIComponent(value);
             return { name: name, value: value };
         });
         return null;
