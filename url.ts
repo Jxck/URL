@@ -201,6 +201,9 @@ class URLSearchParams implements IURLSearchParams {
         throw new Error("not implemented yet");
       }
 
+      name  = encodeURIComponent(name);
+      value = encodeURIComponent(value);
+
       return {name: name, value: value};
     });
 
