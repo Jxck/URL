@@ -162,6 +162,29 @@ class URLSearchParams implements IURLSearchParams {
     }, { emitted: false });
   }
 
+  private byteSerialize(input: string): string {
+    return null;
+  }
+
+  private serialize(pairs: pair[], encodingOverride?: string): string {
+    if (encodingOverride === undefined) {
+      encodingOverride = "utf-8";
+    }
+
+    var output = pairs.reduce((_output, pair, index) => {
+      var name  = this.byteSerialize(decodeURIComponent(pair.name));
+      var value = this.byteSerialize(decodeURIComponent(pair.value));
+      if (index !== 0) {
+        _output = _output + "&";
+      }
+      _output += name + "=" + value;
+      return _output;
+    }, "");
+
+    return output;
+  }
+
+
   // https://url.spec.whatwg.org/#concept-urlencoded-parser
   /**
    * CAUTION
@@ -169,7 +192,7 @@ class URLSearchParams implements IURLSearchParams {
    * so ignore 'encodingOverride' and '_charset_' flag
    */
   private parse(input: USVString, encodingOverride?: string, useCharset?: boolean, isIndex?: boolean): pair[] {
-    if (encodingOverride !== undefined) {
+    if (encodingOverride === undefined) {
       encodingOverride = "utf-8";
     }
 

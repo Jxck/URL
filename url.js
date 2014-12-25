@@ -61,6 +61,25 @@ var URLSearchParams = (function () {
             return true;
         }, { emitted: false });
     };
+    URLSearchParams.prototype.byteSerialize = function (input) {
+        return null;
+    };
+    URLSearchParams.prototype.serialize = function (pairs, encodingOverride) {
+        var _this = this;
+        if (encodingOverride === undefined) {
+            encodingOverride = "utf-8";
+        }
+        var output = pairs.reduce(function (_output, pair, index) {
+            var name = _this.byteSerialize(decodeURIComponent(pair.name));
+            var value = _this.byteSerialize(decodeURIComponent(pair.value));
+            if (index !== 0) {
+                _output = _output + "&";
+            }
+            _output += name + "=" + value;
+            return _output;
+        }, "");
+        return output;
+    };
     // https://url.spec.whatwg.org/#concept-urlencoded-parser
     /**
      * CAUTION
@@ -68,7 +87,7 @@ var URLSearchParams = (function () {
      * so ignore 'encodingOverride' and '_charset_' flag
      */
     URLSearchParams.prototype.parse = function (input, encodingOverride, useCharset, isIndex) {
-        if (encodingOverride !== undefined) {
+        if (encodingOverride === undefined) {
             encodingOverride = "utf-8";
         }
         if (encodingOverride !== "utf-8") {
