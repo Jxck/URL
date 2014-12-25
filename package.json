@@ -1,0 +1,24 @@
+{
+  "name": "URL",
+  "author": "Jxck",
+  "license": "MIT",
+  "version": "1.0.0",
+  "description": "implementaion of https://url.spec.whatwg.org/",
+  "homepage": "https://github.com/Jxck/URL",
+  "bugs": {
+    "url": "https://github.com/Jxck/URL/issues"
+  },
+  "keywords": [
+    "url",
+    "whatwg"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jxck/URL"
+  },
+  "main": "url.ts",
+  "scripts": {
+    "build": "tsc url.ts --target ES5",
+    "test": "npm run build && node url.js"
+  }
+}
