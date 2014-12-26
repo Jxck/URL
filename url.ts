@@ -386,6 +386,21 @@ function assert(actual, expected) {
     var q = "a=b&c=d";
     var searchParams = new URLSearchParams(q);
     assert(searchParams.toString(), q);
+
+    var a = "aAzZ09あ𠮟叱";
+    var e = "aAzZ09%E3%81%82%F0%A0%AE%9F%E5%8F%B1=";
+    var searchParams = new URLSearchParams(a);
+    assert(searchParams.toString(), e);
+
+    var a = " *-._";
+    var e = "+*-._=";
+    var searchParams = new URLSearchParams(a);
+    assert(searchParams.toString(), e);
+
+    var a = "!~'()";
+    var e = "%21%7E%27%28%29=";
+    var searchParams = new URLSearchParams(a);
+    assert(searchParams.toString(), e);
   })();
 
   (function test2() {
