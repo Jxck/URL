@@ -44,7 +44,12 @@ interface IURL extends URLUtils {
 }
 
 // URL already in lib.d.ts
-class jURL {
+class jURL implements IURL {
+  private input:         string;
+  private encoding:      string;
+  private queryObject:   URLSearchParams;
+  private url:           jURL;
+
   private _origin:       USVString;
   private _protocol:     USVString;
   private _username:     USVString;
@@ -56,6 +61,19 @@ class jURL {
   private _search:       USVString;
   private _searchParams: URLSearchParams;
   private _hash:         USVString;
+
+  static domainToASCII(domain: string):   string {
+    // TODO: implement me
+    return "";
+  }
+
+  static domainToUnicode(domain: string): string {
+    // TODO: implement me
+    return "";
+  }
+
+  constructor(url:USVString, base:USVString = "about:blank") {
+  }
 
   get origin(): USVString {
     return this._origin;
