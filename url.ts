@@ -1,17 +1,5 @@
 type USVString = string;
 
-//[Constructor(USVString url, optional USVString base = "about:blank"), Exposed=(Window,Worker)]
-//interface URL {
-//  static USVString domainToASCII(USVString domain);
-//  static USVString domainToUnicode(USVString domain);
-//};
-
-//URL implements URLUtils;
-interface IURL extends URLUtils {
-  // static domainToASCII(domain: string):   string;
-  // static domainToUnicode(domain: string): string;
-}
-
 //[NoInterfaceObject, Exposed=(Window,Worker)]
 //interface URLUtils {
 //  stringifier attribute USVString href;
@@ -41,6 +29,18 @@ interface URLUtils {
   search:       USVString;
   searchParams: URLSearchParams;
   hash:         USVString;
+}
+
+//[Constructor(USVString url, optional USVString base = "about:blank"), Exposed=(Window,Worker)]
+//interface URL {
+//  static USVString domainToASCII(USVString domain);
+//  static USVString domainToUnicode(USVString domain);
+//};
+
+//URL implements URLUtils;
+interface IURL extends URLUtils {
+  // static domainToASCII(domain: string):   string;
+  // static domainToUnicode(domain: string): string;
 }
 
 // URL already in lib.d.ts
