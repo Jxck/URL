@@ -148,6 +148,7 @@ class jURL implements IURL {
 //   readonly attribute USVString hash;
 // };
 
+// https://url.spec.whatwg.org/#interface-urlsearchparams
 //[Constructor(optional (USVString or URLSearchParams) init = ""), Exposed=(Window,Worker)]
 //interface URLSearchParams {
 //  void append(USVString name, USVString value);
