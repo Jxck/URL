@@ -321,7 +321,7 @@ class URLSearchParams implements IURLSearchParams {
 
     if (encodingOverride !== "utf-8") {
       // TODO: support other encoding
-      throw new Error("unsupported eocnding");
+      throw new Error("unsupported encoding");
     }
 
     var sequences = input.split('&');
