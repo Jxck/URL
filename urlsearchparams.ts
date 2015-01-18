@@ -15,13 +15,12 @@
 interface IURLSearchParams {
   append(name: USVString, value: USVString): void;
   delete(name: USVString):                   void;
-  get(name: USVString):                      USVString; //TODO: USVString?
+  get(name: USVString):                      USVString;
   getAll(name: USVString):                   USVString[];
   has(name: USVString):                      boolean;
   set(name: USVString, value: USVString):    void;
+  toString():                                string; // stringifier;
   // iterable<USVString, USVString>;
-  // stringifier;
-  toString():                                string;
 };
 
 interface pair {
