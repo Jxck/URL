@@ -19,6 +19,10 @@
   "main": "url.ts",
   "scripts": {
     "build": "tsc url.ts --target ES5",
+    "clean": "rm *.js",
     "test": "npm run build && node url.js"
+  },
+  "devDependencies": {
+    "typescript": "^1.4.1"
   }
 }
