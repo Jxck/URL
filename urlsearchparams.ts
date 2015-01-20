@@ -186,7 +186,7 @@ class URLSearchParams implements IURLSearchParams {
         continue;
       }
 
-      if ([0x2A, 0x2D, 0x2E].indexOf(byt) > 0) {
+      if ([0x2A, 0x2D, 0x2E].indexOf(byt) > -1) {
         output += String.fromCharCode(byt);
         continue;
       }
