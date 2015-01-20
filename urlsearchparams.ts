@@ -1,11 +1,21 @@
 /// <reference path="webidl.d.ts" />
+/// <reference path="text-encoding.d.ts" />
+import TextEncoding = require('text-encoding');
+var TextEncoder = TextEncoding.TextEncoder;
+var TextDecoder = TextEncoding.TextDecoder;
 
 function copy<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
-function encode(s: string, encodeOverride: string): string {
-  return s;
+function encode(s: string, encodeOverride: string): Uint8Array {
+  var encoder = new TextEncoder(encodeOverride);
+  return encoder.encode(s);
+}
+
+// https://url.spec.whatwg.org/#percent-encoded-bytes
+function percentEncode(b: number): string {
+  return "%" + b.toString(16).toUpperCase();
 }
 
 // https://url.spec.whatwg.org/#interface-urlsearchparams
@@ -164,22 +174,49 @@ class URLSearchParams implements IURLSearchParams {
   }
 
   // https://url.spec.whatwg.org/#concept-urlencoded-byte-serializer
-  // TODO: encode it using encodeURIComponent
-  //       implement parsent encoder refer to spec
-  private byteSerialize(input: string): string {
-    input = encodeURIComponent(input);
+  private byteSerialize(input: Uint8Array): string {
+    // step 1
+    var output = "";
 
-    // revert space to '+'
-    input = input.replace("%20", "+");
+    // step 2
+    for(var i=0; i < input.length; i++) {
+      var byt = input[i];
+      if (byt === 0x20) {
+        output += "+"; // 0x2B
+        continue;
+      }
 
-    // replace chars which encodeURIComponent dosen't cover
-    input = input.replace("!", "%21")
-                 .replace("~", "%7E")
-                 .replace("'", "%27")
-                 .replace("(", "%28")
-                 .replace(")", "%29")
+      if ([0x2A, 0x2D, 0x2E].indexOf(byt) > 0) {
+        output += String.fromCharCode(byt);
+        continue;
+      }
 
-    return input
+      if (0x30 <= byt && byt <= 0x39) {
+        output += String.fromCharCode(byt);
+        continue;
+      }
+
+      if (0x41 <= byt && byt <= 0x5A) {
+        output += String.fromCharCode(byt);
+        continue;
+      }
+
+      if (byt === 0x5F) {
+        output += String.fromCharCode(byt);
+        continue;
+      }
+
+      if (0x61 <= byt && byt <= 0x7A) {
+        output += String.fromCharCode(byt);
+        continue;
+      }
+
+      // Otherwise
+      output += percentEncode(byt);
+    }
+
+    // step 3
+    return output;
   }
 
   // https://url.spec.whatwg.org/#concept-urlencoded-serializer
@@ -198,12 +235,12 @@ class URLSearchParams implements IURLSearchParams {
       var outputPair = copy(pair);
 
       // step 3-2
-      outputPair.name = encode(outputPair.name, encodingOverride);
-      outputPair.value = encode(outputPair.value, encodingOverride);
+      var encodedName = encode(outputPair.name, encodingOverride);
+      var encodedValue = encode(outputPair.value, encodingOverride);
 
       // step 3-3
-      outputPair.name = this.byteSerialize(outputPair.name);
-      outputPair.value = this.byteSerialize(outputPair.value);
+      outputPair.name = this.byteSerialize(encodedName);
+      outputPair.value = this.byteSerialize(encodedValue);
 
       // step 3-4
       if (index !== 0) {
