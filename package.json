@@ -18,11 +18,14 @@
   },
   "main": "url.ts",
   "scripts": {
-    "build": "tsc urlsearchparams.ts --target ES5",
+    "build": "tsc urlsearchparams.ts --module commonjs --target ES5",
     "clean": "rm *.js",
     "test": "npm run build && node urlsearchparams.js"
   },
   "devDependencies": {
     "typescript": "^1.4.1"
+  },
+  "dependencies": {
+    "text-encoding": "^0.5.2"
   }
 }
