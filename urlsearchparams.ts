@@ -68,24 +68,33 @@ class URLSearchParams implements IURLSearchParams {
     return query;
   }
 
+  // https://url.spec.whatwg.org/#dom-urlsearchparams-append
   append(name: USVString, value: USVString): void {
     if(name === undefined || value === undefined) {
       throw new TypeError("Not enough arguments to URLSearchParams.append.");
     }
+
+    // step 1
     this.list.push({ name: name, value: value });
+
+    // step 2
     this.update();
   }
 
+  // https://url.spec.whatwg.org/#dom-urlsearchparams-delete
   delete(name: USVString): void {
     if (name === undefined) {
       throw new TypeError("Not enough arguments to URLSearchParams.delete.");
     }
-    this.list = this.list.filter(function(pair) {
-      return pair.name !== name;
-    });
+
+    // step 1
+    this.list = this.list.filter(pair => pair.name !== name);
+
+    // step 2
     this.update();
   }
 
+  // https://url.spec.whatwg.org/#dom-urlsearchparams-get
   get(name: USVString): USVString {
     if (name === undefined) {
       throw new TypeError("Not enough arguments to URLSearchParams.get.");
@@ -93,11 +102,12 @@ class URLSearchParams implements IURLSearchParams {
     return this.getAll(name).shift() || null;
   }
 
+  // https://url.spec.whatwg.org/#dom-urlsearchparams-getall
   getAll(name: USVString): USVString[] {
     if (name === undefined) {
       throw new TypeError("Not enough arguments to URLSearchParams.getAll.");
     }
-    return this.list.reduce(function(acc, pair) {
+    return this.list.reduce((acc, pair) => {
       if (pair.name === name) {
         acc.push(pair.value);
       }
@@ -105,15 +115,7 @@ class URLSearchParams implements IURLSearchParams {
     }, []);
   }
 
-  has(name: USVString): boolean {
-    if (name === undefined) {
-      throw new TypeError("Not enough arguments to URLSearchParams.has.");
-    }
-    return this.list.some(function(pair) {
-      return pair.name === name;
-    });
-  }
-
+  // https://url.spec.whatwg.org/#dom-urlsearchparams-set
   set(name: USVString, value: USVString): void { // TODO: performance
     if (name === undefined || value === undefined) {
       throw new TypeError("Not enough arguments to URLSearchParams.set.");
@@ -122,7 +124,7 @@ class URLSearchParams implements IURLSearchParams {
     this.list.push({ name: name, value: value });
 
     // update all pair
-    this.list = this.list.map(function(pair) {
+    this.list = this.list.map(pair => {
       if (pair.name === name) {
         pair.value = value;
       }
@@ -143,6 +145,17 @@ class URLSearchParams implements IURLSearchParams {
       // other pair
       return true;
     }, { emitted: false });
+
+    // step 3
+    this.update();
+  }
+
+  // https://url.spec.whatwg.org/#dom-urlsearchparams-has
+  has(name: USVString): boolean {
+    if (name === undefined) {
+      throw new TypeError("Not enough arguments to URLSearchParams.has.");
+    }
+    return this.list.some(pair => pair.name === name);
   }
 
   private byteSerialize(input: string): string {
