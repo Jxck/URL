@@ -163,6 +163,9 @@ class URLSearchParams implements IURLSearchParams {
     return this.list.some(pair => pair.name === name);
   }
 
+  // https://url.spec.whatwg.org/#concept-urlencoded-byte-serializer
+  // TODO: encode it using encodeURIComponent
+  //       implement parsent encoder refer to spec
   private byteSerialize(input: string): string {
     input = encodeURIComponent(input);
 
