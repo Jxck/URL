@@ -18,9 +18,9 @@
   },
   "main": "url.ts",
   "scripts": {
-    "build": "tsc url.ts --target ES5",
+    "build": "tsc urlsearchparams.ts --target ES5",
     "clean": "rm *.js",
-    "test": "npm run build && node url.js"
+    "test": "npm run build && node urlsearchparams.js"
   },
   "devDependencies": {
     "typescript": "^1.4.1"
