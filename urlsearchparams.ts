@@ -4,6 +4,10 @@ function copy<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
+function encode(s: string, encodeOverride: string): string {
+  return s;
+}
+
 // https://url.spec.whatwg.org/#interface-urlsearchparams
 //[Constructor(optional (USVString or URLSearchParams) init = ""), Exposed=(Window,Worker)]
 //interface URLSearchParams {
@@ -151,6 +155,7 @@ class URLSearchParams implements IURLSearchParams {
   }
 
   // https://url.spec.whatwg.org/#dom-urlsearchparams-has
+  // TODO: implement correctly
   has(name: USVString): boolean {
     if (name === undefined) {
       throw new TypeError("Not enough arguments to URLSearchParams.has.");
@@ -174,22 +179,38 @@ class URLSearchParams implements IURLSearchParams {
     return input
   }
 
+  // https://url.spec.whatwg.org/#concept-urlencoded-serializer
   private serialize(pairs: pair[], encodingOverride?: string): string {
+    // step 1
     if (encodingOverride === undefined) {
       encodingOverride = "utf-8";
     }
 
-    var output = pairs.reduce((_output, pair, index) => {
-      // use encodeURIComponent as byte serializer
-      var name  = this.byteSerialize(pair.name);
-      var value = this.byteSerialize(pair.value);
-      if (index !== 0) {
-        _output = _output + "&";
-      }
-      _output += name + "=" + value;
-      return _output;
-    }, "");
+    // step 2
+    var output = "";
 
+    // step 3
+    pairs.forEach((pair, index) => {
+      // step 3-1
+      var outputPair = copy(pair);
+
+      // step 3-2
+      outputPair.name = encode(outputPair.name, encodingOverride);
+      outputPair.value = encode(outputPair.value, encodingOverride);
+
+      // step 3-3
+      outputPair.name = this.byteSerialize(outputPair.name);
+      outputPair.value = this.byteSerialize(outputPair.value);
+
+      // step 3-4
+      if (index !== 0) {
+        output += "&";
+      }
+
+      output += outputPair.name + "=" + outputPair.value;
+    });
+
+    // step 4
     return output;
   }
 
