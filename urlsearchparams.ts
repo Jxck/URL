@@ -271,131 +271,131 @@ function assert(actual, expected) {
 (function TestURLSearchPrams() {
   (function test1() {
     var q = "a=b&c=d";
-    var searchParams = new URLSearchParams(q);
-    assert(searchParams.toString(), q);
+    var s = new URLSearchParams(q);
+    assert(s.toString(), q);
 
     var a = "aAzZ09あ𠮟叱";
     var e = "aAzZ09%E3%81%82%F0%A0%AE%9F%E5%8F%B1=";
-    var searchParams = new URLSearchParams(a);
-    assert(searchParams.toString(), e);
+    var s = new URLSearchParams(a);
+    assert(s.toString(), e);
 
     var a = " *-._";
     var e = "+*-._=";
-    var searchParams = new URLSearchParams(a);
-    assert(searchParams.toString(), e);
+    var s = new URLSearchParams(a);
+    assert(s.toString(), e);
 
     var a = "!~'()";
     var e = "%21%7E%27%28%29=";
-    var searchParams = new URLSearchParams(a);
-    assert(searchParams.toString(), e);
+    var s = new URLSearchParams(a);
+    assert(s.toString(), e);
   })();
 
   (function test2() {
     // append
-    var searchParams = new URLSearchParams();
-    searchParams.append("a", "b");
-    searchParams.append("c", "d");
-    assert(searchParams.toString(), "a=b&c=d");
+    var s = new URLSearchParams();
+    s.append("a", "b");
+    s.append("c", "d");
+    assert(s.toString(), "a=b&c=d");
 
     // get
-    var searchParams = new URLSearchParams("a=b");
-    assert(searchParams.get("a"), "b");
+    var s = new URLSearchParams("a=b");
+    assert(s.get("a"), "b");
 
-    var searchParams = new URLSearchParams("a=b&a=c");
-    assert(searchParams.get("a"), "b");
-    assert(searchParams.get("b"), null);
+    var s = new URLSearchParams("a=b&a=c");
+    assert(s.get("a"), "b");
+    assert(s.get("b"), null);
 
     // getAll
-    var searchParams = new URLSearchParams("a=b&a=c");
-    var all = searchParams.getAll("a");
+    var s = new URLSearchParams("a=b&a=c");
+    var all = s.getAll("a");
     assert(all.length, 2);
     assert(all[0], "b");
     assert(all[1], "c");
 
     // set
-    var searchParams = new URLSearchParams("a=b&a=c");
-    searchParams.set("a", "d");
-    var all = searchParams.getAll("a");
+    var s = new URLSearchParams("a=b&a=c");
+    s.set("a", "d");
+    var all = s.getAll("a");
     assert(all.length, 1);
     assert(all[0], "d");
 
     // delete
-    var searchParams = new URLSearchParams("a=b&a=c&x=y");
-    searchParams.delete("a");
-    var all = searchParams.getAll("a");
+    var s = new URLSearchParams("a=b&a=c&x=y");
+    s.delete("a");
+    var all = s.getAll("a");
     assert(all.length, 0);
 
-    searchParams.delete("z");
-    assert(searchParams.get("x"), "y");
+    s.delete("z");
+    assert(s.get("x"), "y");
 
     // has
-    var searchParams = new URLSearchParams("a=b&a=c&x=y");
-    assert(searchParams.has("a"), true);
-    assert(searchParams.has("x"), true);
-    assert(searchParams.has("z"), false);
+    var s = new URLSearchParams("a=b&a=c&x=y");
+    assert(s.has("a"), true);
+    assert(s.has("x"), true);
+    assert(s.has("z"), false);
   })();
 
   (function test3() {
     // from https://developer.mozilla.org/ja/docs/Web/API/URLSearchParams
-    var paramsString = "q=URLUtils.searchParams&topic=api"
-    var searchParams = new URLSearchParams(paramsString);
+    var paramsString = "q=URLUtils.s&topic=api"
+    var s = new URLSearchParams(paramsString);
 
-  assert(searchParams.has("topic"), true);
-  assert(searchParams.get("topic"), "api");
-  assert(searchParams.getAll("topic")[0], "api");
-  assert(searchParams.get("foo"), null); // true
+    assert(s.has("topic"), true);
+    assert(s.get("topic"), "api");
+    assert(s.getAll("topic")[0], "api");
+    assert(s.get("foo"), null); // true
 
-  searchParams.append("topic", "webdev");
-  assert(searchParams.toString(), "q=URLUtils.searchParams&topic=api&topic=webdev");
+    s.append("topic", "webdev");
+    assert(s.toString(), "q=URLUtils.s&topic=api&topic=webdev");
 
-  searchParams.delete("topic");
-  assert(searchParams.toString(), "q=URLUtils.searchParams");
+    s.delete("topic");
+    assert(s.toString(), "q=URLUtils.s");
   })();
 
   (function test4() {
     var error_message = "Not enough arguments to URLSearchParams"
-    var searchParams = new URLSearchParams();
+    var s = new URLSearchParams();
 
-  // append
-  try {
-    searchParams.append(undefined, undefined);
-  } catch(err) {
-    assert(err.message, error_message + ".append.");
-  }
+    // append
+    try {
+      s.append(undefined, undefined);
+    } catch(err) {
+      assert(err.message, error_message + ".append.");
+    }
 
-  // get
-  try {
-    searchParams.get(undefined);
-  } catch(err) {
-    assert(err.message, error_message + ".get.");
-  }
+    // get
+    try {
+      s.get(undefined);
+    } catch(err) {
+      assert(err.message, error_message + ".get.");
+    }
 
-  // getAll
-  try {
-    searchParams.getAll(undefined);
-  } catch(err) {
-    assert(err.message, error_message + ".getAll.");
-  }
+    // getAll
+    try {
+      s.getAll(undefined);
+    } catch(err) {
+      assert(err.message, error_message + ".getAll.");
+    }
 
-  // set
-  try {
-    searchParams.set(undefined, undefined);
-  } catch(err) {
-    assert(err.message, error_message + ".set.");
-  }
+    // set
+    try {
+      s.set(undefined, undefined);
+    } catch(err) {
+      assert(err.message, error_message + ".set.");
+    }
 
-  // has
-  try {
-    searchParams.has(undefined);
-  } catch(err) {
-    assert(err.message, error_message + ".has.");
-  }
+    // has
+    try {
+      s.has(undefined);
+    } catch(err) {
+      assert(err.message, error_message + ".has.");
+    }
 
-  // delete
-  try {
-    searchParams.delete(undefined);
-  } catch(err) {
-    assert(err.message, error_message + ".delete.");
-  }
+    // delete
+    try {
+      s.delete(undefined);
+    } catch(err) {
+      assert(err.message, error_message + ".delete.");
+    }
   })();
 })();
