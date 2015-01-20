@@ -219,6 +219,24 @@ class URLSearchParams implements IURLSearchParams {
     return output;
   }
 
+  // shim of byte serializer using encodeURIComponent
+  // without text-encoder
+  private _byteSerialize(input: string): string {
+    input = encodeURIComponent(input);
+
+    // revert space to '+'
+    input = input.replace("%20", "+");
+
+    // replace chars which encodeURIComponent dosen't cover
+    input = input.replace("!", "%21")
+                 .replace("~", "%7E")
+                 .replace("'", "%27")
+                 .replace("(", "%28")
+                 .replace(")", "%29")
+
+    return input
+  }
+
   // https://url.spec.whatwg.org/#concept-urlencoded-serializer
   private serialize(pairs: pair[], encodingOverride?: string): string {
     // step 1
@@ -235,12 +253,19 @@ class URLSearchParams implements IURLSearchParams {
       var outputPair = copy(pair);
 
       // step 3-2
-      var encodedName = encode(outputPair.name, encodingOverride);
-      var encodedValue = encode(outputPair.value, encodingOverride);
+      if (TextEncoder !== undefined) {
+        // using TextEncoder
+        var encodedName = encode(outputPair.name, encodingOverride);
+        var encodedValue = encode(outputPair.value, encodingOverride);
 
-      // step 3-3
-      outputPair.name = this.byteSerialize(encodedName);
-      outputPair.value = this.byteSerialize(encodedValue);
+        // step 3-3
+        outputPair.name = this.byteSerialize(encodedName);
+        outputPair.value = this.byteSerialize(encodedValue);
+      } else {
+        // using encodeURIComponents
+        outputPair.name = this._byteSerialize(outputPair.name);
+        outputPair.value = this._byteSerialize(outputPair.value);
+      }
 
       // step 3-4
       if (index !== 0) {
