@@ -1,5 +1,9 @@
 /// <reference path="webidl.d.ts" />
 
+function copy<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 // https://url.spec.whatwg.org/#interface-urlsearchparams
 //[Constructor(optional (USVString or URLSearchParams) init = ""), Exposed=(Window,Worker)]
 //interface URLSearchParams {
@@ -29,21 +33,39 @@ interface pair {
 }
 
 class URLSearchParams implements IURLSearchParams {
+  // https://url.spec.whatwg.org/#concept-urlsearchparams-list
   list: pair[];
+
+  // https://url.spec.whatwg.org/#concept-urlsearchparams-url-object
   urlObject: URL[];
 
+  // https://url.spec.whatwg.org/#concept-urlsearchparams-new
   constructor(init?: USVString);
   constructor(init?: URLSearchParams);
   constructor(init?: any) {
     this.list = [];
     this.urlObject = [];
 
+    // step 1
+    var query = this;
+
+    // step 2
+    if (init === "" || init === null) {
+      return query
+    }
+
+    // step 3
     if (typeof init === "string") {
-      this.list = this.parse(init);
+      query.list = this.parse(init);
     }
-    if (typeof init === "object") {
-      this.list = init.list;
+
+    // step 4
+    if (URLSearchParams.prototype.isPrototypeOf(init)) {
+      query.list = copy(init.list);
     }
+
+    // step 5
+    return query;
   }
 
   append(name: USVString, value: USVString): void {
