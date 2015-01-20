@@ -1,8 +1,17 @@
 /// <reference path="webidl.d.ts" />
 /// <reference path="text-encoding.d.ts" />
-import TextEncoding = require('text-encoding');
-var TextEncoder = TextEncoding.TextEncoder;
-var TextDecoder = TextEncoding.TextDecoder;
+
+declare var require;
+
+import te = require('text-encoding');
+
+var TextEncoder, TextDecoder;
+
+if (typeof window === 'undefined') {
+  var TextEncoding: typeof te = require('text-encoding');
+  TextEncoder = TextEncoding.TextEncoder;
+  TextDecoder = TextEncoding.TextDecoder;
+}
 
 function copy<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
