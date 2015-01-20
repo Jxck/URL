@@ -252,9 +252,16 @@ class URLSearchParams implements IURLSearchParams {
     return pairs;
   }
 
+  // https://url.spec.whatwg.org/#concept-urlsearchparams-update
   private update(): void {
-    // TODO: implement me
-    // https://url.spec.whatwg.org/#concept-urlsearchparams-update
+    // step 1
+    this.urlObject.forEach((url) => {
+      // TODO: add query to url
+      // url.query = this.serialize(this.list);
+
+      // step 2
+      // this.urlObject.preupdate();
+    });
   }
 
   toString(): string {
