@@ -34,10 +34,10 @@ interface pair {
 
 class URLSearchParams implements IURLSearchParams {
   // https://url.spec.whatwg.org/#concept-urlsearchparams-list
-  list: pair[];
+  private list: pair[];
 
   // https://url.spec.whatwg.org/#concept-urlsearchparams-url-object
-  urlObject: URL[];
+  private urlObject: URL[];
 
   // https://url.spec.whatwg.org/#concept-urlsearchparams-new
   constructor(init?: USVString);
@@ -269,7 +269,13 @@ function assert(actual, expected) {
 }
 
 (function TestURLSearchPrams() {
-  (function test1() {
+  (function parse() {
+    var s = new URLSearchParams("");
+    assert(s.toString(), "");
+
+    var s = new URLSearchParams(null);
+    assert(s.toString(), "");
+
     var q = "a=b&c=d";
     var s = new URLSearchParams(q);
     assert(s.toString(), q);
@@ -288,14 +294,26 @@ function assert(actual, expected) {
     var e = "%21%7E%27%28%29=";
     var s = new URLSearchParams(a);
     assert(s.toString(), e);
+
+    var q = "a=b&c=d";
+    var s = new URLSearchParams(q);
+    var ss = new URLSearchParams(s);
+    assert(ss.toString(), q);
+
   })();
 
-  (function test2() {
+  (function api() {
     // append
     var s = new URLSearchParams();
     s.append("a", "b");
     s.append("c", "d");
     assert(s.toString(), "a=b&c=d");
+    s.append("a", "b");
+    assert(s.toString(), "a=b&c=d&a=b");
+
+    var s = new URLSearchParams("a=b");
+    s.append("a", "b");
+    assert(s.toString(), "a=b&a=b");
 
     // get
     var s = new URLSearchParams("a=b");
@@ -304,20 +322,24 @@ function assert(actual, expected) {
     var s = new URLSearchParams("a=b&a=c");
     assert(s.get("a"), "b");
     assert(s.get("b"), null);
+    s.append("a", "d");
+    assert(s.get("a"), "b");
 
     // getAll
-    var s = new URLSearchParams("a=b&a=c");
+    var s = new URLSearchParams("a=b&b=c&a=c");
     var all = s.getAll("a");
     assert(all.length, 2);
     assert(all[0], "b");
     assert(all[1], "c");
+    assert(s.getAll("z").length, 0);
 
     // set
-    var s = new URLSearchParams("a=b&a=c");
+    var s = new URLSearchParams("a=b&b=c&a=c");
     s.set("a", "d");
     var all = s.getAll("a");
     assert(all.length, 1);
     assert(all[0], "d");
+    assert(s.toString(), "a=d&b=c");
 
     // delete
     var s = new URLSearchParams("a=b&a=c&x=y");
@@ -335,7 +357,7 @@ function assert(actual, expected) {
     assert(s.has("z"), false);
   })();
 
-  (function test3() {
+  (function storyTest() {
     // from https://developer.mozilla.org/ja/docs/Web/API/URLSearchParams
     var paramsString = "q=URLUtils.s&topic=api"
     var s = new URLSearchParams(paramsString);
@@ -352,11 +374,23 @@ function assert(actual, expected) {
     assert(s.toString(), "q=URLUtils.s");
   })();
 
-  (function test4() {
+  (function argumentsErrorTest() {
     var error_message = "Not enough arguments to URLSearchParams"
     var s = new URLSearchParams();
 
     // append
+    try {
+      s.append('a', undefined);
+    } catch(err) {
+      assert(err.message, error_message + ".append.");
+    }
+
+    try {
+      s.append(undefined, 'b');
+    } catch(err) {
+      assert(err.message, error_message + ".append.");
+    }
+
     try {
       s.append(undefined, undefined);
     } catch(err) {
@@ -378,6 +412,18 @@ function assert(actual, expected) {
     }
 
     // set
+    try {
+      s.set('a', undefined);
+    } catch(err) {
+      assert(err.message, error_message + ".set.");
+    }
+
+    try {
+      s.set(undefined, 'b');
+    } catch(err) {
+      assert(err.message, error_message + ".set.");
+    }
+
     try {
       s.set(undefined, undefined);
     } catch(err) {
