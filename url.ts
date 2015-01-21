@@ -1,4 +1,4 @@
-/// <reference path="./webidl.d.ts" />
+/// <reference path="types/webidl.d.ts" />
 /// <reference path="urlsearchparams.ts" />
 
 //[NoInterfaceObject, Exposed=(Window,Worker)]

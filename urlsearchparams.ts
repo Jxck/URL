@@ -1,5 +1,5 @@
-/// <reference path="webidl.d.ts" />
-/// <reference path="text-encoding.d.ts" />
+/// <reference path="types/webidl.d.ts" />
+/// <reference path="types/text-encoding.d.ts" />
 
 declare var require;
 
