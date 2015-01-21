@@ -1,13 +1,14 @@
 /// <reference path="types/webidl.d.ts" />
 /// <reference path="types/text-encoding.d.ts" />
 
-declare var require;
+// for dynamic require
+declare var require: any;
 
+// import only type info
 import te = require('text-encoding');
 
 var TextEncoder, TextDecoder;
-
-if (typeof window === 'undefined') {
+if (typeof window === 'undefined') { // in node.js
   var TextEncoding: typeof te = require('text-encoding');
   TextEncoder = TextEncoding.TextEncoder;
   TextDecoder = TextEncoding.TextDecoder;
@@ -318,7 +319,7 @@ class URLSearchParams implements IURLSearchParams {
       if (bytes === "") return;
 
       // Split in "="
-      var name, value: USVString;
+      var name: USVString, value: USVString;
       if (bytes.indexOf("=")) {
         var b = bytes.split("=");
         name  = b.shift();
@@ -365,7 +366,7 @@ class URLSearchParams implements IURLSearchParams {
 }
 
 // tests
-function assert(actual, expected) {
+function assert(actual: any, expected: any) {
   console.log('.');
   console.assert(actual === expected, '\nact: ' + actual + '\nexp: ' + expected);
 }
