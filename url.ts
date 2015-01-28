@@ -39,7 +39,7 @@ interface URLUtils {
   port:         USVString;
   pathname:     USVString;
   search:       USVString;
-  searchParams: URLSearchParams;
+  searchParams: typeof URLSearchParams;
   hash:         USVString;
 }
 
@@ -59,7 +59,7 @@ interface IURL extends URLUtils {
 class jURL implements IURL {
   private input:         string;
   private encoding:      string;
-  private queryObject:   URLSearchParams;
+  private queryObject:   typeof URLSearchParams;
   private url:           jURL;
 
   private _origin:       USVString;
@@ -71,7 +71,7 @@ class jURL implements IURL {
   private _port:         USVString;
   private _pathname:     USVString;
   private _search:       USVString;
-  private _searchParams: URLSearchParams;
+  private _searchParams: typeof URLSearchParams;
   private _hash:         USVString;
 
   static domainToASCII(domain: string):   string {
@@ -123,7 +123,7 @@ class jURL implements IURL {
     return this._search;
   }
 
-  get searchParams(): URLSearchParams {
+  get searchParams(): typeof URLSearchParams {
     return this._searchParams;
   }
 
