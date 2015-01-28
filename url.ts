@@ -1,6 +1,17 @@
 /// <reference path="types/webidl.d.ts" />
 /// <reference path="types/urlsearchparams.d.ts" />
 
+// for dynamic require
+declare var require: any;
+
+// import only type info
+import usp = require('urlsearchparams');
+
+var URLSearchParams: typeof usp.URLSearchParams;
+if (typeof window === 'undefined') { // in node.js
+  URLSearchParams = require('urlsearchparams').URLSearchParams;
+}
+
 //[NoInterfaceObject, Exposed=(Window,Worker)]
 //interface URLUtils {
 //  stringifier attribute USVString href;
