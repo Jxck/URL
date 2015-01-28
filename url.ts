@@ -1,5 +1,5 @@
 /// <reference path="types/webidl.d.ts" />
-/// <reference path="urlsearchparams.ts" />
+/// <reference path="types/urlsearchparams.d.ts" />
 
 //[NoInterfaceObject, Exposed=(Window,Worker)]
 //interface URLUtils {
