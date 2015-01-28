@@ -1,31 +1,44 @@
 {
-  "name": "URL",
+  "name": "url-standard",
+  "description": "implementaion of URL at WHATWG Living Standard https://url.spec.whatwg.org/",
+  "version": "0.0.0",
   "author": "Jxck",
-  "license": "MIT",
-  "version": "1.0.0",
-  "description": "implementaion of https://url.spec.whatwg.org/",
-  "homepage": "https://github.com/Jxck/URL",
   "bugs": {
     "url": "https://github.com/Jxck/URL/issues"
   },
-  "keywords": [
-    "url",
-    "whatwg"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Jxck/URL"
-  },
-  "main": "url.ts",
-  "scripts": {
-    "build": "tsc urlsearchparams.ts --module commonjs --target ES5",
-    "clean": "rm *.js",
-    "test": "npm run build && node urlsearchparams.js"
+  "dependencies": {
+    "urlsearchparams": "*"
   },
   "devDependencies": {
     "typescript": "^1.4.1"
   },
-  "dependencies": {
-    "text-encoding": "^0.5.2"
+  "files": [
+    "test",
+    "types",
+    ".gitignore",
+    "README.md",
+    "package.json",
+    "url.js",
+    "url.ts"
+  ],
+  "homepage": "https://github.com/Jxck/URL",
+  "keywords": [
+    "url",
+    "urlsearchparams",
+    "whatwg",
+    "w3c"
+  ],
+  "license": "MIT",
+  "main": "url.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jxck/URL"
+  },
+  "scripts": {
+    "clean": "\\rm -f *.js",
+    "postinstall": "mv node_modules/urlsearchparams/urlsearchparams.d.ts types/",
+    "prepublish": "npm run tsc",
+    "test": "npm run tsc && node test/test.js && \\rm -f npm-debug.log && echo open test/index.html in your browser",
+    "tsc": "tsc url.ts --module commonjs --target ES5"
   }
 }
