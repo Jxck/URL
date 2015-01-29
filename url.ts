@@ -114,6 +114,11 @@ class jURL implements IURL {
   // https://url.spec.whatwg.org/#concept-url-scheme
   private scheme:      string;
 
+  // https://url.spec.whatwg.org/#concept-url-scheme-data
+  private shcemeData:  string;
+
+  // TODO: 続き
+
   protocol:     USVString;
   username:     USVString;
   password:     USVString;
