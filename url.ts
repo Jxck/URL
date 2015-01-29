@@ -111,6 +111,9 @@ class jURL implements IURL {
   private _hash:       USVString;
   private _origin:     USVString;
 
+  // https://url.spec.whatwg.org/#concept-url-scheme
+  private scheme:      string;
+
   protocol:     USVString;
   username:     USVString;
   password:     USVString;
@@ -176,11 +179,65 @@ class jURL implements IURL {
     var pointer = 0;
 
     // step 8
-  }
+    switch(state) {
+    case "schemeStartState":
+      var c = input.charCodeAt(pointer);
 
+      // step 8-1
+      if (isASCIIAlpha(c)) {
+        buffer += String.fromCharCode(c).toLowerCase();
+        state = "schemeState";
+      }
+
+      // step 8-2
+      else if (stateOverride === undefined) {
+        state = "noSchemeState";
+        pointer = pointer - 1;
+      }
+
+      // step 8-3
+      else {
+        return 'parse error';
+      }
+    case "schemeState":
+      var c = input.charCodeAt(pointer);
+
+      // step 9-1
+      if (isASCIIAlphaNumeric(c) || [43, 45, 46].indexOf(c) > 0) { // +, -, .
+        buffer += String.fromCharCode(c).toLowerCase();
+      }
+
+      // step 9-2
+      else if (c === 58) { // :
+        url.scheme = buffer;
+        buffer = "";
+
+        // step 9-2-1
+        if (stateOverride !== undefined) {
+          return; // terminate
+        }
+
+        // step 9-2-2
+      }
+
+      // step 9-3
+      else {
+
+
+      }
+    }
+  }
 }
 
-
+var relativeScheme = {
+  "ftp"    : "21",
+  "file"   : "",
+  "gopher" : "70",
+  "http"   : "80",
+  "https"  : "443",
+  "ws"     : "80",
+  "wss"    : "443"
+}
 
 
 function assert(actual, expected) {
