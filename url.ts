@@ -112,17 +112,51 @@ class jURL implements IURL {
   private _origin:     USVString;
 
   // https://url.spec.whatwg.org/#concept-url-scheme
-  private scheme:      string;
+  private scheme:      string = "";
 
   // https://url.spec.whatwg.org/#concept-url-scheme-data
-  private shcemeData:  string;
+  private shcemeData:  string = "";
 
-  // TODO: 続き
+  // https://url.spec.whatwg.org/#concept-url-path
+  private path:        string[] = [];
+
+  // https://url.spec.whatwg.org/#concept-url-query
+  private query:       string = null;
+
+  // https://url.spec.whatwg.org/#concept-url-fragment
+  private fragment:    string = null;
+
+  // https://url.spec.whatwg.org/#relative-flag
+  private relativeFlag: boolean = false;
+
+  // https://url.spec.whatwg.org/#concept-url-object
+  private object: Blob = null;
+
+  // TODO: このへんあとで
+
+  // https://url.spec.whatwg.org/#relative-scheme
+  // var relativeScheme = {
+  //   "ftp"    : "21",
+  //   "file"   : "",
+  //   "gopher" : "70",
+  //   "http"   : "80",
+  //   "https"  : "443",
+  //   "ws"     : "80",
+  //   "wss"    : "443"
+  // }
+
 
   protocol:     USVString;
-  username:     USVString;
-  password:     USVString;
-  host:         USVString;
+
+  // https://url.spec.whatwg.org/#concept-url-username
+  username:     USVString = "";
+
+  // https://url.spec.whatwg.org/#concept-url-password
+  password:     USVString = null;
+
+  // https://url.spec.whatwg.org/#concept-url-host
+  host:         USVString = null;
+
   hostname:     USVString;
   port:         USVString;
   pathname:     USVString;
@@ -232,16 +266,6 @@ class jURL implements IURL {
       }
     }
   }
-}
-
-var relativeScheme = {
-  "ftp"    : "21",
-  "file"   : "",
-  "gopher" : "70",
-  "http"   : "80",
-  "https"  : "443",
-  "ws"     : "80",
-  "wss"    : "443"
 }
 
 
