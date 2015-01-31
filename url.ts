@@ -258,7 +258,7 @@ class jURL implements IURL {
 
         // step 9-2-1
         if (stateOverride !== undefined) {
-          return; // terminate
+          return; // TODO: terminate
         }
 
         // step 9-2-2
@@ -291,9 +291,23 @@ class jURL implements IURL {
       }
 
       // step 9-3
+      else if (stateOverride === undefined) {
+        buffer = "";
+        state = "noSchemeState";
+
+        // TODO: return to First
+
+      }
+
+      // step 9-4
+      else if (c === NaN) {
+        return; // TODO: terminate
+      }
+
+      // step 9-5
       else {
-
-
+        // TODO: parse error
+        return; // TODO: terminate
       }
     }
   }
