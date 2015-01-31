@@ -48,7 +48,7 @@ var relativeScheme = {
 }
 
 function isRelativeScheme(scheme: string): boolean {
-  return Object.keys(relativeScheme).indexOf(scheme) > -1;
+  return Object.keys(relativeScheme).indexOf(scheme) !== -1;
 }
 
 // https://url.spec.whatwg.org/#url-code-points
@@ -60,7 +60,7 @@ function isURLCodePoint(codePoint: number): boolean {
   // ["!", "$", "&", "'", "(", ")", "*", "+", ",", "-",
   //  ".", "/", ":", ";", "=", "?", "@", "_", "~"]
   var signs = [ 33, 36, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 58, 59, 61, 63, 64, 95, 126 ];
-  if (signs.indexOf(codePoint) > -1) {
+  if (signs.indexOf(codePoint) !== -1) {
     return true;
   }
 
@@ -263,6 +263,8 @@ class jURL implements IURL {
 
     // step 8
     switch(state) {
+
+    // https://url.spec.whatwg.org/#scheme-start-state
     case "schemeStartState":
       // step 8-1
       if (isASCIIAlpha(c)) {
@@ -280,9 +282,11 @@ class jURL implements IURL {
       else {
         return 'parse error';
       }
+
+    // https://url.spec.whatwg.org/#scheme-state
     case "schemeState":
       // step 9-1
-      if (isASCIIAlphaNumeric(c) || [43, 45, 46].indexOf(c) > 0) { // +, -, .
+      if (isASCIIAlphaNumeric(c) || [43, 45, 46].indexOf(c) !== -1) { // +, -, .
         buffer += String.fromCharCode(c).toLowerCase();
       }
 
@@ -344,6 +348,8 @@ class jURL implements IURL {
         // TODO: parse error
         return; // TODO: terminate
       }
+
+    // https://url.spec.whatwg.org/#scheme-data-state
     case "schemeDataState":
       // step 1
       if (c === 63) { // ?
@@ -380,10 +386,12 @@ class jURL implements IURL {
         }
 
         // step 3-3
-        if (c !== NaN && [0x9, 0xA, 0xD].indexOf(c) < 0) {
+        if (c !== NaN && [0x9, 0xA, 0xD].indexOf(c) === -1) {
           // TODO: implement
         }
       }
+
+    // https://url.spec.whatwg.org/#no-scheme-state
     case "noSchemeState":
       if (base === null || !isRelativeScheme(base.scheme)) {
         // TODO: parse error
@@ -395,6 +403,7 @@ class jURL implements IURL {
         pointer = pointer - 1;
       }
 
+    // https://url.spec.whatwg.org/#relative-or-authority-state
     case "relativeOrAuthorityState":
       if (c === 47 && input.charCodeAt(pointer+1) === 47) { // /
         state = "authorityIgnoreSlashesState";
@@ -407,6 +416,7 @@ class jURL implements IURL {
         pointer = pointer - 1;
       }
 
+    // https://url.spec.whatwg.org/#relative-state
     case "relativeState":
       url.relativeFlag = true;
       url.scheme = base.scheme;
@@ -462,6 +472,12 @@ class jURL implements IURL {
             pointer = pointer - 1;
           }
         }
+      }
+
+    // https://url.spec.whatwg.org/#relative-slash-state
+    case "relativeSlashState":
+      if ([47, 92].indexOf(c) !== -1) {
+
       }
     }
   }
