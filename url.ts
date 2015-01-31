@@ -588,7 +588,7 @@ class jURL implements IURL {
       }
 
       // step 2
-      else if (isNaN(c) || [47, 92, 63, 35]) { // /, \, ?, #
+      else if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // /, \, ?, #
         // TODO: あとで
       }
 
@@ -602,7 +602,7 @@ class jURL implements IURL {
     // https://url.spec.whatwg.org/#file-host-state
     case "fileHostState":
       // step 1
-      if (isNaN(c) || [47, 92, 63, 35]) { // /, \, ?, #
+      if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // /, \, ?, #
         pointer = pointer - 1;
 
         // step 1-1
@@ -627,6 +627,17 @@ class jURL implements IURL {
 
     // https://url.spec.whatwg.org/#relative-path-start-state
     case "relativePathStartState":
+
+      // step 1
+      if (c === 92) {
+        // TODO: parse error
+      }
+
+      // step 2
+      state = "relativePathState";
+      if ([47, 92].indexOf(c) === -1) { // /, \
+        pointer = pointer - 1;
+      }
 
       break;
 
