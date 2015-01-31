@@ -36,6 +36,21 @@ function isASCIIAlphaNumeric(codePoint: number): boolean {
   return isASCIIDigits(codePoint) || isASCIIAlpha(codePoint);
 }
 
+// https://url.spec.whatwg.org/#relative-scheme
+var relativeScheme = {
+  "ftp"    : "21",
+  "file"   : "",
+  "gopher" : "70",
+  "http"   : "80",
+  "https"  : "443",
+  "ws"     : "80",
+  "wss"    : "443"
+}
+
+function isRelativeScheme(scheme: string): boolean {
+  return Object.keys(relativeScheme).indexOf(scheme) > -1;
+}
+
 //[NoInterfaceObject, Exposed=(Window,Worker)]
 // interface URLUtilsReadOnly {
 //   stringifier readonly attribute USVString href;
@@ -134,16 +149,6 @@ class jURL implements IURL {
 
   // TODO: このへんあとで
 
-  // https://url.spec.whatwg.org/#relative-scheme
-  // var relativeScheme = {
-  //   "ftp"    : "21",
-  //   "file"   : "",
-  //   "gopher" : "70",
-  //   "http"   : "80",
-  //   "https"  : "443",
-  //   "ws"     : "80",
-  //   "wss"    : "443"
-  // }
 
 
   protocol:     USVString;
@@ -287,3 +292,12 @@ var t = true, f = false;           [ 'a', 'f', 'z', 'A', 'F', 'Z', '0', '9', '!'
     assert(isASCIIAlpha(a),        [  t ,  t ,  t ,  t ,  t ,  t ,  f ,  f ,  f ,  f ,  f ][i]);
     assert(isASCIIAlphaNumeric(a), [  t ,  t ,  t ,  t ,  t ,  t ,  t ,  t ,  f ,  f ,  f ][i]);
   });
+
+["ftp", "file", "gopher", "http", "https", "ws", "wss"].forEach((scheme) => {
+  assert(isRelativeScheme(scheme), true);
+});
+
+assert(isRelativeScheme("foo"), false);
+assert(isRelativeScheme(""), false);
+assert(isRelativeScheme(null), false);
+assert(isRelativeScheme(undefined), false);
