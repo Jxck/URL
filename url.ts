@@ -193,7 +193,7 @@ class jURL implements IURL {
   }
 
   // TODO: using enum in state
-  private basicURLParser(input: string, base?: string, encodingOverride?: string, url?: jURL, stateOverride?: string) {
+  private basicURLParser(input: string, base?: jURL, encodingOverride?: string, url?: jURL, stateOverride?: string) {
     // step 1
     if (url === undefined) {
       // step 1-1
@@ -262,6 +262,32 @@ class jURL implements IURL {
         }
 
         // step 9-2-2
+        if (isRelativeScheme(url.scheme)) {
+          url.relativeFlag = true;
+        }
+
+        // step 9-2-3
+        if (url.scheme === "file") {
+          state = "relativeState";
+        }
+
+        // step 9-2-4
+        else if (url.relativeFlag === true
+                 && base !== null
+                 && base.scheme === url.scheme) {
+          state = "relativeOrAuthority";
+
+        }
+
+        // step 9-2-5
+        else if (url.relativeFlag === true) {
+          state = "authorityFirstSlashState";
+        }
+
+        // step 9-2-6
+        else {
+          state = "schemeDataState";
+        }
       }
 
       // step 9-3
