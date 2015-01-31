@@ -253,8 +253,8 @@ class jURL implements IURL {
     var buffer = "";
 
     // step 6
-    var flagAt = false;
-    var flagParen = false;
+    var flagAt = false; // @flag
+    var flagParen = false; // []flag
 
     // step 7
     var pointer = 0;
@@ -282,6 +282,8 @@ class jURL implements IURL {
       else {
         return 'parse error';
       }
+
+      break;
 
     // https://url.spec.whatwg.org/#scheme-state
     case "schemeState":
@@ -349,6 +351,8 @@ class jURL implements IURL {
         return; // TODO: terminate
       }
 
+      break;
+
     // https://url.spec.whatwg.org/#scheme-data-state
     case "schemeDataState":
       // step 1
@@ -391,6 +395,8 @@ class jURL implements IURL {
         }
       }
 
+      break;
+
     // https://url.spec.whatwg.org/#no-scheme-state
     case "noSchemeState":
       if (base === null || !isRelativeScheme(base.scheme)) {
@@ -402,6 +408,8 @@ class jURL implements IURL {
         state = "relativeState";
         pointer = pointer - 1;
       }
+
+      break;
 
     // https://url.spec.whatwg.org/#relative-or-authority-state
     case "relativeOrAuthorityState":
@@ -415,6 +423,8 @@ class jURL implements IURL {
         state = "relativeState";
         pointer = pointer - 1;
       }
+
+      break;
 
     // https://url.spec.whatwg.org/#relative-state
     case "relativeState":
@@ -432,12 +442,16 @@ class jURL implements IURL {
 
           // step 2
           state = "relativeSlashState";
+
+          break;
         case 63: // ?
           url.host = base.host;
           url.port = base.port;
           url.path = base.path;
           url.query = "";
           state = "queryState";
+
+          break;
         case 35: // #
           url.host = base.host;
           url.port = base.port;
@@ -445,6 +459,8 @@ class jURL implements IURL {
           url.query = base.query;
           url.fragment = "";
           state = "flagmentState";
+
+          break;
         default:
           if (isNaN(c)) { // EOF
             url.host = base.host;
@@ -471,8 +487,12 @@ class jURL implements IURL {
             state = "relativePathState";
             pointer = pointer - 1;
           }
+
+          break;
         }
       }
+
+      break;
 
     // https://url.spec.whatwg.org/#relative-slash-state
     case "relativeSlashState":
@@ -506,41 +526,124 @@ class jURL implements IURL {
         pointer = pointer - 1;
       }
 
+      break;
+
     // https://url.spec.whatwg.org/#authority-first-slash-state
     case "authorityFirstSlashState":
+      if (c === 47) { // /
+        state = "authoritySecondState";
+      }
+      else {
+        // TODO: parse error
+        state = "authorityIgnoreSlashesState";
+        pointer = pointer - 1;
+      }
+
+      break;
 
     // https://url.spec.whatwg.org/#authority-second-slash-state
     case "authoritySecondSlashState":
+      if (c === 47) { // /
+        state = "authorityIgnoreSlashesState";
+      }
+      else {
+        // TODO: parse error
+        state = "authorityIgnoreSlashesState";
+        pointer = pointer - 1;
+      }
+
+      break;
 
     // https://url.spec.whatwg.org/#authority-ignore-slashes-state
     case "authorityIgnoreSlashesState":
+      if ([47, 92].indexOf(c) !== -1) { // /, \
+        state = "authorityState";
+        pointer = pointer - 1;
+      }
+
+      else {
+        // TODO: parse error
+      }
+
+      break;
 
     // https://url.spec.whatwg.org/#authority-state
     case "authorityState":
+      // step 1
+      if (c === 64) { // @
+
+        // step 1-1
+        if (flagAt === true) {
+          // TODO: parse error
+          buffer = "%40" + buffer;
+        }
+
+        // step 1-2
+        flagAt = true;
+
+        // step 1-3
+
+        // TODO: あとで
+
+      }
+
+      // step 2
+      else if (isNaN(c) || [47, 92, 63, 35]) { // /, \, ?, #
+        // TODO: あとで
+      }
+
+      // step 3
+      else {
+        // TODO: あとで
+      }
+
+      break;
 
     // https://url.spec.whatwg.org/#file-host-state
     case "fileHostState":
+      // step 1
+      if (isNaN(c) || [47, 92, 63, 35]) { // /, \, ?, #
+        pointer = pointer - 1;
+
+        // step 1-1
+      }
+
+      break;
 
     // https://url.spec.whatwg.org/#host-state
     case "hostState":
 
+      break;
+
     // https://url.spec.whatwg.org/#hostname-state
     case "hostnameState":
+
+      break;
 
     // https://url.spec.whatwg.org/#port-state
     case "portState":
 
+      break;
+
     // https://url.spec.whatwg.org/#relative-path-start-state
     case "relativePathStartState":
+
+      break;
 
     // https://url.spec.whatwg.org/#relative-path-state
     case "relativePathState":
 
+      break;
+
     // https://url.spec.whatwg.org/#query-state
     case "queryState":
 
+      break;
+
     // https://url.spec.whatwg.org/#fragment-state
     case "fragmentState":
+
+      break;
 
     }
   }
