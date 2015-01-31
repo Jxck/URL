@@ -51,6 +51,43 @@ function isRelativeScheme(scheme: string): boolean {
   return Object.keys(relativeScheme).indexOf(scheme) > -1;
 }
 
+// https://url.spec.whatwg.org/#url-code-points
+function isURLCodePoint(codePoint: number): boolean {
+  if (isASCIIAlphaNumeric(codePoint)) {
+    return true;
+  }
+
+  // ["!", "$", "&", "'", "(", ")", "*", "+", ",", "-",
+  //  ".", "/", ":", ";", "=", "?", "@", "_", "~"]
+  var signs = [ 33, 36, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 58, 59, 61, 63, 64, 95, 126 ];
+  if (signs.indexOf(codePoint) > -1) {
+    return true;
+  }
+
+  if (inRange(0x00A0  , codePoint, 0xD7FF  )) return true;
+  if (inRange(0xE000  , codePoint, 0xFDCF  )) return true;
+  if (inRange(0xFDF0  , codePoint, 0xFFFD  )) return true;
+  if (inRange(0x10000 , codePoint, 0x1FFFD )) return true;
+  if (inRange(0x20000 , codePoint, 0x2FFFD )) return true;
+  if (inRange(0x30000 , codePoint, 0x3FFFD )) return true;
+  if (inRange(0x40000 , codePoint, 0x4FFFD )) return true;
+  if (inRange(0x50000 , codePoint, 0x5FFFD )) return true;
+  if (inRange(0x60000 , codePoint, 0x6FFFD )) return true;
+  if (inRange(0x70000 , codePoint, 0x7FFFD )) return true;
+  if (inRange(0x80000 , codePoint, 0x8FFFD )) return true;
+  if (inRange(0x90000 , codePoint, 0x9FFFD )) return true;
+  if (inRange(0xA0000 , codePoint, 0xAFFFD )) return true;
+  if (inRange(0xB0000 , codePoint, 0xBFFFD )) return true;
+  if (inRange(0xC0000 , codePoint, 0xCFFFD )) return true;
+  if (inRange(0xD0000 , codePoint, 0xDFFFD )) return true;
+  if (inRange(0xE0000 , codePoint, 0xEFFFD )) return true;
+  if (inRange(0xF0000 , codePoint, 0xFFFFD )) return true;
+  if (inRange(0x100000, codePoint, 0x10FFFD)) return true;
+
+  return false;
+}
+
+
 //[NoInterfaceObject, Exposed=(Window,Worker)]
 // interface URLUtilsReadOnly {
 //   stringifier readonly attribute USVString href;
@@ -222,11 +259,11 @@ class jURL implements IURL {
     // step 7
     var pointer = 0;
 
+    var c = input.charCodeAt(pointer);
+
     // step 8
     switch(state) {
     case "schemeStartState":
-      var c = input.charCodeAt(pointer);
-
       // step 8-1
       if (isASCIIAlpha(c)) {
         buffer += String.fromCharCode(c).toLowerCase();
@@ -244,8 +281,6 @@ class jURL implements IURL {
         return 'parse error';
       }
     case "schemeState":
-      var c = input.charCodeAt(pointer);
-
       // step 9-1
       if (isASCIIAlphaNumeric(c) || [43, 45, 46].indexOf(c) > 0) { // +, -, .
         buffer += String.fromCharCode(c).toLowerCase();
@@ -308,6 +343,68 @@ class jURL implements IURL {
       else {
         // TODO: parse error
         return; // TODO: terminate
+      }
+    case "schemeDataState":
+      // step 1
+      if (c === 63) { // ?
+        url.query = "";
+        state = "queryState";
+      }
+
+      // step 2
+      else if (c === 35) { // #
+        url.fragment = "";
+        state = "flagmentState";
+      }
+
+      // step 3
+      else {
+        // step 3-1
+        if (c === NaN && !isURLCodePoint(c) && c !== 37) { // %
+          // TODO: parse error
+          return "parse error";
+        }
+
+        // step 3-2
+        if (c === 37) { // %
+          var c0 = input.charCodeAt(pointer+1);
+          if (isASCIIHexDigits(c0)) {
+            // TODO: parse error
+            return "parse error";
+          }
+          var c1 = input.charCodeAt(pointer+2);
+          if (isASCIIHexDigits(c1)) {
+            // TODO: parse error
+            return "parse error";
+          }
+        }
+
+        // step 3-3
+        if (c !== NaN && [0x9, 0xA, 0xD].indexOf(c) < 0) {
+          // TODO: implement
+        }
+      }
+    case "noSchemeState":
+      if (base === null || !isRelativeScheme(base.scheme)) {
+        // TODO: parse error
+        return "failure";
+      }
+
+      else {
+        state = "relativeState";
+        pointer = pointer - 1;
+      }
+
+    case "relativeOrAuthorityState":
+      if (c === 47 && input.charCodeAt(pointer+1) === 47) { // /
+        state = "authorityIgnoreSlashesState";
+        pointer = pointer + 1;
+      }
+
+      else {
+        // TODO: parse error
+        state = "relativeState";
+        pointer = pointer - 1;
       }
     }
   }
