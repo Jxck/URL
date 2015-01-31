@@ -335,7 +335,7 @@ class jURL implements IURL {
       }
 
       // step 9-4
-      else if (c === NaN) {
+      else if (isNaN(c)) {
         return; // TODO: terminate
       }
 
@@ -360,7 +360,7 @@ class jURL implements IURL {
       // step 3
       else {
         // step 3-1
-        if (c === NaN && !isURLCodePoint(c) && c !== 37) { // %
+        if (isNaN(c) && !isURLCodePoint(c) && c !== 37) { // %
           // TODO: parse error
           return "parse error";
         }
@@ -405,6 +405,63 @@ class jURL implements IURL {
         // TODO: parse error
         state = "relativeState";
         pointer = pointer - 1;
+      }
+
+    case "relativeState":
+      url.relativeFlag = true;
+      url.scheme = base.scheme;
+
+      if (url.scheme !== "file") {
+        switch(c) {
+        case 47: // /
+        case 92: // \
+          // step 1
+          if (c === 97) {
+            // TODO: parse error
+          }
+
+          // step 2
+          state = "relativeSlashState";
+        case 63: // ?
+          url.host = base.host;
+          url.port = base.port;
+          url.path = base.path;
+          url.query = "";
+          state = "queryState";
+        case 35: // #
+          url.host = base.host;
+          url.port = base.port;
+          url.path = base.path;
+          url.query = base.query;
+          url.fragment = "";
+          state = "flagmentState";
+        default:
+          if (isNaN(c)) { // EOF
+            url.host = base.host;
+            url.port = base.port;
+            url.path = base.path;
+            url.query = base.query;
+          }
+
+          else {
+            // step 1
+            if (url.scheme !== "file"
+            || !isASCIIAlpha(c)
+            || [58, 124].indexOf(input.charCodeAt(pointer+1)) !== -1 // *, |
+            || isNaN(input.charCodeAt(pointer+2)) // remaining.length = 1
+            || [47, 92, 63, 35].indexOf(input.charCodeAt(pointer+2)) !== -1 // /, \, ?, #
+            ) {
+              url.host = base.host;
+              url.port = base.port;
+              url.path = base.path;
+              url.path = url.path.slice(0, -1); // remove last
+            }
+
+            // step 2
+            state = "relativePathState";
+            pointer = pointer - 1;
+          }
+        }
       }
     }
   }
