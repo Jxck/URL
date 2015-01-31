@@ -476,9 +476,72 @@ class jURL implements IURL {
 
     // https://url.spec.whatwg.org/#relative-slash-state
     case "relativeSlashState":
-      if ([47, 92].indexOf(c) !== -1) {
+      if ([47, 92].indexOf(c) !== -1) { // /, \
+        // step 1
+        if (c === 92) { // \
+          // TODO
+          return "parse error";
+        }
 
+        // step 2
+        if (url.scheme === "file") {
+          state = "fileHostState";
+        }
+
+        // step 3
+        else {
+          state = "authorityIgnoreSlashesState";
+        }
       }
+
+      else {
+        // step 1
+        if (url.scheme !== "file") {
+          url.host = base.host;
+          url.port = base.port;
+        }
+
+        // step 2
+        state = "relativePathState";
+        pointer = pointer - 1;
+      }
+
+    // https://url.spec.whatwg.org/#authority-first-slash-state
+    case "authorityFirstSlashState":
+
+    // https://url.spec.whatwg.org/#authority-second-slash-state
+    case "authoritySecondSlashState":
+
+    // https://url.spec.whatwg.org/#authority-ignore-slashes-state
+    case "authorityIgnoreSlashesState":
+
+    // https://url.spec.whatwg.org/#authority-state
+    case "authorityState":
+
+    // https://url.spec.whatwg.org/#file-host-state
+    case "fileHostState":
+
+    // https://url.spec.whatwg.org/#host-state
+    case "hostState":
+
+    // https://url.spec.whatwg.org/#hostname-state
+    case "hostnameState":
+
+    // https://url.spec.whatwg.org/#port-state
+    case "portState":
+
+    // https://url.spec.whatwg.org/#relative-path-start-state
+    case "relativePathStartState":
+
+    // https://url.spec.whatwg.org/#relative-path-state
+    case "relativePathState":
+
+    // https://url.spec.whatwg.org/#query-state
+    case "queryState":
+
+    // https://url.spec.whatwg.org/#fragment-state
+    case "fragmentState":
+
     }
   }
 }
