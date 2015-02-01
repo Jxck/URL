@@ -12,6 +12,11 @@ if (typeof window === 'undefined') { // in node.js
   URLSearchParams = require('urlsearchparams').URLSearchParams;
 }
 
+
+// MEMO: code point
+// [ #,  %,  /,  *,  ?,  @,  \,   |]
+// [35, 37, 47, 58, 63, 64, 92, 124]
+
 function inRange(from, tar, to: number): boolean {
   return (from <= tar && tar <= to);
 }
@@ -653,6 +658,40 @@ class jURL implements IURL {
 
     // https://url.spec.whatwg.org/#fragment-state
     case "fragmentState":
+      switch(c) {
+        case 0x0000:
+        case 0x0009:
+        case 0x000A:
+        case 0x000D:
+          // TODO: parse error
+        default:
+          if (isNaN(c)) {
+            // TODO: do nothing
+            break;
+          }
+
+          // step 1
+          if (!isURLCodePoint(c) && c !== 37) { // %
+            // TODO: parse error
+          }
+
+          // step 2
+          if (c === 37) { // %
+            var c0 = input.charCodeAt(pointer+1);
+            if (isASCIIHexDigits(c0)) {
+              // TODO: parse error
+              return "parse error";
+            }
+            var c1 = input.charCodeAt(pointer+2);
+            if (isASCIIHexDigits(c1)) {
+              // TODO: parse error
+              return "parse error";
+            }
+          }
+
+          // step 3
+          url.fragment += String.fromCharCode(c);
+      }
 
       break;
 
