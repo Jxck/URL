@@ -710,6 +710,51 @@ class jURL implements IURL {
           // step 1-5-2
           url.path.push(buffer);
         }
+
+        // step 1-6
+        buffer = "";
+
+        // step 1-7
+        if (c === 63) {
+          url.query = "";
+          state = "queryState";
+        }
+
+        // step 1-8
+        if (c === 35) {
+          url.fragment = "";
+          state = "fragmentState";
+        }
+      }
+
+      // step 2
+      else if ([0x9, 0xA, 0xD].indexOf(c) !== -1) {
+        // TODO:  parse error
+      }
+
+      // step 3
+      else {
+        // step 3-1
+        if (!isURLCodePoint(c) && c !== 37) {
+          // TODO: parse error
+        }
+
+        // step 3-2
+        if (c === 37) { // %
+          var c0 = input.charCodeAt(pointer+1);
+          if (isASCIIHexDigits(c0)) {
+            // TODO: parse error
+            return "parse error";
+          }
+          var c1 = input.charCodeAt(pointer+2);
+          if (isASCIIHexDigits(c1)) {
+            // TODO: parse error
+            return "parse error";
+          }
+        }
+
+        // step 3-3
+        // TODO
       }
 
       break;
