@@ -717,6 +717,7 @@ var t = true, f = false;           [ 'a', 'f', 'z', 'A', 'F', 'Z', '0', '9', '!'
     assert(isASCIIHexDigits(a),    [  t ,  t ,  f ,  t ,  t ,  f ,  f ,  f ,  f ,  f ,  f ][i]);
     assert(isASCIIAlpha(a),        [  t ,  t ,  t ,  t ,  t ,  t ,  f ,  f ,  f ,  f ,  f ][i]);
     assert(isASCIIAlphaNumeric(a), [  t ,  t ,  t ,  t ,  t ,  t ,  t ,  t ,  f ,  f ,  f ][i]);
+    assert(isURLCodePoint(a),      [  t ,  t ,  t ,  t ,  t ,  t ,  t ,  t ,  t ,  t ,  f ][i]);
   });
 
 ["ftp", "file", "gopher", "http", "https", "ws", "wss"].forEach((scheme) => {
@@ -727,3 +728,8 @@ assert(isRelativeScheme("foo"), false);
 assert(isRelativeScheme(""), false);
 assert(isRelativeScheme(null), false);
 assert(isRelativeScheme(undefined), false);
+
+
+["!", "$", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", ":", ";", "=", "?", "@", "_", "~"].forEach(function(c) {
+  assert(isURLCodePoint(c.charCodeAt(0)), true);
+});
