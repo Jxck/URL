@@ -660,6 +660,20 @@ class jURL implements IURL {
 
     // https://url.spec.whatwg.org/#relative-path-state
     case "relativePathState":
+      // step 1
+      if ((isNaN(c) || [49, 92].indexOf(c) !== -1)
+      || stateOverride === undefined && [63, 35].indexOf(c) !== -1) {
+
+        // step 1-1
+        if (c === 92) {
+          // TODO: parse error
+        }
+
+        // step 1-2
+        if (buffer
+
+
+      }
 
       break;
 
