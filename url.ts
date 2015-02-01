@@ -12,6 +12,18 @@ if (typeof window === 'undefined') { // in node.js
   URLSearchParams = require('urlsearchparams').URLSearchParams;
 }
 
+// TODO:
+function encode(s: string, encodingOverride?: string): Uint8Array {
+  if (encodingOverride !== "utf-8") {
+    throw new Error("support utf-8 only");
+  }
+  return  null;//encoder.encode(s);
+}
+
+function percentEncode(byt: number): string {
+  return "%" + byt.toString(16).toUpperCase();
+}
+
 
 // MEMO: code point
 // [ #,  %,  /,  *,  ?,  @,  \,   |]
@@ -653,6 +665,68 @@ class jURL implements IURL {
 
     // https://url.spec.whatwg.org/#query-state
     case "queryState":
+      // step 1
+      if (isNaN(c) || (stateOverride === undefined && c === 35)) {
+        // step 1-1
+        if (url.relativeFlag === false || ["ws", "wss"].indexOf(url.scheme) === -1) {
+          encodingOverride = "utf-8";
+        }
+
+        // step 1-2
+        var encodedBuffer = encode(buffer, encodingOverride);
+
+        // step 1-3
+        for (var i=0; i<encodedBuffer.length; i++) {
+          var byt = encodedBuffer[i];
+          // step 1-3-1
+          if (inRange(0, byt, 0x19) || inRange(0x7F, byt, 0xFF) || [0x22, 0x23, 0x3C, 0x3E, 0x60].indexOf(byt) !== -1) {
+            url.query = percentEncode(encodedBuffer);
+          }
+          // step 1-3-2
+          else {
+            url.query = String.fromCharCode(byt);
+          }
+        }
+
+        // step 1-4
+        buffer = "";
+
+        // step 1-5
+        if (c === 35) {
+          url.fragment = "";
+          state = "fragmentState";
+        }
+      }
+
+      // step 2
+      else if ([0x9, 0xA, 0xD].indexOf !== -1) {
+        // TODO: parse error
+      }
+
+      // step 3
+      else {
+        // step 3-1
+        if (!isURLCodePoint(c) && c !== 37) {
+          // TODO: parse error
+        }
+
+        // step 3-2
+        if (c === 37) { // %
+          var c0 = input.charCodeAt(pointer+1);
+          if (isASCIIHexDigits(c0)) {
+            // TODO: parse error
+            return "parse error";
+          }
+          var c1 = input.charCodeAt(pointer+2);
+          if (isASCIIHexDigits(c1)) {
+            // TODO: parse error
+            return "parse error";
+          }
+        }
+
+        // step 3-3
+        buffer += String.fromCharCode(c);
+      }
 
       break;
 
