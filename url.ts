@@ -672,9 +672,44 @@ class jURL implements IURL {
           // TODO: parse error
         }
 
+        var table = {
+          "%2e":    ".",
+          ".%2e":   "..",
+          "%2e.":   "..",
+          "%2e%2e": ".."
+        }
+
         // step 1-2
+        var matched = table[buffer.toLowerCase()];
+        if (matched !== undefined) {
+          buffer = matched;
+        }
 
+        // step 1-3
+        if (buffer === "..") {
+          url.path.pop();
+          if ([47, 92].indexOf(c) === -1) { // /, \
+            url.path.push("");
+          }
+        }
 
+        // step 1-4
+        else if (buffer === "." && [47, 92].indexOf(c) === -1) {
+          url.path.push("");
+        }
+
+        // step 1-5
+        else if (buffer === ".") {
+          // step 1-5-1
+          if (url.scheme === "file"
+          && url.path.length === 0
+          && (isASCIIAlpha(buffer.charCodeAt(0)) && buffer.charCodeAt(0) === 124)) { // |
+            buffer[1] = ":";
+          }
+
+          // step 1-5-2
+          url.path.push(buffer);
+        }
       }
 
       break;
