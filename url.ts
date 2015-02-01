@@ -20,10 +20,13 @@ function encode(s: string, encodingOverride?: string): Uint8Array {
   return  null;//encoder.encode(s);
 }
 
-function percentEncode(byt: number): string {
-  return "%" + byt.toString(16).toUpperCase();
+function percentEncode(encoded: Uint8Array): string {
+  var result = "";
+  for (var i = 0; i < encoded.length; i ++) {
+    result += "%" + encoded[i].toString(16).toUpperCase();
+  }
+  return result;
 }
-
 
 // MEMO: code point
 // [ #,  %,  /,  *,  ?,  @,  \,   |]
@@ -670,7 +673,6 @@ class jURL implements IURL {
         }
 
         // step 1-2
-        if (buffer
 
 
       }
@@ -713,7 +715,7 @@ class jURL implements IURL {
       }
 
       // step 2
-      else if ([0x9, 0xA, 0xD].indexOf !== -1) {
+      else if ([0x9, 0xA, 0xD].indexOf(c) !== -1) {
         // TODO: parse error
       }
 
