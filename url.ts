@@ -20,12 +20,28 @@ function encode(s: string, encodingOverride?: string): Uint8Array {
   return  null;//encoder.encode(s);
 }
 
+function decode(input: Uint8Array): string {
+  return null;
+}
+
 function percentEncode(encoded: Uint8Array): string {
   var result = "";
   for (var i = 0; i < encoded.length; i ++) {
     result += "%" + encoded[i].toString(16).toUpperCase();
   }
   return result;
+}
+
+function percentDecode(input: Uint8Array): Uint8Array {
+  return null;
+}
+
+function domainToUnicode(input: string): string {
+  return null;
+}
+
+function domainToASCII(input: string): string {
+  return null;
 }
 
 // MEMO: code point
@@ -107,7 +123,52 @@ function isURLCodePoint(codePoint: number): boolean {
   return false;
 }
 
+// https://url.spec.whatwg.org/#concept-host-parser
 function hostParse(input: string, unicodeFlag?: boolean): string {
+  // step 1
+  if (input === "") {
+    return "failure";
+  }
+
+  // step 2
+  if (input.charAt(0) === "[") {
+    // step 2-1
+    if (input.charAt(input.length-1) !== "]") {
+      // TODO: parse error
+      return "failure";
+    }
+
+    // step 2-2
+    return parseIPv6(input.slice(1, -1));
+  }
+
+  // step 3
+  var domain = decode(percentDecode(encode(input)));
+
+  // step 4
+  var asciiDomain = domainToASCII(domain);
+
+  // step 5
+  if (asciiDomain === "failure") {
+    return "failure";
+  }
+
+  // step 6
+  if ([ "\u0000", "\t", "\n", "\r", " ", "#", "%", "/", ":", "?", "@", "[", "\\", "]" ].some((s) => {
+    return asciiDomain.indexOf(s) !== -1;
+  })) {
+    return "failure";
+  }
+
+  // step 7
+  if (unicodeFlag) { // TODO: sent a bug to clearify default flag, so follow to update spec.
+    return asciiDomain;
+  } else {
+    return domainToUnicode(asciiDomain);
+  }
+}
+
+function parseIPv6(input: string): string {
   return null;
 }
 
