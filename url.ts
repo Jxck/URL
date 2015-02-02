@@ -29,8 +29,8 @@ function percentEncode(encoded: Uint8Array): string {
 }
 
 // MEMO: code point
-// [ #,  %,  /,  *,  ?,  @,  \,   |]
-// [35, 37, 47, 58, 63, 64, 92, 124]
+// [ #,  %,  /,  :,  *,  ?,  @,  \,   |]
+// [35, 37, 47, 58, 42, 63, 64, 92, 124]
 
 function inRange(from, tar, to: number): boolean {
   return (from <= tar && tar <= to);
@@ -107,6 +107,9 @@ function isURLCodePoint(codePoint: number): boolean {
   return false;
 }
 
+function hostParse(input: string, unicodeFlag?: boolean): string {
+  return null;
+}
 
 //[NoInterfaceObject, Exposed=(Window,Worker)]
 // interface URLUtilsReadOnly {
@@ -493,7 +496,7 @@ class jURL implements IURL {
             // step 1
             if (url.scheme !== "file"
             || !isASCIIAlpha(c)
-            || [58, 124].indexOf(input.charCodeAt(pointer+1)) !== -1 // *, |
+            || [42, 124].indexOf(input.charCodeAt(pointer+1)) !== -1 // *, |
             || isNaN(input.charCodeAt(pointer+2)) // remaining.length = 1
             || [47, 92, 63, 35].indexOf(input.charCodeAt(pointer+2)) !== -1 // /, \, ?, #
             ) {
@@ -626,15 +629,46 @@ class jURL implements IURL {
         pointer = pointer - 1;
 
         // step 1-1
+        if (isASCIIAlpha(buffer.charCodeAt(0)) && [58, 124].indexOf(buffer.charCodeAt(1))) {
+          state = "relativePathState";
+        }
+
+        // step 1-2
+        else if (buffer === "") {
+          state = "relativePathStartState";
+        }
+
+        // step 1-3
+        else {
+          // step 1-3-1
+          var host = hostParse(buffer);
+
+          // step 1-3-2
+          if (host === "failure") {
+            return "failure";
+          }
+
+          // step 1-3-3
+          url.host = host;
+          buffer = "";
+          state = "relativePathStartState";
+        }
+      }
+
+      // step 2
+      else if ([0x9, 0xA, 0xD].indexOf(c)) {
+        // TODO parse error
+      }
+
+      // step 3
+      else {
+        buffer += String.fromCharCode(c);
       }
 
       break;
 
     // https://url.spec.whatwg.org/#host-state
-    case "hostState":
-
-      break;
-
+    case "hostState": // fall through
     // https://url.spec.whatwg.org/#hostname-state
     case "hostnameState":
 
