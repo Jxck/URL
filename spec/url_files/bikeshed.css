@@ -1,0 +1,113 @@
+/* Self-link styles */
+.heading {
+  position: relative;
+}
+a.self-link {
+  position: absolute;
+  top: 0;
+  left: -2.5em;
+  width: 2em;
+  height: 2em;
+  text-align: center;
+  border: none;
+  transition: opacity .2s;
+  opacity: .5;
+}
+a.self-link:hover {
+  opacity: 1;
+  text-decoration: none;
+}
+.heading > a.self-link {
+  font-size: 83%;
+  color: inherit;
+}
+li > a.self-link {
+  left: -3.5em;
+}
+dfn > a.self-link {
+  top: auto;
+  left: auto;
+  opacity: 0;
+  width: 1.5em;
+  height: 1.5em;
+  background: gray;
+  color: white;
+  font-style: normal;
+  transition: opacity .2s, background-color .2s, color .2s;
+}
+dfn:hover > a.self-link {
+  opacity: 1;
+}
+dfn > a.self-link:hover {
+  color: black;
+  background-color: #B1C99D;
+}
+a.self-link::before {
+  content: "¶";
+}
+.heading > a.self-link::before {
+  content: "§";
+}
+dfn > a.self-link::before {
+  content: "#";
+}
+
+/* Hide editor visually, but leave it for scraping tools */
+.head .editor {
+  display: none;
+}
+
+/* Floating-but-collapsible annoying warning for snapshots */
+details.annoying-warning {
+  background-color: #920800;
+  background-image: linear-gradient(transparent 40%, rgba(255, 255, 255, 0.2));
+  border: solid rgba(0, 0, 0, 0.4);
+  border-radius: 3px;
+  border-width: 1px 1px 0 1px;
+  box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.95);
+  padding: 10px 0;
+  opacity: .95;
+  position: fixed;
+  left: 5%;
+  margin: 0 auto;
+  right: 5%;
+  z-index: 99;
+}
+
+details.annoying-warning[open] {
+  bottom: 50%;
+  max-width: 1024px;
+  outline: solid 10000px rgba(255, 255, 255, 0.6);
+}
+
+details.annoying-warning:not([open]) {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 0;
+}
+
+details.annoying-warning > summary {
+  display: block; /* polyfill */
+  font-size: 0.875em;
+  font-weight: bold;
+  letter-spacing: 0.02em;
+  margin-bottom: 0px;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.85);
+  cursor: default;
+}
+
+details.annoying-warning p {
+  padding: 0.25em 7.5%;
+  line-height: 1.4;
+  margin-top: 0.25em;
+  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.85);
+}
+
+details.annoying-warning a {
+  color: white;
+  text-decoration: underline;
+}
