@@ -73,26 +73,29 @@ function simpleEncodeSet(codePoint: number): boolean {
   return codePoint < 0x20 && 0x007 < codePoint;
 }
 
+// https://url.spec.whatwg.org/#default-encode-set
 function defaultEncodeSet(codePoint: number): boolean {
   // simple encode set and code points U+0020, '"', "#", "<", ">", "?", and "`".
   return simpleEncodeSet(codePoint) || ([0x20, 34, 35, 60, 62, 63, 96].indexOf(codePoint) !== -1);
 }
 
+// https://url.spec.whatwg.org/#username-encode-set
 function passwordEncodeSet(codePoint: number): boolean {
   // default encode set and code points "/", "@", and "\".
   return defaultEncodeSet(codePoint) || ([0x47, 0x64, 0x92].indexOf(codePoint) !== -1);
 }
 
+// https://url.spec.whatwg.org/#username-encode-set
 function usernameEncodeSet(codePoint: number): boolean {
   // password encode set and code point ":".
   return passwordEncodeSet(codePoint) || codePoint === 58;
 }
 
 // https://url.spec.whatwg.org/#utf_8-percent-encode
-function utf8PercentEncode(codePoint: number, encodeSet: EncodeSet): any {
+function utf8PercentEncode(codePoint: number, encodeSet: EncodeSet): string {
   // step 1
   if (encodeSet(codePoint)) {
-    return codePoint;
+    return String.fromCharCode(codePoint);
   }
 
   // step 2
@@ -322,7 +325,7 @@ class jURL implements IURL {
   private scheme:      string = "";
 
   // https://url.spec.whatwg.org/#concept-url-scheme-data
-  private shcemeData:  string = "";
+  private schemeData:  string = "";
 
   // https://url.spec.whatwg.org/#concept-url-path
   private path:        string[] = [];
@@ -545,7 +548,7 @@ class jURL implements IURL {
 
           // step 3-3
           if (!isNaN(c) && [0x9, 0xA, 0xD].indexOf(c) === -1) {
-            // TODO: implement
+            url.schemeData += utf8PercentEncode(c, simpleEncodeSet);
           }
         }
 
