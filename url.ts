@@ -595,7 +595,7 @@ class jURL implements IURL {
         case 47: // /
         case 92: // \
           // step 1
-          if (c === 97) {
+          if (c === 97) { // \
             // TODO: parse error
           }
 
@@ -621,7 +621,8 @@ class jURL implements IURL {
 
           break;
         default:
-          if (isNaN(c)) { // EOF
+          // EOF code point
+          if (isNaN(c)) {
             url.host = base.host;
             url.port = base.port;
             url.path = base.path;
@@ -657,8 +658,7 @@ class jURL implements IURL {
         if ([47, 92].indexOf(c) !== -1) { // /, \
           // step 1
           if (c === 92) { // \
-            // TODO
-            return "parse error";
+            // TODO: parse error
           }
 
           // step 2
@@ -689,7 +689,7 @@ class jURL implements IURL {
       // https://url.spec.whatwg.org/#authority-first-slash-state
       case "authorityFirstSlashState":
         if (c === 47) { // /
-          state = "authoritySecondState";
+          state = "authoritySecondSlashState";
         }
         else {
           // TODO: parse error
@@ -740,19 +740,61 @@ class jURL implements IURL {
           flagAt = true;
 
           // step 1-3
+          for (var i = 0; i < buffer.length; i++) {
+            var cp = buffer.charCodeAt(i);
 
-          // TODO: あとで
+            // step 1-3-1
+            if ([0x9, 0xA, 0xD].indexOf(cp) === 0) {
+              // TODO: parse error
+              continue;
+            }
 
+            // step 1-3-2
+            if (!isURLCodePoint(cp) && cp !== 37) {
+              // TODO: parse error
+            }
+
+            // step 1-3-3
+            if (cp === 37) { // %
+              var c0 = input.charCodeAt(pointer+1);
+              if (isASCIIHexDigits(c0)) {
+                // TODO: parse error
+              }
+              var c1 = input.charCodeAt(pointer+2);
+              if (isASCIIHexDigits(c1)) {
+                // TODO: parse error
+              }
+            }
+
+            // step 1-3-4
+            if (cp === 58 && url.password === null) { // :
+              url.password = "";
+              continue;
+            }
+
+            // step 1-3-5
+            var result = utf8PercentEncode(cp, defaultEncodeSet);
+            if (url.password !== null) {
+              url.password += result;
+            } else {
+              url.username += result;
+            }
+          }
+
+          // step 1-4
+          buffer = "";
         }
 
         // step 2
         else if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // /, \, ?, #
-          // TODO: あとで
+          pointer = pointer - (buffer.length + 1);
+          buffer = "";
+          state = "hostState";
         }
 
         // step 3
         else {
-          // TODO: あとで
+          buffer = buffer + String.fromCharCode(c);
         }
 
         break;
