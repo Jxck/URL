@@ -42,8 +42,16 @@ function encode(s: string, encodingOverride?: string): Uint8Array {
   return  null;//encoder.encode(s);
 }
 
+function encodeCodePoint(codePoint: number): Uint8Array {
+  return null;
+}
+
 function decode(input: Uint8Array): string {
   return null;
+}
+
+function percentEncodeByte(byt: number): string {
+  return null
 }
 
 function percentEncode(encoded: Uint8Array): string {
@@ -51,6 +59,27 @@ function percentEncode(encoded: Uint8Array): string {
   for (var i = 0; i < encoded.length; i ++) {
     result += "%" + encoded[i].toString(16).toUpperCase();
   }
+  return result;
+}
+
+type EncodeSet = (p: number) => boolean;
+
+// https://url.spec.whatwg.org/#utf_8-percent-encode
+function utf8PercentEncode(codePoint: number, encodeSet: EncodeSet): any {
+  // step 1
+  if (encodeSet(codePoint)) {
+    return codePoint;
+  }
+
+  // step 2
+  var bytes = encodeCodePoint(codePoint);
+
+  // step 3
+  var result = "";
+  for (var i=0; i<bytes.length; i++) {
+    result += percentEncodeByte(bytes[i]);
+  }
+
   return result;
 }
 
