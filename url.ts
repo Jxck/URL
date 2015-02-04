@@ -1,6 +1,28 @@
 /// <reference path="types/webidl.d.ts" />
 /// <reference path="types/urlsearchparams.d.ts" />
 
+// MEMO: code point
+//  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,   -,  .,  /
+// 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47
+
+//  0, ...,  9
+// 48, ..., 57
+
+//  :,  ;,  <,  =,  >,  ?,  @
+// 58, 59, 60, 61, 62, 63, 64
+
+//  A, ...,  Z
+// 65, ..., 90
+
+//  [, \\,  ],  ^,  _,  `
+// 91, 92, 93, 94, 95, 96
+
+//  a, ...,   z
+// 97, ..., 122
+
+//   {,   |,   },   ~
+// 123, 124, 125, 126
+
 // for dynamic require
 declare var require: any;
 
@@ -43,28 +65,6 @@ function domainToUnicode(input: string): string {
 function domainToASCII(input: string): string {
   return null;
 }
-
-// MEMO: code point
-//  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,   -,  .,  /
-// 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47
-
-//  0, ...,  9
-// 48, ..., 57
-
-//  :,  ;,  <,  =,  >,  ?,  @
-// 58, 59, 60, 61, 62, 63, 64
-
-//  A, ...,  Z
-// 65, ..., 90
-
-//  [, \\,  ],  ^,  _,  `
-// 91, 92, 93, 94, 95, 96
-
-//  a, ...,   z
-// 97, ..., 122
-
-//   {,   |,   },   ~
-// 123, 124, 125, 126
 
 function inRange(from, tar, to: number): boolean {
   return (from <= tar && tar <= to);
@@ -359,8 +359,11 @@ class jURL implements IURL {
     var flagAt = false; // @flag
     var flagParen = false; // []flag
 
-    // step 7, 8
-    for (var pointer = 0; pointer < input.length; i++) {
+    // step 7
+    var pointer = 0;
+
+    // step 8
+    while (pointer < input.length) {
       var c = input.charCodeAt(pointer);
 
       switch(state) {
@@ -381,7 +384,8 @@ class jURL implements IURL {
 
         // step 8-3
         else {
-          return 'parse error';
+          // TODO: parse error;
+          return; // TODO: terminate
         }
 
         break;
@@ -417,7 +421,7 @@ class jURL implements IURL {
           else if (url.relativeFlag === true
                    && base !== null
                    && base.scheme === url.scheme) {
-            state = "relativeOrAuthority";
+            state = "relativeOrAuthorityState";
 
           }
 
@@ -436,9 +440,8 @@ class jURL implements IURL {
         else if (stateOverride === undefined) {
           buffer = "";
           state = "noSchemeState";
-
-          // TODO: return to First
-
+          pointer = 0;
+          continue;
         }
 
         // step 9-4
@@ -473,7 +476,6 @@ class jURL implements IURL {
           // step 3-1
           if (isNaN(c) && !isURLCodePoint(c) && c !== 37) { // %
             // TODO: parse error
-            return "parse error";
           }
 
           // step 3-2
@@ -481,17 +483,15 @@ class jURL implements IURL {
             var c0 = input.charCodeAt(pointer+1);
             if (isASCIIHexDigits(c0)) {
               // TODO: parse error
-              return "parse error";
             }
             var c1 = input.charCodeAt(pointer+2);
             if (isASCIIHexDigits(c1)) {
               // TODO: parse error
-              return "parse error";
             }
           }
 
           // step 3-3
-          if (c !== NaN && [0x9, 0xA, 0xD].indexOf(c) === -1) {
+          if (!isNaN(c) && [0x9, 0xA, 0xD].indexOf(c) === -1) {
             // TODO: implement
           }
         }
@@ -978,6 +978,8 @@ class jURL implements IURL {
         break;
 
       }
+
+      pointer ++;
     }
 
     return url; // TODO: any
