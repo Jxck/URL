@@ -341,607 +341,124 @@ class jURL implements IURL {
     var flagAt = false; // @flag
     var flagParen = false; // []flag
 
-    // step 7
-    var pointer = 0;
+    // step 7, 8
+    for (var pointer = 0; pointer < input.length; i++) {
+      var c = input.charCodeAt(pointer);
 
-    var c = input.charCodeAt(pointer);
+      switch(state) {
 
-    // step 8
-    switch(state) {
+      // https://url.spec.whatwg.org/#scheme-start-state
+      case "schemeStartState":
+        // step 8-1
+        if (isASCIIAlpha(c)) {
+          buffer += String.fromCharCode(c).toLowerCase();
+          state = "schemeState";
+        }
 
-    // https://url.spec.whatwg.org/#scheme-start-state
-    case "schemeStartState":
-      // step 8-1
-      if (isASCIIAlpha(c)) {
-        buffer += String.fromCharCode(c).toLowerCase();
-        state = "schemeState";
-      }
+        // step 8-2
+        else if (stateOverride === undefined) {
+          state = "noSchemeState";
+          pointer = pointer - 1;
+        }
 
-      // step 8-2
-      else if (stateOverride === undefined) {
-        state = "noSchemeState";
-        pointer = pointer - 1;
-      }
+        // step 8-3
+        else {
+          return 'parse error';
+        }
 
-      // step 8-3
-      else {
-        return 'parse error';
-      }
+        break;
 
-      break;
+      // https://url.spec.whatwg.org/#scheme-state
+      case "schemeState":
+        // step 9-1
+        if (isASCIIAlphaNumeric(c) || [43, 45, 46].indexOf(c) !== -1) { // +, -, .
+          buffer += String.fromCharCode(c).toLowerCase();
+        }
 
-    // https://url.spec.whatwg.org/#scheme-state
-    case "schemeState":
-      // step 9-1
-      if (isASCIIAlphaNumeric(c) || [43, 45, 46].indexOf(c) !== -1) { // +, -, .
-        buffer += String.fromCharCode(c).toLowerCase();
-      }
+        // step 9-2
+        else if (c === 58) { // :
+          url.scheme = buffer;
+          buffer = "";
 
-      // step 9-2
-      else if (c === 58) { // :
-        url.scheme = buffer;
-        buffer = "";
+          // step 9-2-1
+          if (stateOverride !== undefined) {
+            return; // TODO: terminate
+          }
 
-        // step 9-2-1
-        if (stateOverride !== undefined) {
+          // step 9-2-2
+          if (isRelativeScheme(url.scheme)) {
+            url.relativeFlag = true;
+          }
+
+          // step 9-2-3
+          if (url.scheme === "file") {
+            state = "relativeState";
+          }
+
+          // step 9-2-4
+          else if (url.relativeFlag === true
+                   && base !== null
+                   && base.scheme === url.scheme) {
+            state = "relativeOrAuthority";
+
+          }
+
+          // step 9-2-5
+          else if (url.relativeFlag === true) {
+            state = "authorityFirstSlashState";
+          }
+
+          // step 9-2-6
+          else {
+            state = "schemeDataState";
+          }
+        }
+
+        // step 9-3
+        else if (stateOverride === undefined) {
+          buffer = "";
+          state = "noSchemeState";
+
+          // TODO: return to First
+
+        }
+
+        // step 9-4
+        else if (isNaN(c)) {
           return; // TODO: terminate
         }
 
-        // step 9-2-2
-        if (isRelativeScheme(url.scheme)) {
-          url.relativeFlag = true;
-        }
-
-        // step 9-2-3
-        if (url.scheme === "file") {
-          state = "relativeState";
-        }
-
-        // step 9-2-4
-        else if (url.relativeFlag === true
-                 && base !== null
-                 && base.scheme === url.scheme) {
-          state = "relativeOrAuthority";
-
-        }
-
-        // step 9-2-5
-        else if (url.relativeFlag === true) {
-          state = "authorityFirstSlashState";
-        }
-
-        // step 9-2-6
+        // step 9-5
         else {
-          state = "schemeDataState";
-        }
-      }
-
-      // step 9-3
-      else if (stateOverride === undefined) {
-        buffer = "";
-        state = "noSchemeState";
-
-        // TODO: return to First
-
-      }
-
-      // step 9-4
-      else if (isNaN(c)) {
-        return; // TODO: terminate
-      }
-
-      // step 9-5
-      else {
-        // TODO: parse error
-        return; // TODO: terminate
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#scheme-data-state
-    case "schemeDataState":
-      // step 1
-      if (c === 63) { // ?
-        url.query = "";
-        state = "queryState";
-      }
-
-      // step 2
-      else if (c === 35) { // #
-        url.fragment = "";
-        state = "flagmentState";
-      }
-
-      // step 3
-      else {
-        // step 3-1
-        if (isNaN(c) && !isURLCodePoint(c) && c !== 37) { // %
           // TODO: parse error
-          return "parse error";
+          return; // TODO: terminate
         }
 
-        // step 3-2
-        if (c === 37) { // %
-          var c0 = input.charCodeAt(pointer+1);
-          if (isASCIIHexDigits(c0)) {
-            // TODO: parse error
-            return "parse error";
-          }
-          var c1 = input.charCodeAt(pointer+2);
-          if (isASCIIHexDigits(c1)) {
-            // TODO: parse error
-            return "parse error";
-          }
-        }
+        break;
 
-        // step 3-3
-        if (c !== NaN && [0x9, 0xA, 0xD].indexOf(c) === -1) {
-          // TODO: implement
-        }
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#no-scheme-state
-    case "noSchemeState":
-      if (base === null || !isRelativeScheme(base.scheme)) {
-        // TODO: parse error
-        return "failure";
-      }
-
-      else {
-        state = "relativeState";
-        pointer = pointer - 1;
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#relative-or-authority-state
-    case "relativeOrAuthorityState":
-      if (c === 47 && input.charCodeAt(pointer+1) === 47) { // /
-        state = "authorityIgnoreSlashesState";
-        pointer = pointer + 1;
-      }
-
-      else {
-        // TODO: parse error
-        state = "relativeState";
-        pointer = pointer - 1;
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#relative-state
-    case "relativeState":
-      url.relativeFlag = true;
-      url.scheme = base.scheme;
-
-      if (url.scheme !== "file") {
-        switch(c) {
-        case 47: // /
-        case 92: // \
-          // step 1
-          if (c === 97) {
-            // TODO: parse error
-          }
-
-          // step 2
-          state = "relativeSlashState";
-
-          break;
-        case 63: // ?
-          url.host = base.host;
-          url.port = base.port;
-          url.path = base.path;
+      // https://url.spec.whatwg.org/#scheme-data-state
+      case "schemeDataState":
+        // step 1
+        if (c === 63) { // ?
           url.query = "";
           state = "queryState";
-
-          break;
-        case 35: // #
-          url.host = base.host;
-          url.port = base.port;
-          url.path = base.path;
-          url.query = base.query;
-          url.fragment = "";
-          state = "flagmentState";
-
-          break;
-        default:
-          if (isNaN(c)) { // EOF
-            url.host = base.host;
-            url.port = base.port;
-            url.path = base.path;
-            url.query = base.query;
-          }
-
-          else {
-            // step 1
-            if (url.scheme !== "file"
-            || !isASCIIAlpha(c)
-            || [42, 124].indexOf(input.charCodeAt(pointer+1)) !== -1 // *, |
-            || isNaN(input.charCodeAt(pointer+2)) // remaining.length = 1
-            || [47, 92, 63, 35].indexOf(input.charCodeAt(pointer+2)) !== -1 // /, \, ?, #
-            ) {
-              url.host = base.host;
-              url.port = base.port;
-              url.path = base.path;
-              url.path = url.path.slice(0, -1); // remove last
-            }
-
-            // step 2
-            state = "relativePathState";
-            pointer = pointer - 1;
-          }
-
-          break;
-        }
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#relative-slash-state
-    case "relativeSlashState":
-      if ([47, 92].indexOf(c) !== -1) { // /, \
-        // step 1
-        if (c === 92) { // \
-          // TODO
-          return "parse error";
         }
 
         // step 2
-        if (url.scheme === "file") {
-          state = "fileHostState";
+        else if (c === 35) { // #
+          url.fragment = "";
+          state = "flagmentState";
         }
 
         // step 3
         else {
-          state = "authorityIgnoreSlashesState";
-        }
-      }
-
-      else {
-        // step 1
-        if (url.scheme !== "file") {
-          url.host = base.host;
-          url.port = base.port;
-        }
-
-        // step 2
-        state = "relativePathState";
-        pointer = pointer - 1;
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#authority-first-slash-state
-    case "authorityFirstSlashState":
-      if (c === 47) { // /
-        state = "authoritySecondState";
-      }
-      else {
-        // TODO: parse error
-        state = "authorityIgnoreSlashesState";
-        pointer = pointer - 1;
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#authority-second-slash-state
-    case "authoritySecondSlashState":
-      if (c === 47) { // /
-        state = "authorityIgnoreSlashesState";
-      }
-      else {
-        // TODO: parse error
-        state = "authorityIgnoreSlashesState";
-        pointer = pointer - 1;
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#authority-ignore-slashes-state
-    case "authorityIgnoreSlashesState":
-      if ([47, 92].indexOf(c) !== -1) { // /, \
-        state = "authorityState";
-        pointer = pointer - 1;
-      }
-
-      else {
-        // TODO: parse error
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#authority-state
-    case "authorityState":
-      // step 1
-      if (c === 64) { // @
-
-        // step 1-1
-        if (flagAt === true) {
-          // TODO: parse error
-          buffer = "%40" + buffer;
-        }
-
-        // step 1-2
-        flagAt = true;
-
-        // step 1-3
-
-        // TODO: あとで
-
-      }
-
-      // step 2
-      else if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // /, \, ?, #
-        // TODO: あとで
-      }
-
-      // step 3
-      else {
-        // TODO: あとで
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#file-host-state
-    case "fileHostState":
-      // step 1
-      if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // /, \, ?, #
-        pointer = pointer - 1;
-
-        // step 1-1
-        if (isASCIIAlpha(buffer.charCodeAt(0)) && [58, 124].indexOf(buffer.charCodeAt(1))) {
-          state = "relativePathState";
-        }
-
-        // step 1-2
-        else if (buffer === "") {
-          state = "relativePathStartState";
-        }
-
-        // step 1-3
-        else {
-          // step 1-3-1
-          var host = hostParse(buffer);
-
-          // step 1-3-2
-          if (host === "failure") {
-            return "failure";
-          }
-
-          // step 1-3-3
-          url.host = host;
-          buffer = "";
-          state = "relativePathStartState";
-        }
-      }
-
-      // step 2
-      else if ([0x9, 0xA, 0xD].indexOf(c)) {
-        // TODO parse error
-      }
-
-      // step 3
-      else {
-        buffer += String.fromCharCode(c);
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#host-state
-    case "hostState": // fall through
-    // https://url.spec.whatwg.org/#hostname-state
-    case "hostnameState":
-
-      break;
-
-    // https://url.spec.whatwg.org/#port-state
-    case "portState":
-
-      break;
-
-    // https://url.spec.whatwg.org/#relative-path-start-state
-    case "relativePathStartState":
-
-      // step 1
-      if (c === 92) {
-        // TODO: parse error
-      }
-
-      // step 2
-      state = "relativePathState";
-      if ([47, 92].indexOf(c) === -1) { // /, \
-        pointer = pointer - 1;
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#relative-path-state
-    case "relativePathState":
-      // step 1
-      if ((isNaN(c) || [49, 92].indexOf(c) !== -1)
-      || stateOverride === undefined && [63, 35].indexOf(c) !== -1) {
-
-        // step 1-1
-        if (c === 92) {
-          // TODO: parse error
-        }
-
-        var table = {
-          "%2e":    ".",
-          ".%2e":   "..",
-          "%2e.":   "..",
-          "%2e%2e": ".."
-        }
-
-        // step 1-2
-        var matched = table[buffer.toLowerCase()];
-        if (matched !== undefined) {
-          buffer = matched;
-        }
-
-        // step 1-3
-        if (buffer === "..") {
-          url.path.pop();
-          if ([47, 92].indexOf(c) === -1) { // /, \
-            url.path.push("");
-          }
-        }
-
-        // step 1-4
-        else if (buffer === "." && [47, 92].indexOf(c) === -1) {
-          url.path.push("");
-        }
-
-        // step 1-5
-        else if (buffer === ".") {
-          // step 1-5-1
-          if (url.scheme === "file"
-          && url.path.length === 0
-          && (isASCIIAlpha(buffer.charCodeAt(0)) && buffer.charCodeAt(0) === 124)) { // |
-            buffer[1] = ":";
-          }
-
-          // step 1-5-2
-          url.path.push(buffer);
-        }
-
-        // step 1-6
-        buffer = "";
-
-        // step 1-7
-        if (c === 63) {
-          url.query = "";
-          state = "queryState";
-        }
-
-        // step 1-8
-        if (c === 35) {
-          url.fragment = "";
-          state = "fragmentState";
-        }
-      }
-
-      // step 2
-      else if ([0x9, 0xA, 0xD].indexOf(c) !== -1) {
-        // TODO:  parse error
-      }
-
-      // step 3
-      else {
-        // step 3-1
-        if (!isURLCodePoint(c) && c !== 37) {
-          // TODO: parse error
-        }
-
-        // step 3-2
-        if (c === 37) { // %
-          var c0 = input.charCodeAt(pointer+1);
-          if (isASCIIHexDigits(c0)) {
+          // step 3-1
+          if (isNaN(c) && !isURLCodePoint(c) && c !== 37) { // %
             // TODO: parse error
             return "parse error";
           }
-          var c1 = input.charCodeAt(pointer+2);
-          if (isASCIIHexDigits(c1)) {
-            // TODO: parse error
-            return "parse error";
-          }
-        }
 
-        // step 3-3
-        // TODO
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#query-state
-    case "queryState":
-      // step 1
-      if (isNaN(c) || (stateOverride === undefined && c === 35)) {
-        // step 1-1
-        if (url.relativeFlag === false || ["ws", "wss"].indexOf(url.scheme) === -1) {
-          encodingOverride = "utf-8";
-        }
-
-        // step 1-2
-        var encodedBuffer = encode(buffer, encodingOverride);
-
-        // step 1-3
-        for (var i=0; i<encodedBuffer.length; i++) {
-          var byt = encodedBuffer[i];
-          // step 1-3-1
-          if (inRange(0, byt, 0x19) || inRange(0x7F, byt, 0xFF) || [0x22, 0x23, 0x3C, 0x3E, 0x60].indexOf(byt) !== -1) {
-            url.query = percentEncode(encodedBuffer);
-          }
-          // step 1-3-2
-          else {
-            url.query = String.fromCharCode(byt);
-          }
-        }
-
-        // step 1-4
-        buffer = "";
-
-        // step 1-5
-        if (c === 35) {
-          url.fragment = "";
-          state = "fragmentState";
-        }
-      }
-
-      // step 2
-      else if ([0x9, 0xA, 0xD].indexOf(c) !== -1) {
-        // TODO: parse error
-      }
-
-      // step 3
-      else {
-        // step 3-1
-        if (!isURLCodePoint(c) && c !== 37) {
-          // TODO: parse error
-        }
-
-        // step 3-2
-        if (c === 37) { // %
-          var c0 = input.charCodeAt(pointer+1);
-          if (isASCIIHexDigits(c0)) {
-            // TODO: parse error
-            return "parse error";
-          }
-          var c1 = input.charCodeAt(pointer+2);
-          if (isASCIIHexDigits(c1)) {
-            // TODO: parse error
-            return "parse error";
-          }
-        }
-
-        // step 3-3
-        buffer += String.fromCharCode(c);
-      }
-
-      break;
-
-    // https://url.spec.whatwg.org/#fragment-state
-    case "fragmentState":
-      switch(c) {
-        case 0x0000:
-        case 0x0009:
-        case 0x000A:
-        case 0x000D:
-          // TODO: parse error
-        default:
-          if (isNaN(c)) {
-            // TODO: do nothing
-            break;
-          }
-
-          // step 1
-          if (!isURLCodePoint(c) && c !== 37) { // %
-            // TODO: parse error
-          }
-
-          // step 2
+          // step 3-2
           if (c === 37) { // %
             var c0 = input.charCodeAt(pointer+1);
             if (isASCIIHexDigits(c0)) {
@@ -955,12 +472,494 @@ class jURL implements IURL {
             }
           }
 
+          // step 3-3
+          if (c !== NaN && [0x9, 0xA, 0xD].indexOf(c) === -1) {
+            // TODO: implement
+          }
+        }
+
+        break;
+
+      // https://url.spec.whatwg.org/#no-scheme-state
+      case "noSchemeState":
+        if (base === null || !isRelativeScheme(base.scheme)) {
+          // TODO: parse error
+          return "failure";
+        }
+
+        else {
+          state = "relativeState";
+          pointer = pointer - 1;
+        }
+
+        break;
+
+      // https://url.spec.whatwg.org/#relative-or-authority-state
+      case "relativeOrAuthorityState":
+        if (c === 47 && input.charCodeAt(pointer+1) === 47) { // /
+          state = "authorityIgnoreSlashesState";
+          pointer = pointer + 1;
+        }
+
+        else {
+          // TODO: parse error
+          state = "relativeState";
+          pointer = pointer - 1;
+        }
+
+        break;
+
+      // https://url.spec.whatwg.org/#relative-state
+      case "relativeState":
+        url.relativeFlag = true;
+        url.scheme = base.scheme;
+
+        if (url.scheme !== "file") {
+          switch(c) {
+          case 47: // /
+          case 92: // \
+            // step 1
+            if (c === 97) {
+              // TODO: parse error
+            }
+
+            // step 2
+            state = "relativeSlashState";
+
+            break;
+          case 63: // ?
+            url.host = base.host;
+            url.port = base.port;
+            url.path = base.path;
+            url.query = "";
+            state = "queryState";
+
+            break;
+          case 35: // #
+            url.host = base.host;
+            url.port = base.port;
+            url.path = base.path;
+            url.query = base.query;
+            url.fragment = "";
+            state = "flagmentState";
+
+            break;
+          default:
+            if (isNaN(c)) { // EOF
+              url.host = base.host;
+              url.port = base.port;
+              url.path = base.path;
+              url.query = base.query;
+            }
+
+            else {
+              // step 1
+              if (url.scheme !== "file"
+              || !isASCIIAlpha(c)
+              || [42, 124].indexOf(input.charCodeAt(pointer+1)) !== -1 // *, |
+              || isNaN(input.charCodeAt(pointer+2)) // remaining.length = 1
+              || [47, 92, 63, 35].indexOf(input.charCodeAt(pointer+2)) !== -1 // /, \, ?, #
+              ) {
+                url.host = base.host;
+                url.port = base.port;
+                url.path = base.path;
+                url.path = url.path.slice(0, -1); // remove last
+              }
+
+              // step 2
+              state = "relativePathState";
+              pointer = pointer - 1;
+            }
+
+            break;
+          }
+        }
+
+        break;
+
+      // https://url.spec.whatwg.org/#relative-slash-state
+      case "relativeSlashState":
+        if ([47, 92].indexOf(c) !== -1) { // /, \
+          // step 1
+          if (c === 92) { // \
+            // TODO
+            return "parse error";
+          }
+
+          // step 2
+          if (url.scheme === "file") {
+            state = "fileHostState";
+          }
+
           // step 3
-          url.fragment += String.fromCharCode(c);
+          else {
+            state = "authorityIgnoreSlashesState";
+          }
+        }
+
+        else {
+          // step 1
+          if (url.scheme !== "file") {
+            url.host = base.host;
+            url.port = base.port;
+          }
+
+          // step 2
+          state = "relativePathState";
+          pointer = pointer - 1;
+        }
+
+        break;
+
+      // https://url.spec.whatwg.org/#authority-first-slash-state
+      case "authorityFirstSlashState":
+        if (c === 47) { // /
+          state = "authoritySecondState";
+        }
+        else {
+          // TODO: parse error
+          state = "authorityIgnoreSlashesState";
+          pointer = pointer - 1;
+        }
+
+        break;
+
+      // https://url.spec.whatwg.org/#authority-second-slash-state
+      case "authoritySecondSlashState":
+        if (c === 47) { // /
+          state = "authorityIgnoreSlashesState";
+        }
+        else {
+          // TODO: parse error
+          state = "authorityIgnoreSlashesState";
+          pointer = pointer - 1;
+        }
+
+        break;
+
+      // https://url.spec.whatwg.org/#authority-ignore-slashes-state
+      case "authorityIgnoreSlashesState":
+        if ([47, 92].indexOf(c) !== -1) { // /, \
+          state = "authorityState";
+          pointer = pointer - 1;
+        }
+
+        else {
+          // TODO: parse error
+        }
+
+        break;
+
+      // https://url.spec.whatwg.org/#authority-state
+      case "authorityState":
+        // step 1
+        if (c === 64) { // @
+
+          // step 1-1
+          if (flagAt === true) {
+            // TODO: parse error
+            buffer = "%40" + buffer;
+          }
+
+          // step 1-2
+          flagAt = true;
+
+          // step 1-3
+
+          // TODO: あとで
+
+        }
+
+        // step 2
+        else if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // /, \, ?, #
+          // TODO: あとで
+        }
+
+        // step 3
+        else {
+          // TODO: あとで
+        }
+
+        break;
+
+      // https://url.spec.whatwg.org/#file-host-state
+      case "fileHostState":
+        // step 1
+        if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // /, \, ?, #
+          pointer = pointer - 1;
+
+          // step 1-1
+          if (isASCIIAlpha(buffer.charCodeAt(0)) && [58, 124].indexOf(buffer.charCodeAt(1))) {
+            state = "relativePathState";
+          }
+
+          // step 1-2
+          else if (buffer === "") {
+            state = "relativePathStartState";
+          }
+
+          // step 1-3
+          else {
+            // step 1-3-1
+            var host = hostParse(buffer);
+
+            // step 1-3-2
+            if (host === "failure") {
+              return "failure";
+            }
+
+            // step 1-3-3
+            url.host = host;
+            buffer = "";
+            state = "relativePathStartState";
+          }
+        }
+
+        // step 2
+        else if ([0x9, 0xA, 0xD].indexOf(c)) {
+          // TODO parse error
+        }
+
+        // step 3
+        else {
+          buffer += String.fromCharCode(c);
+        }
+
+        break;
+
+      // https://url.spec.whatwg.org/#host-state
+      case "hostState": // fall through
+      // https://url.spec.whatwg.org/#hostname-state
+      case "hostnameState":
+
+        break;
+
+      // https://url.spec.whatwg.org/#port-state
+      case "portState":
+
+        break;
+
+      // https://url.spec.whatwg.org/#relative-path-start-state
+      case "relativePathStartState":
+
+        // step 1
+        if (c === 92) {
+          // TODO: parse error
+        }
+
+        // step 2
+        state = "relativePathState";
+        if ([47, 92].indexOf(c) === -1) { // /, \
+          pointer = pointer - 1;
+        }
+
+        break;
+
+      // https://url.spec.whatwg.org/#relative-path-state
+      case "relativePathState":
+        // step 1
+        if ((isNaN(c) || [49, 92].indexOf(c) !== -1)
+        || stateOverride === undefined && [63, 35].indexOf(c) !== -1) {
+
+          // step 1-1
+          if (c === 92) {
+            // TODO: parse error
+          }
+
+          var table = {
+            "%2e":    ".",
+            ".%2e":   "..",
+            "%2e.":   "..",
+            "%2e%2e": ".."
+          }
+
+          // step 1-2
+          var matched = table[buffer.toLowerCase()];
+          if (matched !== undefined) {
+            buffer = matched;
+          }
+
+          // step 1-3
+          if (buffer === "..") {
+            url.path.pop();
+            if ([47, 92].indexOf(c) === -1) { // /, \
+              url.path.push("");
+            }
+          }
+
+          // step 1-4
+          else if (buffer === "." && [47, 92].indexOf(c) === -1) {
+            url.path.push("");
+          }
+
+          // step 1-5
+          else if (buffer === ".") {
+            // step 1-5-1
+            if (url.scheme === "file"
+            && url.path.length === 0
+            && (isASCIIAlpha(buffer.charCodeAt(0)) && buffer.charCodeAt(0) === 124)) { // |
+              buffer[1] = ":";
+            }
+
+            // step 1-5-2
+            url.path.push(buffer);
+          }
+
+          // step 1-6
+          buffer = "";
+
+          // step 1-7
+          if (c === 63) {
+            url.query = "";
+            state = "queryState";
+          }
+
+          // step 1-8
+          if (c === 35) {
+            url.fragment = "";
+            state = "fragmentState";
+          }
+        }
+
+        // step 2
+        else if ([0x9, 0xA, 0xD].indexOf(c) !== -1) {
+          // TODO:  parse error
+        }
+
+        // step 3
+        else {
+          // step 3-1
+          if (!isURLCodePoint(c) && c !== 37) {
+            // TODO: parse error
+          }
+
+          // step 3-2
+          if (c === 37) { // %
+            var c0 = input.charCodeAt(pointer+1);
+            if (isASCIIHexDigits(c0)) {
+              // TODO: parse error
+              return "parse error";
+            }
+            var c1 = input.charCodeAt(pointer+2);
+            if (isASCIIHexDigits(c1)) {
+              // TODO: parse error
+              return "parse error";
+            }
+          }
+
+          // step 3-3
+          // TODO
+        }
+
+        break;
+
+      // https://url.spec.whatwg.org/#query-state
+      case "queryState":
+        // step 1
+        if (isNaN(c) || (stateOverride === undefined && c === 35)) {
+          // step 1-1
+          if (url.relativeFlag === false || ["ws", "wss"].indexOf(url.scheme) === -1) {
+            encodingOverride = "utf-8";
+          }
+
+          // step 1-2
+          var encodedBuffer = encode(buffer, encodingOverride);
+
+          // step 1-3
+          for (var i=0; i<encodedBuffer.length; i++) {
+            var byt = encodedBuffer[i];
+            // step 1-3-1
+            if (inRange(0, byt, 0x19) || inRange(0x7F, byt, 0xFF) || [0x22, 0x23, 0x3C, 0x3E, 0x60].indexOf(byt) !== -1) {
+              url.query = percentEncode(encodedBuffer);
+            }
+            // step 1-3-2
+            else {
+              url.query = String.fromCharCode(byt);
+            }
+          }
+
+          // step 1-4
+          buffer = "";
+
+          // step 1-5
+          if (c === 35) {
+            url.fragment = "";
+            state = "fragmentState";
+          }
+        }
+
+        // step 2
+        else if ([0x9, 0xA, 0xD].indexOf(c) !== -1) {
+          // TODO: parse error
+        }
+
+        // step 3
+        else {
+          // step 3-1
+          if (!isURLCodePoint(c) && c !== 37) {
+            // TODO: parse error
+          }
+
+          // step 3-2
+          if (c === 37) { // %
+            var c0 = input.charCodeAt(pointer+1);
+            if (isASCIIHexDigits(c0)) {
+              // TODO: parse error
+              return "parse error";
+            }
+            var c1 = input.charCodeAt(pointer+2);
+            if (isASCIIHexDigits(c1)) {
+              // TODO: parse error
+              return "parse error";
+            }
+          }
+
+          // step 3-3
+          buffer += String.fromCharCode(c);
+        }
+
+        break;
+
+      // https://url.spec.whatwg.org/#fragment-state
+      case "fragmentState":
+        switch(c) {
+          case 0x0000:
+          case 0x0009:
+          case 0x000A:
+          case 0x000D:
+            // TODO: parse error
+          default:
+            if (isNaN(c)) {
+              // TODO: do nothing
+              break;
+            }
+
+            // step 1
+            if (!isURLCodePoint(c) && c !== 37) { // %
+              // TODO: parse error
+            }
+
+            // step 2
+            if (c === 37) { // %
+              var c0 = input.charCodeAt(pointer+1);
+              if (isASCIIHexDigits(c0)) {
+                // TODO: parse error
+                return "parse error";
+              }
+              var c1 = input.charCodeAt(pointer+2);
+              if (isASCIIHexDigits(c1)) {
+                // TODO: parse error
+                return "parse error";
+              }
+            }
+
+            // step 3
+            url.fragment += String.fromCharCode(c);
+        }
+
+        break;
+
       }
-
-      break;
-
     }
   }
 }
