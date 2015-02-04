@@ -586,67 +586,68 @@ class jURL implements IURL {
       // https://url.spec.whatwg.org/#relative-state
       case "relativeState":
         url.relativeFlag = true;
-        url.scheme = base.scheme;
 
         if (url.scheme !== "file") {
-          switch(c) {
-          case 47: // /
-          case 92: // \
-            // step 1
-            if (c === 97) {
-              // TODO: parse error
-            }
+          url.scheme = base.scheme;
+        }
 
-            // step 2
-            state = "relativeSlashState";
+        switch(c) {
+        case 47: // /
+        case 92: // \
+          // step 1
+          if (c === 97) {
+            // TODO: parse error
+          }
 
-            break;
-          case 63: // ?
-            url.host = base.host;
-            url.port = base.port;
-            url.path = base.path;
-            url.query = "";
-            state = "queryState";
+          // step 2
+          state = "relativeSlashState";
 
-            break;
-          case 35: // #
+          break;
+        case 63: // ?
+          url.host = base.host;
+          url.port = base.port;
+          url.path = base.path;
+          url.query = "";
+          state = "queryState";
+
+          break;
+        case 35: // #
+          url.host = base.host;
+          url.port = base.port;
+          url.path = base.path;
+          url.query = base.query;
+          url.fragment = "";
+          state = "flagmentState";
+
+          break;
+        default:
+          if (isNaN(c)) { // EOF
             url.host = base.host;
             url.port = base.port;
             url.path = base.path;
             url.query = base.query;
-            url.fragment = "";
-            state = "flagmentState";
+          }
 
-            break;
-          default:
-            if (isNaN(c)) { // EOF
+          else {
+            // step 1
+            if (url.scheme !== "file"
+            || !isASCIIAlpha(c)
+            || [42, 124].indexOf(input.charCodeAt(pointer+1)) !== -1 // *, |
+            || isNaN(input.charCodeAt(pointer+2)) // remaining.length = 1
+            || [47, 92, 63, 35].indexOf(input.charCodeAt(pointer+2)) !== -1 // /, \, ?, #
+            ) {
               url.host = base.host;
               url.port = base.port;
               url.path = base.path;
-              url.query = base.query;
+              url.path = url.path.slice(0, -1); // remove last
             }
 
-            else {
-              // step 1
-              if (url.scheme !== "file"
-              || !isASCIIAlpha(c)
-              || [42, 124].indexOf(input.charCodeAt(pointer+1)) !== -1 // *, |
-              || isNaN(input.charCodeAt(pointer+2)) // remaining.length = 1
-              || [47, 92, 63, 35].indexOf(input.charCodeAt(pointer+2)) !== -1 // /, \, ?, #
-              ) {
-                url.host = base.host;
-                url.port = base.port;
-                url.path = base.path;
-                url.path = url.path.slice(0, -1); // remove last
-              }
-
-              // step 2
-              state = "relativePathState";
-              pointer = pointer - 1;
-            }
-
-            break;
+            // step 2
+            state = "relativePathState";
+            pointer = pointer - 1;
           }
+
+          break;
         }
 
         break;
@@ -1035,7 +1036,7 @@ class jURL implements IURL {
 
       }
 
-      pointer ++;
+      pointer = pointer + 1;
     }
 
     return url; // TODO: any
