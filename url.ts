@@ -62,7 +62,31 @@ function percentEncode(encoded: Uint8Array): string {
   return result;
 }
 
+/**
+ * Encode Set
+ */
 type EncodeSet = (p: number) => boolean;
+
+// https://url.spec.whatwg.org/#simple-encode-set
+function simpleEncodeSet(codePoint: number): boolean {
+  // all code points less than U+0020 (i.e. excluding U+0020) and all code points greater than U+007E.
+  return codePoint < 0x20 && 0x007 < codePoint;
+}
+
+function defaultEncodeSet(codePoint: number): boolean {
+  // simple encode set and code points U+0020, '"', "#", "<", ">", "?", and "`".
+  return simpleEncodeSet(codePoint) || ([0x20, 34, 35, 60, 62, 63, 96].indexOf(codePoint) !== -1);
+}
+
+function passwordEncodeSet(codePoint: number): boolean {
+  // default encode set and code points "/", "@", and "\".
+  return defaultEncodeSet(codePoint) || ([0x47, 0x64, 0x92].indexOf(codePoint) !== -1);
+}
+
+function usernameEncodeSet(codePoint: number): boolean {
+  // password encode set and code point ":".
+  return passwordEncodeSet(codePoint) || codePoint === 58;
+}
 
 // https://url.spec.whatwg.org/#utf_8-percent-encode
 function utf8PercentEncode(codePoint: number, encodeSet: EncodeSet): any {
