@@ -314,6 +314,7 @@ class jURL implements IURL {
   }
 
   // TODO: using enum in state
+  // https://url.spec.whatwg.org/#concept-basic-url-parser
   private basicURLParser(input: string, base?: jURL, encodingOverride?: string, url?: jURL, stateOverride?: string) {
     // step 1
     if (url === undefined) {
@@ -325,13 +326,13 @@ class jURL implements IURL {
     }
 
     // step 2
-    var state = stateOverride || "schemeStartState";
+    var state = (stateOverride !== undefined)? stateOverride : "schemeStartState";
 
     // step 3
-    base = base || null;
+    base = (base !== undefined)? base : null;
 
     // step4
-    encodingOverride = encodingOverride || null;
+    encodingOverride = (encodingOverride !== undefined) ? encodingOverride : "utf-8";
 
     // step 5
     var buffer = "";
