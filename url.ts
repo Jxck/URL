@@ -426,19 +426,19 @@ class jURL implements IURL {
 
       // https://url.spec.whatwg.org/#scheme-start-state
       case "schemeStartState":
-        // step 8-1
+        // step 1
         if (isASCIIAlpha(c)) {
           buffer += String.fromCharCode(c).toLowerCase();
           state = "schemeState";
         }
 
-        // step 8-2
+        // step 2
         else if (stateOverride === undefined) {
           state = "noSchemeState";
           pointer = pointer - 1;
         }
 
-        // step 8-3
+        // step 3
         else {
           // TODO: parse error;
           return; // TODO: terminate
@@ -448,32 +448,32 @@ class jURL implements IURL {
 
       // https://url.spec.whatwg.org/#scheme-state
       case "schemeState":
-        // step 9-1
+        // step 1
         if (isASCIIAlphaNumeric(c) || [43, 45, 46].indexOf(c) !== -1) { // +, -, .
           buffer += String.fromCharCode(c).toLowerCase();
         }
 
-        // step 9-2
+        // step 2
         else if (c === 58) { // :
           url.scheme = buffer;
           buffer = "";
 
-          // step 9-2-1
+          // step 2-1
           if (stateOverride !== undefined) {
             return; // TODO: terminate
           }
 
-          // step 9-2-2
+          // step 2-2
           if (isRelativeScheme(url.scheme)) {
             url.relativeFlag = true;
           }
 
-          // step 9-2-3
+          // step 2-3
           if (url.scheme === "file") {
             state = "relativeState";
           }
 
-          // step 9-2-4
+          // step 2-4
           else if (url.relativeFlag === true
                    && base !== null
                    && base.scheme === url.scheme) {
@@ -481,18 +481,18 @@ class jURL implements IURL {
 
           }
 
-          // step 9-2-5
+          // step 2-5
           else if (url.relativeFlag === true) {
             state = "authorityFirstSlashState";
           }
 
-          // step 9-2-6
+          // step 2-6
           else {
             state = "schemeDataState";
           }
         }
 
-        // step 9-3
+        // step 3
         else if (stateOverride === undefined) {
           buffer = "";
           state = "noSchemeState";
@@ -500,12 +500,12 @@ class jURL implements IURL {
           continue;
         }
 
-        // step 9-4
+        // step 4
         else if (isNaN(c)) {
           return; // TODO: terminate
         }
 
-        // step 9-5
+        // step 5
         else {
           // TODO: parse error
           return; // TODO: terminate
