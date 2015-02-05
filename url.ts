@@ -2,28 +2,6 @@
 /// <reference path="types/obtain-unicode.d.ts" />
 /// <reference path="types/urlsearchparams.d.ts" />
 
-// MEMO: code point
-// ",  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,   -,  .,  /
-// 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47
-
-//  0, ...,  9
-// 48, ..., 57
-
-//  :,  ;,  <,  =,  >,  ?,  @
-// 58, 59, 60, 61, 62, 63, 64
-
-//  A, ...,  Z
-// 65, ..., 90
-
-//  [,  \,  ],  ^,  _,  `
-// 91, 92, 93, 94, 95, 96
-
-//  a, ...,   z
-// 97, ..., 122
-
-//   {,   |,   },   ~
-// 123, 124, 125, 126
-
 // polyfill for String.fromCodePoint
 declare var String: {
   new (value?: any): String;
@@ -54,6 +32,29 @@ var URLSearchParams: typeof usp.URLSearchParams;
 if (typeof window === 'undefined') { // in node.js
   URLSearchParams = require('urlsearchparams').URLSearchParams;
 }
+
+// MEMO: code point
+// ",  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,   -,  .,  /
+// 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47
+
+//  0, ...,  9
+// 48, ..., 57
+
+//  :,  ;,  <,  =,  >,  ?,  @
+// 58, 59, 60, 61, 62, 63, 64
+
+//  A, ...,  Z
+// 65, ..., 90
+
+//  [,  \,  ],  ^,  _,  `
+// 91, 92, 93, 94, 95, 96
+
+//  a, ...,   z
+// 97, ..., 122
+
+//   {,   |,   },   ~
+// 123, 124, 125, 126
+
 
 // original type
 type CodePoint = number;
@@ -224,14 +225,14 @@ function isASCIIAlphaNumeric(codePoint: number): boolean {
 }
 
 // https://url.spec.whatwg.org/#relative-scheme
-var relativeScheme = {
-  "ftp"    : "21",
-  "file"   : "",
-  "gopher" : "70",
-  "http"   : "80",
-  "https"  : "443",
-  "ws"     : "80",
-  "wss"    : "443"
+var relativeScheme: { [index: string] : string } = {
+  ftp   : "21",
+  file  : "",
+  gopher: "70",
+  http  : "80",
+  https : "443",
+  ws    : "80",
+  wss   : "443"
 }
 
 function isRelativeScheme(scheme: string): boolean {
@@ -1039,7 +1040,7 @@ class jURL implements IURL {
             // TODO: parse error
           }
 
-          var table = {
+          var table: { [index:string]: number[] } = {
             "%2e":    [46],
             ".%2e":   [46, 46],
             "%2e.":   [46, 46],
@@ -1227,7 +1228,7 @@ class jURL implements IURL {
 }
 
 
-function assert(actual, expected) {
+function assert(actual: any, expected: any): void {
   console.log('.');
   console.assert(actual === expected, '\nact: ' + actual + '\nexp: ' + expected);
 }
