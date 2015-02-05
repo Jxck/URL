@@ -7,6 +7,7 @@
     "url": "https://github.com/Jxck/URL/issues"
   },
   "dependencies": {
+    "obtain-unicode": "0.0.5",
     "urlsearchparams": "*",
     "utf8-encoding": "0.0.9"
   },
