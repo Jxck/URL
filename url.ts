@@ -55,6 +55,9 @@ if (typeof window === 'undefined') { // in node.js
   URLSearchParams = require('urlsearchparams').URLSearchParams;
 }
 
+// original type
+type CodePoint = number;
+
 function toLower(codePoint: number): number {
   return codePoint + 32;
 }
@@ -126,10 +129,10 @@ function parseHost(input: number[], unicodeFlag?: boolean): string {
   }
 
   // step 3
-  var domain = decode(percentDecode(encode(input)));
+  var domain: string = decode(percentDecode(encode(input)));
 
   // step 4
-  var asciiDomain = domainToASCII(domain);
+  var asciiDomain: string = domainToASCII(domain);
 
   // step 5
   if (asciiDomain === "failure") {
@@ -188,10 +191,10 @@ function utf8PercentEncode(codePoint: number, encodeSet: EncodeSet): number[] {
   }
 
   // step 2
-  var bytes: number[] = encode([codePoint]);
+  var bytes: CodePoint[] = encode([codePoint]);
 
   // step 3
-  var result: number[] = percentEncode(bytes);
+  var result: CodePoint[] = percentEncode(bytes);
 
   return result;
 }
@@ -243,7 +246,7 @@ function isURLCodePoint(codePoint: number): boolean {
 
   // ["!", "$", "&", "'", "(", ")", "*", "+", ",", "-",
   //  ".", "/", ":", ";", "=", "?", "@", "_", "~"]
-  var signs = [ 33, 36, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 58, 59, 61, 63, 64, 95, 126 ];
+  var signs: number[] = [ 33, 36, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 58, 59, 61, 63, 64, 95, 126 ];
   if (signs.indexOf(codePoint) !== -1) {
     return true;
   }
@@ -457,7 +460,7 @@ class jURL implements IURL {
     encodingOverride = (encodingOverride !== undefined) ? encodingOverride : "utf-8";
 
     // step 5
-    var buffer: number[] = [];
+    var buffer: CodePoint[] = [];
 
     // step 6
     var flagAt:    boolean = false; // @flag
@@ -465,11 +468,11 @@ class jURL implements IURL {
 
     // step 7
     var pointer: number = 0;
-    var encodedInput: number[] = obtainUnicode(input);
+    var encodedInput: CodePoint[] = obtainUnicode(input);
 
     // step 8
     while (pointer < encodedInput.length) {
-      var c = encodedInput[pointer];
+      var c: CodePoint = encodedInput[pointer];
 
       switch(state) {
 
@@ -785,8 +788,8 @@ class jURL implements IURL {
           flagAt = true;
 
           // step 1-3
-          for (var i = 0; i < buffer.length; i++) {
-            var cp = buffer[i];
+          for (var i: number = 0; i < buffer.length; i++) {
+            var cp: CodePoint = buffer[i];
 
             // step 1-3-1
             if ([0x9, 0xA, 0xD].indexOf(cp) === 0) {
@@ -862,7 +865,7 @@ class jURL implements IURL {
           // step 1-3
           else {
             // step 1-3-1
-            var host = parseHost(buffer);
+            var host: string = parseHost(buffer);
 
             // step 1-3-2
             if (host === "failure") {
@@ -895,7 +898,7 @@ class jURL implements IURL {
         // step 1
         if (c === 58 && flagParen === false) {
           // step 1-1
-          var host = parseHost(buffer);
+          var host: string = parseHost(buffer);
 
           // step 1-2
           if (host === "failure") {
@@ -916,7 +919,7 @@ class jURL implements IURL {
         // step 2
         else if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // / \ ? #
           // step 2-1
-          var host = parseHost(buffer);
+          var host: string = parseHost(buffer);
 
           // step 2-2
           if (host === "failure") {
@@ -970,7 +973,7 @@ class jURL implements IURL {
               || stateOverride !== undefined) {
 
           // step 2-1
-          function trimZero(s: number[]): number[] {
+          function trimZero(s: CodePoint[]): CodePoint[] {
             while(true) {
               if (s[0] === 48 && s.length > 1) { // 0
                 s.shift();
@@ -1132,7 +1135,7 @@ class jURL implements IURL {
 
           // step 1-3
           for (var i = 0; i < buffer.length; i++) {
-            var byt = buffer[i];
+            var byt: number = buffer[i];
 
             // step 1-3-1
             if (byt < 0x21
