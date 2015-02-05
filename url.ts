@@ -55,8 +55,20 @@ if (typeof window === 'undefined') { // in node.js
   URLSearchParams = require('urlsearchparams').URLSearchParams;
 }
 
+function toLower(codePoint: number): number {
+  return codePoint + 32;
+}
+
+function toUpper(codePoint: number): number {
+  return codePoint - 32;
+}
+
+function toString(codePoints: number[]): string {
+  return String.fromCodePoint.apply(null, codePoints);
+}
+
 // TODO:
-function encode(s: string, encodingOverride?: string): Uint8Array {
+function encode(input: number[], encodingOverride?: string): number[] {
   if (encodingOverride !== "utf-8") {
     throw new Error("support utf-8 only");
   }
@@ -67,11 +79,11 @@ function encodeCodePoint(codePoint: number): Uint8Array {
   return null;
 }
 
-function decode(input: Uint8Array): string {
+function decode(input: number[]): string {
   return null;
 }
 
-function percentEncodeByte(byt: number): string {
+function percentEncodeByte(byt: number): number[] {
   return null
 }
 
@@ -83,7 +95,7 @@ function percentEncode(encoded: Uint8Array): string {
   return result;
 }
 
-function percentDecode(input: Uint8Array): Uint8Array {
+function percentDecode(input: number[]): number[] {
   return null;
 }
 
@@ -97,22 +109,22 @@ function domainToASCII(input: string): string {
   return input;
 }
 
-function parseIPv6(input: string): string {
+function parseIPv6(input: number[]): string {
   // TODO: imple
-  return input;
+  return toString(input);
 }
 
 // https://url.spec.whatwg.org/#concept-host-parser
-function hostParse(input: string, unicodeFlag?: boolean): string {
+function parseHost(input: number[], unicodeFlag?: boolean): string {
   // step 1
-  if (input === "") {
+  if (input.length === 0) {
     return "failure";
   }
 
   // step 2
-  if (input.charAt(0) === "[") {
+  if (input[0] === 91) {
     // step 2-1
-    if (input.charAt(input.length-1) !== "]") {
+    if (input[input.length-1] !== 93) {
       // TODO: parse error
       return "failure";
     }
@@ -177,19 +189,19 @@ function usernameEncodeSet(codePoint: number): boolean {
 }
 
 // https://url.spec.whatwg.org/#utf_8-percent-encode
-function utf8PercentEncode(codePoint: number, encodeSet: EncodeSet): string {
+function utf8PercentEncode(codePoint: number, encodeSet: EncodeSet): number[] {
   // step 1
   if (encodeSet(codePoint)) {
-    return String.fromCharCode(codePoint);
+    return [codePoint];
   }
 
   // step 2
   var bytes = encodeCodePoint(codePoint);
 
   // step 3
-  var result = "";
+  var result = [];
   for (var i=0; i<bytes.length; i++) {
-    result += percentEncodeByte(bytes[i]);
+    result = result.concat(percentEncodeByte(bytes[i]));
   }
 
   return result;
@@ -434,7 +446,7 @@ class jURL implements IURL {
     encodingOverride = (encodingOverride !== undefined) ? encodingOverride : "utf-8";
 
     // step 5
-    var buffer = "";
+    var buffer = [];
 
     // step 6
     var flagAt = false; // @flag
@@ -442,10 +454,11 @@ class jURL implements IURL {
 
     // step 7
     var pointer = 0;
+    var encodedInput = obtainUnicode(input);
 
     // step 8
-    while (pointer < input.length) {
-      var c = input.charCodeAt(pointer);
+    while (pointer < encodedInput.length) {
+      var c = encodedInput[pointer];
 
       switch(state) {
 
@@ -453,7 +466,7 @@ class jURL implements IURL {
       case "schemeStartState":
         // step 1
         if (isASCIIAlpha(c)) {
-          buffer += String.fromCharCode(c).toLowerCase();
+          buffer.push(toLower(c));
           state = "schemeState";
         }
 
@@ -475,13 +488,13 @@ class jURL implements IURL {
       case "schemeState":
         // step 1
         if (isASCIIAlphaNumeric(c) || [43, 45, 46].indexOf(c) !== -1) { // +, -, .
-          buffer += String.fromCharCode(c).toLowerCase();
+          buffer.push(toLower(c));
         }
 
         // step 2
         else if (c === 58) { // :
-          url.scheme = buffer;
-          buffer = "";
+          url.scheme = toString(buffer);
+          buffer = [];
 
           // step 2-1
           if (stateOverride !== undefined) {
@@ -519,7 +532,7 @@ class jURL implements IURL {
 
         // step 3
         else if (stateOverride === undefined) {
-          buffer = "";
+          buffer = [];
           state = "noSchemeState";
           pointer = 0;
           continue;
@@ -560,20 +573,15 @@ class jURL implements IURL {
           }
 
           // step 3-2
-          if (c === 37) { // %
-            var c0 = input.charCodeAt(pointer+1);
-            if (isASCIIHexDigits(c0)) {
+          if (c === 37 // %
+           && isASCIIHexDigits(encodedInput[pointer+1])
+           && isASCIIHexDigits(encodedInput[pointer+2])) {
               // TODO: parse error
-            }
-            var c1 = input.charCodeAt(pointer+2);
-            if (isASCIIHexDigits(c1)) {
-              // TODO: parse error
-            }
           }
 
           // step 3-3
           if (!isNaN(c) && [0x9, 0xA, 0xD].indexOf(c) === -1) {
-            url.schemeData += utf8PercentEncode(c, simpleEncodeSet);
+            url.schemeData += toString(utf8PercentEncode(c, simpleEncodeSet));
           }
         }
 
@@ -595,7 +603,7 @@ class jURL implements IURL {
 
       // https://url.spec.whatwg.org/#relative-or-authority-state
       case "relativeOrAuthorityState":
-        if (c === 47 && input.charCodeAt(pointer+1) === 47) { // /
+        if (c === 47 && encodedInput[pointer+1] === 47) { // /
           state = "authorityIgnoreSlashesState";
           pointer = pointer + 1;
         }
@@ -654,13 +662,14 @@ class jURL implements IURL {
             url.query = base.query;
           }
 
+          // [x, x, o, x] 2+1  4
           else {
             // step 1
             if (url.scheme !== "file"
-            || !isASCIIAlpha(c)
-            || [42, 124].indexOf(input.charCodeAt(pointer+1)) !== -1 // *, |
-            || isNaN(input.charCodeAt(pointer+2)) // remaining.length = 1
-            || [47, 92, 63, 35].indexOf(input.charCodeAt(pointer+2)) !== -1 // /, \, ?, #
+             || !isASCIIAlpha(c)
+             || [58, 124].indexOf(encodedInput[pointer+1]) === -1 // :, |
+             || encodedInput.length - (pointer+1) === 1 // remaining.length = 1
+             || [47, 92, 63, 35].indexOf(encodedInput[pointer+2]) === -1 // /, \, ?, #
             ) {
               url.host = base.host;
               url.port = base.port;
@@ -758,7 +767,7 @@ class jURL implements IURL {
           // step 1-1
           if (flagAt === true) {
             // TODO: parse error
-            buffer = "%40" + buffer;
+            buffer = [37, 52, 48].concat(buffer); // %40
           }
 
           // step 1-2
@@ -766,7 +775,7 @@ class jURL implements IURL {
 
           // step 1-3
           for (var i = 0; i < buffer.length; i++) {
-            var cp = buffer.charCodeAt(i);
+            var cp = buffer[i];
 
             // step 1-3-1
             if ([0x9, 0xA, 0xD].indexOf(cp) === 0) {
@@ -780,15 +789,11 @@ class jURL implements IURL {
             }
 
             // step 1-3-3
-            if (cp === 37) { // %
-              var c0 = input.charCodeAt(pointer+1);
-              if (isASCIIHexDigits(c0)) {
+            if (cp === 37 // %
+             && isASCIIHexDigits(buffer[i+1])
+             && isASCIIHexDigits(buffer[i+2])
+            ) {
                 // TODO: parse error
-              }
-              var c1 = input.charCodeAt(pointer+2);
-              if (isASCIIHexDigits(c1)) {
-                // TODO: parse error
-              }
             }
 
             // step 1-3-4
@@ -807,19 +812,19 @@ class jURL implements IURL {
           }
 
           // step 1-4
-          buffer = "";
+          buffer = [];
         }
 
         // step 2
         else if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // /, \, ?, #
           pointer = pointer - (buffer.length + 1);
-          buffer = "";
+          buffer = [];
           state = "hostState";
         }
 
         // step 3
         else {
-          buffer = buffer + String.fromCharCode(c);
+          buffer.push(c);
         }
 
         break;
@@ -831,19 +836,22 @@ class jURL implements IURL {
           pointer = pointer - 1;
 
           // step 1-1
-          if (isASCIIAlpha(buffer.charCodeAt(0)) && [58, 124].indexOf(buffer.charCodeAt(1))) {
+          if (buffer.length === 2
+            && isASCIIAlpha(buffer[0])
+            && [58, 124].indexOf(buffer[1])) {
+
             state = "relativePathState";
           }
 
           // step 1-2
-          else if (buffer === "") {
+          else if (buffer.length === 0) {
             state = "relativePathStartState";
           }
 
           // step 1-3
           else {
             // step 1-3-1
-            var host = hostParse(buffer);
+            var host = parseHost(buffer);
 
             // step 1-3-2
             if (host === "failure") {
@@ -852,7 +860,7 @@ class jURL implements IURL {
 
             // step 1-3-3
             url.host = host;
-            buffer = "";
+            buffer = [];
             state = "relativePathStartState";
           }
         }
@@ -864,7 +872,7 @@ class jURL implements IURL {
 
         // step 3
         else {
-          buffer += String.fromCharCode(c);
+          buffer.push(c);
         }
 
         break;
@@ -876,7 +884,7 @@ class jURL implements IURL {
         // step 1
         if (c === 58 && flagParen === false) {
           // step 1-1
-          var host = hostParse(buffer);
+          var host = parseHost(buffer);
 
           // step 1-2
           if (host === "failure") {
@@ -885,7 +893,7 @@ class jURL implements IURL {
 
           // step 1-3
           url.host = host;
-          buffer = "";
+          buffer = [];
           state = "portState";
 
           // step 1-4
@@ -897,7 +905,7 @@ class jURL implements IURL {
         // step 2
         else if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // / \ ? #
           // step 2-1
-          var host = hostParse(buffer);
+          var host = parseHost(buffer);
 
           // step 2-2
           if (host === "failure") {
@@ -906,7 +914,7 @@ class jURL implements IURL {
 
           // step 2-3
           url.host = host;
-          buffer = "";
+          buffer = [];
           state = "relativePathStartState";
 
           // step 2-4
@@ -933,7 +941,7 @@ class jURL implements IURL {
           }
 
           // step 4-3
-          buffer += String.fromCharCode(c);
+          buffer.push(c);
         }
 
         break;
@@ -942,7 +950,7 @@ class jURL implements IURL {
       case "portState":
         // step 1
         if (isASCIIDigits(c)) {
-          buffer += String.fromCharCode(c);
+          buffer.push(c);
         }
 
         // step 2
@@ -951,10 +959,10 @@ class jURL implements IURL {
               || stateOverride !== undefined) {
 
           // step 2-1
-          function trimZero(s) {
+          function trimZero(s: number[]): number[] {
             while(true) {
-              if (s[0] === "0" && s.length > 1) {
-                s = s.slice(1);
+              if (s[0] === 48 && s.length > 1) { // 0
+                s.shift();
               } else {
                 break;
               }
@@ -964,12 +972,12 @@ class jURL implements IURL {
           buffer = trimZero(buffer);
 
           // step 2-2
-          if (buffer === relativeScheme[url.scheme]) {
-            buffer = "";
+          if (toString(buffer) === relativeScheme[url.scheme]) {
+            buffer = [];
           }
 
           // step 2-3
-          url.port = buffer;
+          url.port = toString(buffer);
 
           // step 2-4
           if (stateOverride !== undefined) {
@@ -1010,7 +1018,7 @@ class jURL implements IURL {
       case "relativePathState":
         // step 1
         if ((isNaN(c) || [49, 92].indexOf(c) !== -1)
-        || stateOverride === undefined && [63, 35].indexOf(c) !== -1) {
+         || stateOverride === undefined && [63, 35].indexOf(c) !== -1) {
 
           // step 1-1
           if (c === 92) {
@@ -1018,20 +1026,20 @@ class jURL implements IURL {
           }
 
           var table = {
-            "%2e":    ".",
-            ".%2e":   "..",
-            "%2e.":   "..",
-            "%2e%2e": ".."
+            "%2e":    [46],
+            ".%2e":   [46, 46],
+            "%2e.":   [46, 46],
+            "%2e%2e": [46, 46]
           }
 
           // step 1-2
-          var matched = table[buffer.toLowerCase()];
+          var matched = table[toString(buffer.map(toLower))];
           if (matched !== undefined) {
             buffer = matched;
           }
 
           // step 1-3
-          if (buffer === "..") {
+          if (toString(buffer) === "..") {
             url.path.pop();
             if ([47, 92].indexOf(c) === -1) { // /, \
               url.path.push("");
@@ -1039,25 +1047,27 @@ class jURL implements IURL {
           }
 
           // step 1-4
-          else if (buffer === "." && [47, 92].indexOf(c) === -1) {
+          else if (toString(buffer) === "." && [47, 92].indexOf(c) === -1) {
             url.path.push("");
           }
 
           // step 1-5
-          else if (buffer === ".") {
+          else if (toString(buffer) === ".") {
             // step 1-5-1
             if (url.scheme === "file"
-            && url.path.length === 0
-            && (isASCIIAlpha(buffer.charCodeAt(0)) && buffer.charCodeAt(0) === 124)) { // |
-              buffer[1] = ":";
+             && url.path.length === 0
+             && buffer.length === 2
+             && isASCIIAlpha(buffer[0])
+             && buffer[1] === 124) { // |
+              buffer[1] = 58;
             }
 
             // step 1-5-2
-            url.path.push(buffer);
+            url.path.push(toString(buffer));
           }
 
           // step 1-6
-          buffer = "";
+          buffer = [];
 
           // step 1-7
           if (c === 63) {
@@ -1085,21 +1095,14 @@ class jURL implements IURL {
           }
 
           // step 3-2
-          if (c === 37) { // %
-            var c0 = input.charCodeAt(pointer+1);
-            if (isASCIIHexDigits(c0)) {
+          if (c === 37 // %
+           && isASCIIHexDigits(encodedInput[pointer+1])
+           && isASCIIHexDigits(encodedInput[pointer+2])) {
               // TODO: parse error
-              return "parse error";
-            }
-            var c1 = input.charCodeAt(pointer+2);
-            if (isASCIIHexDigits(c1)) {
-              // TODO: parse error
-              return "parse error";
-            }
           }
 
           // step 3-3
-          // TODO
+          buffer = buffer.concat(utf8PercentEncode(c, defaultEncodeSet));
         }
 
         break;
@@ -1114,23 +1117,27 @@ class jURL implements IURL {
           }
 
           // step 1-2
-          var encodedBuffer = encode(buffer, encodingOverride);
+          buffer = encode(buffer, encodingOverride);
 
           // step 1-3
-          for (var i=0; i<encodedBuffer.length; i++) {
-            var byt = encodedBuffer[i];
+          for (var i = 0; i < buffer.length; i++) {
+            var byt = buffer[i];
+
             // step 1-3-1
-            if (inRange(0, byt, 0x19) || inRange(0x7F, byt, 0xFF) || [0x22, 0x23, 0x3C, 0x3E, 0x60].indexOf(byt) !== -1) {
-              url.query = percentEncode(encodedBuffer);
+            if (byt < 0x21
+             || byt > 0x7E
+             || [0x22, 0x23, 0x3C, 0x3E, 0x60].indexOf(byt) !== -1) {
+              url.query = percentEncode(byt);
             }
+
             // step 1-3-2
             else {
-              url.query = String.fromCharCode(byt);
+              url.query = String.fromCodePoint(byt);
             }
           }
 
           // step 1-4
-          buffer = "";
+          buffer = [];
 
           // step 1-5
           if (c === 35) {
@@ -1152,21 +1159,14 @@ class jURL implements IURL {
           }
 
           // step 3-2
-          if (c === 37) { // %
-            var c0 = input.charCodeAt(pointer+1);
-            if (isASCIIHexDigits(c0)) {
+          if (c === 37 // %
+           && isASCIIHexDigits(encodedInput[pointer+1])
+           && isASCIIHexDigits(encodedInput[pointer+2])) {
               // TODO: parse error
-              return "parse error";
-            }
-            var c1 = input.charCodeAt(pointer+2);
-            if (isASCIIHexDigits(c1)) {
-              // TODO: parse error
-              return "parse error";
-            }
           }
 
           // step 3-3
-          buffer += String.fromCharCode(c);
+          buffer.push(c);
         }
 
         break;
@@ -1191,21 +1191,14 @@ class jURL implements IURL {
             }
 
             // step 2
-            if (c === 37) { // %
-              var c0 = input.charCodeAt(pointer+1);
-              if (isASCIIHexDigits(c0)) {
+            if (c === 37 // %
+             && isASCIIHexDigits(encodedInput[pointer+1])
+             && isASCIIHexDigits(encodedInput[pointer+2])) {
                 // TODO: parse error
-                return "parse error";
-              }
-              var c1 = input.charCodeAt(pointer+2);
-              if (isASCIIHexDigits(c1)) {
-                // TODO: parse error
-                return "parse error";
-              }
             }
 
             // step 3
-            url.fragment += String.fromCharCode(c);
+            url.fragment += String.fromCodePoint(c);
         }
 
         break;
