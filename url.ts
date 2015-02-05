@@ -199,7 +199,7 @@ function utf8PercentEncode(codePoint: number, encodeSet: EncodeSet): number[] {
   var bytes = encodeCodePoint(codePoint);
 
   // step 3
-  var result = [];
+  var result: number[] = [];
   for (var i=0; i<bytes.length; i++) {
     result = result.concat(percentEncodeByte(bytes[i]));
   }
@@ -207,7 +207,7 @@ function utf8PercentEncode(codePoint: number, encodeSet: EncodeSet): number[] {
   return result;
 }
 
-function inRange(from, tar, to: number): boolean {
+function inRange(from: number, tar: number, to: number): boolean {
   return (from <= tar && tar <= to);
 }
 
@@ -446,7 +446,7 @@ class jURL implements IURL {
     encodingOverride = (encodingOverride !== undefined) ? encodingOverride : "utf-8";
 
     // step 5
-    var buffer = [];
+    var buffer: number[] = [];
 
     // step 6
     var flagAt = false; // @flag
@@ -1033,7 +1033,7 @@ class jURL implements IURL {
           }
 
           // step 1-2
-          var matched = table[toString(buffer.map(toLower))];
+          var matched: number[] = table[toString(buffer.map(toLower))];
           if (matched !== undefined) {
             buffer = matched;
           }
@@ -1127,7 +1127,7 @@ class jURL implements IURL {
             if (byt < 0x21
              || byt > 0x7E
              || [0x22, 0x23, 0x3C, 0x3E, 0x60].indexOf(byt) !== -1) {
-              url.query = percentEncode(byt);
+              url.query = toString(percentEncode(byt));
             }
 
             // step 1-3-2
