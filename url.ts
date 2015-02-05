@@ -915,6 +915,53 @@ class jURL implements IURL {
 
       // https://url.spec.whatwg.org/#port-state
       case "portState":
+        // step 1
+        if (isASCIIDigits(c)) {
+          buffer += String.fromCharCode(c);
+        }
+
+        // step 2
+        else if (isNaN(c)
+              || [47, 92, 63, 35].indexOf(c) !== -1 // / \ ? #
+              || stateOverride !== undefined) {
+
+          // step 2-1
+          function trimZero(s) {
+            while(true) {
+              if (s[0] === "0" && s.length > 1) {
+                s = s.slice(1);
+              } else {
+                break;
+              }
+            }
+            return s;
+          }
+          buffer = trimZero(buffer);
+
+          // step 2-2
+          if (buffer === relativeScheme[url.scheme]) {
+            buffer = "";
+          }
+
+          // step 2-3
+          url.port = buffer;
+
+          // step 2-4
+          if (stateOverride !== undefined) {
+            return; // terminate
+          }
+        }
+
+        // step 3
+        else if ([0x9, 0xA, 0xD].indexOf(c) !== -1) {
+          // TODO: parse error
+        }
+
+        // step 4
+        else {
+          // TODO: parse error
+          return "failure";
+        }
 
         break;
 
