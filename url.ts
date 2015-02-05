@@ -4,6 +4,19 @@
 /// <reference path="types/utf8-encoding.d.ts" />
 /// <reference path="types/urlsearchparams.d.ts" />
 
+interface String {
+  codePoint(): number;
+}
+
+Object.defineProperty(String.prototype, 'codePoint', {
+  enumerable: false,
+  configurable: false,
+  writable: false,
+  value: function(): number[] {
+    return obtainUnicode(this);
+  }
+});
+
 // polyfill for String.fromCodePoint
 declare var String: {
   new (value?: any): String;
