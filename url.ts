@@ -1,4 +1,5 @@
 /// <reference path="types/webidl.d.ts" />
+/// <reference path="types/obtain-unicode.d.ts" />
 /// <reference path="types/urlsearchparams.d.ts" />
 
 // MEMO: code point
@@ -23,8 +24,28 @@
 //   {,   |,   },   ~
 // 123, 124, 125, 126
 
+// polyfill for String.fromCodePoint
+declare var String: {
+  new (value?: any): String;
+  (value?: any): string;
+  prototype: String;
+  fromCharCode(...codes: number[]): string;
+  /**
+   * Pollyfill of String.fromCodePoint
+   */
+  fromCodePoint(...codePoints: number[]): string;
+};
+
 // for dynamic require
 declare var require: any;
+
+// import only type info
+import ou = require("obtain-unicode");
+
+var obtainUnicode: typeof ou.obtainUnicode;
+if (typeof window === "undefined") { // in node.js
+  obtainUnicode = require("obtain-unicode").obtainUnicode;
+}
 
 // import only type info
 import usp = require('urlsearchparams');
