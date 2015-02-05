@@ -62,6 +62,70 @@ function percentEncode(encoded: Uint8Array): string {
   return result;
 }
 
+function percentDecode(input: Uint8Array): Uint8Array {
+  return null;
+}
+
+function domainToUnicode(input: string): string {
+ // TODO: imple
+  return input;
+}
+
+function domainToASCII(input: string): string {
+ // TODO: imple
+  return input;
+}
+
+function parseIPv6(input: string): string {
+  // TODO: imple
+  return input;
+}
+
+// https://url.spec.whatwg.org/#concept-host-parser
+function hostParse(input: string, unicodeFlag?: boolean): string {
+  // step 1
+  if (input === "") {
+    return "failure";
+  }
+
+  // step 2
+  if (input.charAt(0) === "[") {
+    // step 2-1
+    if (input.charAt(input.length-1) !== "]") {
+      // TODO: parse error
+      return "failure";
+    }
+
+    // step 2-2
+    return parseIPv6(input.slice(1, -1));
+  }
+
+  // step 3
+  var domain = decode(percentDecode(encode(input)));
+
+  // step 4
+  var asciiDomain = domainToASCII(domain);
+
+  // step 5
+  if (asciiDomain === "failure") {
+    return "failure";
+  }
+
+  // step 6
+  if ([ "\u0000", "\t", "\n", "\r", " ", "#", "%", "/", ":", "?", "@", "[", "\\", "]" ].some((s) => {
+    return asciiDomain.indexOf(s) !== -1;
+  })) {
+    return "failure";
+  }
+
+  // step 7
+  if (unicodeFlag) { // TODO: sent a bug to clearify default flag, so follow to update spec.
+    return asciiDomain;
+  } else {
+    return domainToUnicode(asciiDomain);
+  }
+}
+
 /**
  * Encode Set
  */
@@ -108,18 +172,6 @@ function utf8PercentEncode(codePoint: number, encodeSet: EncodeSet): string {
   }
 
   return result;
-}
-
-function percentDecode(input: Uint8Array): Uint8Array {
-  return null;
-}
-
-function domainToUnicode(input: string): string {
-  return null;
-}
-
-function domainToASCII(input: string): string {
-  return null;
 }
 
 function inRange(from, tar, to: number): boolean {
@@ -195,55 +247,6 @@ function isURLCodePoint(codePoint: number): boolean {
   if (inRange(0x100000, codePoint, 0x10FFFD)) return true;
 
   return false;
-}
-
-// https://url.spec.whatwg.org/#concept-host-parser
-function hostParse(input: string, unicodeFlag?: boolean): string {
-  // step 1
-  if (input === "") {
-    return "failure";
-  }
-
-  // step 2
-  if (input.charAt(0) === "[") {
-    // step 2-1
-    if (input.charAt(input.length-1) !== "]") {
-      // TODO: parse error
-      return "failure";
-    }
-
-    // step 2-2
-    return parseIPv6(input.slice(1, -1));
-  }
-
-  // step 3
-  var domain = decode(percentDecode(encode(input)));
-
-  // step 4
-  var asciiDomain = domainToASCII(domain);
-
-  // step 5
-  if (asciiDomain === "failure") {
-    return "failure";
-  }
-
-  // step 6
-  if ([ "\u0000", "\t", "\n", "\r", " ", "#", "%", "/", ":", "?", "@", "[", "\\", "]" ].some((s) => {
-    return asciiDomain.indexOf(s) !== -1;
-  })) {
-    return "failure";
-  }
-
-  // step 7
-  if (unicodeFlag) { // TODO: sent a bug to clearify default flag, so follow to update spec.
-    return asciiDomain;
-  } else {
-    return domainToUnicode(asciiDomain);
-  }
-}
-
-function parseIPv6(input: string): string {
-  return null;
 }
 
 //[NoInterfaceObject, Exposed=(Window,Worker)]
@@ -385,6 +388,7 @@ class jURL implements IURL {
   constructor(url:USVString, base:USVString = "about:blank") {
     // step 1
     var parsedBase = this.basicURLParser(base);
+    console.log(parsedBase);
   }
 
   // TODO: using enum in state

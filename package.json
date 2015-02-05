@@ -7,7 +7,8 @@
     "url": "https://github.com/Jxck/URL/issues"
   },
   "dependencies": {
-    "urlsearchparams": "*"
+    "urlsearchparams": "*",
+    "utf8-encoding": "0.0.9"
   },
   "devDependencies": {
     "typescript": "^1.4.1"
