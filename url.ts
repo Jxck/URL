@@ -847,7 +847,69 @@ class jURL implements IURL {
       // https://url.spec.whatwg.org/#host-state
       case "hostState": // fall through
       // https://url.spec.whatwg.org/#hostname-state
-      case "hostnameState":
+      case "hostNameState":
+        // step 1
+        if (c === 58 && flagParen === false) {
+          // step 1-1
+          var host = hostParse(buffer);
+
+          // step 1-2
+          if (host === "failure") {
+            return "failure";
+          }
+
+          // step 1-3
+          url.host = host;
+          buffer = "";
+          state = "portState";
+
+          // step 1-4
+          if (stateOverride === "hostNameState") {
+            return; // TODO: teminate
+          }
+        }
+
+        // step 2
+        else if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // / \ ? #
+          // step 2-1
+          var host = hostParse(buffer);
+
+          // step 2-2
+          if (host === "failure") {
+            return "failure";
+          }
+
+          // step 2-3
+          url.host = host;
+          buffer = "";
+          state = "relativePathStartState";
+
+          // step 2-4
+          if (stateOverride !== undefined) {
+            return; // TODO: teminate
+          }
+        }
+
+        // step 3
+        else if ([0x9, 0xA, 0xD].indexOf(c) !== -1) {
+          // TODO: parse error
+        }
+
+        // step 4
+        else {
+          // step 4-1
+          if (c === 91) { // [
+            flagParen = true;
+          }
+
+          // step 4-2
+          if (c === 93) { // ]
+            flagParen = false;
+          }
+
+          // step 4-3
+          buffer += String.fromCharCode(c);
+        }
 
         break;
 
