@@ -75,22 +75,14 @@ function encode(input: number[], encodingOverride?: string): number[] {
   return  null;//encoder.encode(s);
 }
 
-function encodeCodePoint(codePoint: number): Uint8Array {
-  return null;
-}
-
 function decode(input: number[]): string {
   return null;
 }
 
-function percentEncodeByte(byt: number): number[] {
-  return null
-}
-
-function percentEncode(encoded: Uint8Array): string {
-  var result = "";
-  for (var i = 0; i < encoded.length; i ++) {
-    result += "%" + encoded[i].toString(16).toUpperCase();
+function percentEncode(input: number[]): number[] {
+  var result: number[] = [];
+  for (var i = 0; i < input.length; i ++) {
+    result.concat(obtainUnicode("%" + input[i].toString(16).toUpperCase()));
   }
   return result;
 }
@@ -196,13 +188,10 @@ function utf8PercentEncode(codePoint: number, encodeSet: EncodeSet): number[] {
   }
 
   // step 2
-  var bytes = encodeCodePoint(codePoint);
+  var bytes: number[] = encode([codePoint]);
 
   // step 3
-  var result: number[] = [];
-  for (var i=0; i<bytes.length; i++) {
-    result = result.concat(percentEncodeByte(bytes[i]));
-  }
+  var result: number[] = percentEncode(bytes);
 
   return result;
 }
@@ -803,7 +792,7 @@ class jURL implements IURL {
             }
 
             // step 1-3-5
-            var result = utf8PercentEncode(cp, defaultEncodeSet);
+            var result: string = toString(utf8PercentEncode(cp, defaultEncodeSet));
             if (url.password !== null) {
               url.password += result;
             } else {
@@ -1127,7 +1116,7 @@ class jURL implements IURL {
             if (byt < 0x21
              || byt > 0x7E
              || [0x22, 0x23, 0x3C, 0x3E, 0x60].indexOf(byt) !== -1) {
-              url.query = toString(percentEncode(byt));
+              url.query = toString(percentEncode([byt]));
             }
 
             // step 1-3-2
