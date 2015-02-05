@@ -59,39 +59,39 @@ if (typeof window === 'undefined') { // in node.js
 // original type
 type CodePoint = number;
 
-function toLower(codePoint: number): number {
+function toLower(codePoint: CodePoint): CodePoint{
   return codePoint + 32;
 }
 
-function toUpper(codePoint: number): number {
+function toUpper(codePoint: CodePoint): CodePoint {
   return codePoint - 32;
 }
 
-function toString(codePoints: number[]): string {
+function toString(codePoints: CodePoint[]): string {
   return String.fromCodePoint.apply(null, codePoints);
 }
 
 // TODO:
-function encode(input: number[], encodingOverride?: string): number[] {
+function encode(input: CodePoint[], encodingOverride?: string): CodePoint[] {
   if (encodingOverride !== "utf-8") {
     throw new Error("support utf-8 only");
   }
   return  null;//encoder.encode(s);
 }
 
-function decode(input: number[]): string {
+function decode(input: CodePoint[]): string {
   return null;
 }
 
-function percentEncode(input: number[]): number[] {
-  var result: number[] = [];
+function percentEncode(input: CodePoint[]): CodePoint[] {
+  var result: CodePoint[] = [];
   for (var i = 0; i < input.length; i ++) {
     result.concat(obtainUnicode("%" + input[i].toString(16).toUpperCase()));
   }
   return result;
 }
 
-function percentDecode(input: number[]): number[] {
+function percentDecode(input: CodePoint[]): CodePoint[] {
   return null;
 }
 
@@ -105,13 +105,13 @@ function domainToASCII(input: string): string {
   return input;
 }
 
-function parseIPv6(input: number[]): string {
+function parseIPv6(input: CodePoint[]): string {
   // TODO: imple
   return toString(input);
 }
 
 // https://url.spec.whatwg.org/#concept-host-parser
-function parseHost(input: number[], unicodeFlag?: boolean): string {
+function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
   // step 1
   if (input.length === 0) {
     return "failure";
@@ -158,34 +158,34 @@ function parseHost(input: number[], unicodeFlag?: boolean): string {
 /**
  * Encode Set
  */
-type EncodeSet = (p: number) => boolean;
+type EncodeSet = (p: CodePoint) => boolean;
 
 // https://url.spec.whatwg.org/#simple-encode-set
-function simpleEncodeSet(codePoint: number): boolean {
+function simpleEncodeSet(codePoint: CodePoint): boolean {
   // all code points less than U+0020 (i.e. excluding U+0020) and all code points greater than U+007E.
   return codePoint < 0x20 && 0x007 < codePoint;
 }
 
 // https://url.spec.whatwg.org/#default-encode-set
-function defaultEncodeSet(codePoint: number): boolean {
+function defaultEncodeSet(codePoint: CodePoint): boolean {
   // simple encode set and code points U+0020, '"', "#", "<", ">", "?", and "`".
   return simpleEncodeSet(codePoint) || ([0x20, 34, 35, 60, 62, 63, 96].indexOf(codePoint) !== -1);
 }
 
 // https://url.spec.whatwg.org/#username-encode-set
-function passwordEncodeSet(codePoint: number): boolean {
+function passwordEncodeSet(codePoint: CodePoint): boolean {
   // default encode set and code points "/", "@", and "\".
   return defaultEncodeSet(codePoint) || ([0x47, 0x64, 0x92].indexOf(codePoint) !== -1);
 }
 
 // https://url.spec.whatwg.org/#username-encode-set
-function usernameEncodeSet(codePoint: number): boolean {
+function usernameEncodeSet(codePoint: CodePoint): boolean {
   // password encode set and code point ":".
   return passwordEncodeSet(codePoint) || codePoint === 58;
 }
 
 // https://url.spec.whatwg.org/#utf_8-percent-encode
-function utf8PercentEncode(codePoint: number, encodeSet: EncodeSet): number[] {
+function utf8PercentEncode(codePoint: CodePoint, encodeSet: EncodeSet): CodePoint[] {
   // step 1
   if (encodeSet(codePoint)) {
     return [codePoint];
@@ -205,22 +205,22 @@ function inRange(from: number, tar: number, to: number): boolean {
 }
 
 // https://url.spec.whatwg.org/#ascii-digits
-function isASCIIDigits(codePoint: number): boolean {
+function isASCIIDigits(codePoint: CodePoint): boolean {
   return inRange(0x30, codePoint, 0x39);
 }
 
 // https://url.spec.whatwg.org/#ascii-hex-digits
-function isASCIIHexDigits(codePoint: number): boolean {
+function isASCIIHexDigits(codePoint: CodePoint): boolean {
   return inRange(0x41, codePoint, 0x46) || inRange(0x61, codePoint, 0x66);
 }
 
 // https://url.spec.whatwg.org/#ascii-alpha
-function isASCIIAlpha(codePoint: number): boolean {
+function isASCIIAlpha(codePoint: CodePoint): boolean {
   return inRange(0x41, codePoint, 0x5A) || inRange(0x61, codePoint, 0x7A);
 }
 
 // https://url.spec.whatwg.org/#ascii-alphanumeric
-function isASCIIAlphaNumeric(codePoint: number): boolean {
+function isASCIIAlphaNumeric(codePoint: CodePoint): boolean {
   return isASCIIDigits(codePoint) || isASCIIAlpha(codePoint);
 }
 
@@ -240,14 +240,14 @@ function isRelativeScheme(scheme: string): boolean {
 }
 
 // https://url.spec.whatwg.org/#url-code-points
-function isURLCodePoint(codePoint: number): boolean {
+function isURLCodePoint(codePoint: CodePoint): boolean {
   if (isASCIIAlphaNumeric(codePoint)) {
     return true;
   }
 
   // ["!", "$", "&", "'", "(", ")", "*", "+", ",", "-",
   //  ".", "/", ":", ";", "=", "?", "@", "_", "~"]
-  var signs: number[] = [ 33, 36, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 58, 59, 61, 63, 64, 95, 126 ];
+  var signs: CodePoint[] = [ 33, 36, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 58, 59, 61, 63, 64, 95, 126 ];
   if (signs.indexOf(codePoint) !== -1) {
     return true;
   }
@@ -1040,7 +1040,7 @@ class jURL implements IURL {
             // TODO: parse error
           }
 
-          var table: { [index:string]: number[] } = {
+          var table: { [index:string]: CodePoint[] } = {
             "%2e":    [46],
             ".%2e":   [46, 46],
             "%2e.":   [46, 46],
@@ -1048,7 +1048,7 @@ class jURL implements IURL {
           }
 
           // step 1-2
-          var matched: number[] = table[toString(buffer.map(toLower))];
+          var matched: CodePoint[] = table[toString(buffer.map(toLower))];
           if (matched !== undefined) {
             buffer = matched;
           }
@@ -1136,7 +1136,7 @@ class jURL implements IURL {
 
           // step 1-3
           for (var i = 0; i < buffer.length; i++) {
-            var byt: number = buffer[i];
+            var byt: CodePoint = buffer[i];
 
             // step 1-3-1
             if (byt < 0x21
