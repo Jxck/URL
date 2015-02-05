@@ -22,6 +22,7 @@
     "README.md",
     "package.json",
     "url.js",
+    "url.js.map",
     "url.ts"
   ],
   "homepage": "https://github.com/Jxck/URL",
