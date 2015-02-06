@@ -1364,4 +1364,4 @@ assert("𠮟", decode(percentDecode(utf8PercentEncode(obtainUnicode("𠮟")[0], 
 assert([1,2,3].includes(2), true);
 assert([1,2,3].includes(-1), false);
 
-new jURL('http://example.com');
+new jURL('http://user:password@example.com');
