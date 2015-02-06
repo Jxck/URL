@@ -499,7 +499,21 @@ class jURL implements IURL {
   constructor(url:USVString, base:USVString = "about:blank") {
     // step 1
     var parsedBase = this.basicURLParser(base);
-    console.log(parsedBase);
+
+    // step 2
+    if (parsedBase === "failure") {
+      throw new TypeError("invalid url");
+    }
+
+    // step 3
+    var parsedURL = this.basicURLParser(url, parsedBase);
+
+    // step 4
+    if (parsedURL === "failure") {
+      throw new TypeError("invalid url");
+    }
+
+    console.log(parsedURL);
   }
 
   // https://url.spec.whatwg.org/#concept-basic-url-parser
