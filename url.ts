@@ -17,14 +17,16 @@ declare var String: {
 };
 
 // polyfill for Array.prototype.includes
-Object.defineProperty(Array.prototype, 'includes', {
-  enumerable: false,
-  configurable: false,
-  writable: false,
-  value: function(e: number): boolean {
-    return this.indexOf(e) !== -1
-  }
-});
+if (Array.prototype.includes === undefined) {
+  Object.defineProperty(Array.prototype, 'includes', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: function(e: number): boolean {
+      return this.indexOf(e) !== -1
+    }
+  });
+}
 
 // for dynamic require
 declare var require: any;
