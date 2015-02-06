@@ -242,13 +242,13 @@ function simpleEncodeSet(codePoint: CodePoint): boolean {
 // https://url.spec.whatwg.org/#default-encode-set
 function defaultEncodeSet(codePoint: CodePoint): boolean {
   // simple encode set and code points U+0020, '"', "#", "<", ">", "?", and "`".
-  return simpleEncodeSet(codePoint) || ([0x20, 34, 35, 60, 62, 63, 96].indexOf(codePoint) !== -1);
+  return simpleEncodeSet(codePoint) || ([0x20, 34, 35, 60, 62, 63, 96].includes(codePoint));
 }
 
 // https://url.spec.whatwg.org/#username-encode-set
 function passwordEncodeSet(codePoint: CodePoint): boolean {
   // default encode set and code points "/", "@", and "\".
-  return defaultEncodeSet(codePoint) || ([0x47, 0x64, 0x92].indexOf(codePoint) !== -1);
+  return defaultEncodeSet(codePoint) || ([0x47, 0x64, 0x92].includes(codePoint));
 }
 
 // https://url.spec.whatwg.org/#username-encode-set
@@ -309,7 +309,7 @@ var relativeScheme: { [index: string] : string } = {
 }
 
 function isRelativeScheme(scheme: string): boolean {
-  return Object.keys(relativeScheme).indexOf(scheme) !== -1;
+  return Object.keys(relativeScheme).includes(scheme);
 }
 
 // https://url.spec.whatwg.org/#url-code-points
@@ -321,7 +321,7 @@ function isURLCodePoint(codePoint: CodePoint): boolean {
   // ["!", "$", "&", "'", "(", ")", "*", "+", ",", "-",
   //  ".", "/", ":", ";", "=", "?", "@", "_", "~"]
   var signs: CodePoint[] = [ 33, 36, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 58, 59, 61, 63, 64, 95, 126 ];
-  if (signs.indexOf(codePoint) !== -1) {
+  if (signs.includes(codePoint)) {
     return true;
   }
 
@@ -589,7 +589,7 @@ class jURL implements IURL {
       // https://url.spec.whatwg.org/#scheme-state
       case State.SchemeState:
         // step 1
-        if (isASCIIAlphaNumeric(c) || [43, 45, 46].indexOf(c) !== -1) { // +, -, .
+        if (isASCIIAlphaNumeric(c) || [43, 45, 46].includes(c)) { // +, -, .
           buffer.push(toLower(c));
         }
 
@@ -682,7 +682,7 @@ class jURL implements IURL {
           }
 
           // step 3-3
-          if (!isNaN(c) && [0x9, 0xA, 0xD].indexOf(c) === -1) {
+          if (!isNaN(c) && ![0x9, 0xA, 0xD].includes(c)) {
             url.schemeData += toString(utf8PercentEncode(c, simpleEncodeSet));
           }
         }
@@ -769,9 +769,9 @@ class jURL implements IURL {
             // step 1
             if (url.scheme !== "file"
              || !isASCIIAlpha(c)
-             || [58, 124].indexOf(encodedInput[pointer+1]) === -1 // :, |
+             || ![58, 124].includes(encodedInput[pointer+1]) // :, |
              || encodedInput.length - (pointer+1) === 1 // remaining.length = 1
-             || [47, 92, 63, 35].indexOf(encodedInput[pointer+2]) === -1 // /, \, ?, #
+             || ![47, 92, 63, 35].includes(encodedInput[pointer+2]) // /, \, ?, #
             ) {
               url.host = base.host;
               url.port = base.port;
@@ -791,7 +791,7 @@ class jURL implements IURL {
 
       // https://url.spec.whatwg.org/#relative-slash-state
       case State.RelativeSlashState:
-        if ([47, 92].indexOf(c) !== -1) { // /, \
+        if ([47, 92].includes(c)) { // /, \
           // step 1
           if (c === 92) { // \
             // TODO: parse error
@@ -850,7 +850,7 @@ class jURL implements IURL {
 
       // https://url.spec.whatwg.org/#authority-ignore-slashes-state
       case State.AuthorityIgnoreSlashesState:
-        if ([47, 92].indexOf(c) === -1) { // /, \
+        if (![47, 92].includes(c)) { // /, \
           state = State.AuthorityState;
           pointer = pointer - 1;
         }
@@ -880,7 +880,7 @@ class jURL implements IURL {
             var cp: CodePoint = buffer[i];
 
             // step 1-3-1
-            if ([0x9, 0xA, 0xD].indexOf(cp) === 0) {
+            if ([0x9, 0xA, 0xD].includes(cp)) {
               // TODO: parse error
               continue;
             }
@@ -918,7 +918,7 @@ class jURL implements IURL {
         }
 
         // step 2
-        else if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // /, \, ?, #
+        else if (isNaN(c) || [47, 92, 63, 35].includes(c)) { // /, \, ?, #
           pointer = pointer - (buffer.length + 1);
           buffer = [];
           state = State.HostState;
@@ -934,13 +934,13 @@ class jURL implements IURL {
       // https://url.spec.whatwg.org/#file-host-state
       case State.FileHostState:
         // step 1
-        if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // /, \, ?, #
+        if (isNaN(c) || [47, 92, 63, 35].includes(c)) { // /, \, ?, #
           pointer = pointer - 1;
 
           // step 1-1
           if (buffer.length === 2
             && isASCIIAlpha(buffer[0])
-            && [58, 124].indexOf(buffer[1])) {
+            && [58, 124].includes(buffer[1])) {
 
             state = State.RelativePathState;
           }
@@ -968,7 +968,7 @@ class jURL implements IURL {
         }
 
         // step 2
-        else if ([0x9, 0xA, 0xD].indexOf(c)) {
+        else if ([0x9, 0xA, 0xD].includes(c)) {
           // TODO parse error
         }
 
@@ -1005,7 +1005,7 @@ class jURL implements IURL {
         }
 
         // step 2
-        else if (isNaN(c) || [47, 92, 63, 35].indexOf(c) !== -1) { // / \ ? #
+        else if (isNaN(c) || [47, 92, 63, 35].includes(c)) { // / \ ? #
           // step 2-1
           var host: string = parseHost(buffer);
 
@@ -1026,7 +1026,7 @@ class jURL implements IURL {
         }
 
         // step 3
-        else if ([0x9, 0xA, 0xD].indexOf(c) !== -1) {
+        else if ([0x9, 0xA, 0xD].includes(c)) {
           // TODO: parse error
         }
 
@@ -1057,7 +1057,7 @@ class jURL implements IURL {
 
         // step 2
         else if (isNaN(c)
-              || [47, 92, 63, 35].indexOf(c) !== -1 // / \ ? #
+              || [47, 92, 63, 35].includes(c) // / \ ? #
               || stateOverride !== undefined) {
 
           // step 2-1
@@ -1088,7 +1088,7 @@ class jURL implements IURL {
         }
 
         // step 3
-        else if ([0x9, 0xA, 0xD].indexOf(c) !== -1) {
+        else if ([0x9, 0xA, 0xD].includes(c)) {
           // TODO: parse error
         }
 
@@ -1110,7 +1110,7 @@ class jURL implements IURL {
 
         // step 2
         state = State.RelativePathState;
-        if ([47, 92].indexOf(c) === -1) { // /, \
+        if (![47, 92].includes(c)) { // /, \
           pointer = pointer - 1;
         }
 
@@ -1119,8 +1119,8 @@ class jURL implements IURL {
       // https://url.spec.whatwg.org/#relative-path-state
       case State.RelativePathState:
         // step 1
-        if ((isNaN(c) || [49, 92].indexOf(c) !== -1)
-         || stateOverride === undefined && [63, 35].indexOf(c) !== -1) {
+        if ((isNaN(c) || [49, 92].includes(c)) // /, \
+         || stateOverride === undefined && [63, 35].includes(c)) {
 
           // step 1-1
           if (c === 92) {
@@ -1143,13 +1143,13 @@ class jURL implements IURL {
           // step 1-3
           if (toString(buffer) === "..") {
             url.path.pop();
-            if ([47, 92].indexOf(c) === -1) { // /, \
+            if (![47, 92].includes(c)) { // /, \
               url.path.push("");
             }
           }
 
           // step 1-4
-          else if (toString(buffer) === "." && [47, 92].indexOf(c) === -1) {
+          else if (toString(buffer) === "." && ![47, 92].includes(c)) {
             url.path.push("");
           }
 
@@ -1185,7 +1185,7 @@ class jURL implements IURL {
         }
 
         // step 2
-        else if ([0x9, 0xA, 0xD].indexOf(c) !== -1) {
+        else if ([0x9, 0xA, 0xD].includes(c)) {
           // TODO:  parse error
         }
 
@@ -1214,7 +1214,7 @@ class jURL implements IURL {
         // step 1
         if (isNaN(c) || (stateOverride === undefined && c === 35)) {
           // step 1-1
-          if (url.relativeFlag === false || ["ws", "wss"].indexOf(url.scheme) === -1) {
+          if (url.relativeFlag === false || ["ws", "wss"].includes(url.scheme)) {
             encodingOverride = "utf-8";
           }
 
@@ -1228,7 +1228,7 @@ class jURL implements IURL {
             // step 1-3-1
             if (byt < 0x21
              || byt > 0x7E
-             || [0x22, 0x23, 0x3C, 0x3E, 0x60].indexOf(byt) !== -1) {
+             || [0x22, 0x23, 0x3C, 0x3E, 0x60].includes(byt)) {
               url.query = toString(percentEncode([byt]));
             }
 
@@ -1249,7 +1249,7 @@ class jURL implements IURL {
         }
 
         // step 2
-        else if ([0x9, 0xA, 0xD].indexOf(c) !== -1) {
+        else if ([0x9, 0xA, 0xD].includes(c)) {
           // TODO: parse error
         }
 
