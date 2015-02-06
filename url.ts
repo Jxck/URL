@@ -839,7 +839,7 @@ class jURL implements IURL {
 
       // https://url.spec.whatwg.org/#authority-ignore-slashes-state
       case State.AuthorityIgnoreSlashesState:
-        if ([47, 92].indexOf(c) !== -1) { // /, \
+        if ([47, 92].indexOf(c) === -1) { // /, \
           state = State.AuthorityState;
           pointer = pointer - 1;
         }
@@ -1347,3 +1347,5 @@ assert("A".charCodeAt(0), toUpper("A".charCodeAt(0)));
 assert("𠮟", toString(obtainUnicode("𠮟")));
 assert("𠮟", decode(encode(obtainUnicode("𠮟"))));
 assert("𠮟", decode(percentDecode(utf8PercentEncode(obtainUnicode("𠮟")[0], simpleEncodeSet))));
+
+new jURL('http://example.com');
