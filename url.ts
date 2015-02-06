@@ -83,27 +83,72 @@ function toString(codePoints: CodePoint[]): string {
 }
 
 // TODO:
-function encode(input: CodePoint[], encodingOverride?: string): CodePoint[] {
+function encode(input: CodePoint[], encodingOverride: string = "utf-8"): CodePoint[] {
   if (encodingOverride !== "utf-8") {
     throw new Error("support utf-8 only");
   }
-  return  null;//encoder.encode(s);
+
+  var encoded: Uint8Array = new TextEncoder("utf-8").encode(toString(input));
+  return Array.prototype.slice.call(encoded);
 }
 
 function decode(input: CodePoint[]): string {
-  return null;
+  return new TextDecoder().decode(new Uint8Array(input));
 }
 
 function percentEncode(input: CodePoint[]): CodePoint[] {
   var result: CodePoint[] = [];
   for (var i = 0; i < input.length; i ++) {
-    result.concat(obtainUnicode("%" + input[i].toString(16).toUpperCase()));
+    var hex = input[i].toString(16).toUpperCase();
+    if (hex.length === 1) {
+      hex = "0" + hex;
+    }
+    result = result.concat(obtainUnicode("%" + hex));
   }
   return result;
 }
 
 function percentDecode(input: CodePoint[]): CodePoint[] {
-  return null;
+  function range(b: number): boolean {
+    return !inRange(0x30, b, 0x39)
+        && !inRange(0x41, b, 0x46)
+        && !inRange(0x61, b, 0x66)
+  }
+
+  // step 1
+  var output: CodePoint[] = [];
+
+  // step 2
+  for (var i=0; i<input.length; i++) {
+    var byt = input[i];
+
+    // setp 2-1
+    if (byt !== 37) { // %
+      output.push(byt);
+    }
+
+    // step 2-2
+    else if (byt === 37
+          && range(input[i+1])
+          && range(input[i+2])
+    ) { // %
+      output.push(byt);
+    }
+
+    // step 2-3
+    else {
+      // step 2-3-1
+      var bytePoint = parseInt(decode([input[i+1], input[i+2]]), 16);
+
+      // step 2-3-2
+      output.push(bytePoint);
+
+      // step 2-3-3
+      i = i + 2;
+    }
+  }
+
+  return output;
 }
 
 function domainToUnicode(input: string): string {
@@ -1272,3 +1317,11 @@ assert(isRelativeScheme(undefined), false);
 ["!", "$", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", ":", ";", "=", "?", "@", "_", "~"].forEach(function(c) {
   assert(isURLCodePoint(c.charCodeAt(0)), true);
 });
+
+
+assert("a".charCodeAt(0), toLower("A".charCodeAt(0)));
+assert("A".charCodeAt(0), toUpper("a".charCodeAt(0)));
+
+assert("𠮟", toString(obtainUnicode("𠮟")));
+assert("𠮟", decode(encode(obtainUnicode("𠮟"))));
+assert("𠮟", decode(percentDecode(utf8PercentEncode(obtainUnicode("𠮟")[0], simpleEncodeSet))));
