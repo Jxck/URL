@@ -1,4 +1,5 @@
 /// <reference path="types/webidl.d.ts" />
+/// <reference path="types/array.d.ts" />
 /// <reference path="types/obtain-unicode.d.ts" />
 /// <reference path="types/utf8-encoding.d.ts" />
 /// <reference path="types/urlsearchparams.d.ts" />
@@ -14,6 +15,16 @@ declare var String: {
    */
   fromCodePoint(...codePoints: number[]): string;
 };
+
+// polyfill for Array.prototype.includes
+Object.defineProperty(Array.prototype, 'includes', {
+  enumerable: false,
+  configurable: false,
+  writable: false,
+  value: function(e: number): boolean {
+    return this.indexOf(e) !== -1
+  }
+});
 
 // for dynamic require
 declare var require: any;
@@ -1347,5 +1358,8 @@ assert("A".charCodeAt(0), toUpper("A".charCodeAt(0)));
 assert("𠮟", toString(obtainUnicode("𠮟")));
 assert("𠮟", decode(encode(obtainUnicode("𠮟"))));
 assert("𠮟", decode(percentDecode(utf8PercentEncode(obtainUnicode("𠮟")[0], simpleEncodeSet))));
+
+assert([1,2,3].includes(2), true);
+assert([1,2,3].includes(-1), false);
 
 new jURL('http://example.com');
