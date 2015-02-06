@@ -71,10 +71,16 @@ if (typeof window === 'undefined') { // in node.js
 type CodePoint = number;
 
 function toLower(codePoint: CodePoint): CodePoint{
+  if (!inRange(65, codePoint, 90)) {
+    return codePoint;
+  }
   return codePoint + 32;
 }
 
 function toUpper(codePoint: CodePoint): CodePoint {
+  if (!inRange(97, codePoint, 122)) {
+    return codePoint;
+  }
   return codePoint - 32;
 }
 
@@ -1320,7 +1326,9 @@ assert(isRelativeScheme(undefined), false);
 
 
 assert("a".charCodeAt(0), toLower("A".charCodeAt(0)));
+assert("a".charCodeAt(0), toLower("a".charCodeAt(0)));
 assert("A".charCodeAt(0), toUpper("a".charCodeAt(0)));
+assert("A".charCodeAt(0), toUpper("A".charCodeAt(0)));
 
 assert("𠮟", toString(obtainUnicode("𠮟")));
 assert("𠮟", decode(encode(obtainUnicode("𠮟"))));
