@@ -1,5 +1,6 @@
 /// <reference path="types/webidl.d.ts" />
 /// <reference path="types/obtain-unicode.d.ts" />
+/// <reference path="types/utf8-encoding.d.ts" />
 /// <reference path="types/urlsearchparams.d.ts" />
 
 // polyfill for String.fromCodePoint
@@ -23,6 +24,16 @@ import ou = require("obtain-unicode");
 var obtainUnicode: typeof ou.obtainUnicode;
 if (typeof window === "undefined") { // in node.js
   obtainUnicode = require("obtain-unicode").obtainUnicode;
+}
+
+// import only type info
+import te = require('utf8-encoding');
+
+var TextEncoder: typeof te.TextEncoder;
+var TextDecoder: typeof te.TextDecoder;
+if (typeof window === 'undefined') { // in node.js
+  TextEncoder = require('utf8-encoding').TextEncoder;
+  TextDecoder = require('utf8-encoding').TextDecoder;
 }
 
 // import only type info
