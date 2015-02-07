@@ -546,6 +546,63 @@ class jURL implements IURL {
     return result;
   }
 
+  // https://url.spec.whatwg.org/#concept-urlutils-set-the-input
+  private setTheInput(input: string, url?: jURL) {
+    // step 1
+    if (url !== undefined) {
+      this.url = url;
+      this.input = input;
+    }
+
+    // step 2
+    else {
+      // step 2-1
+      this.url = null;
+
+      // step 2-2
+      if (input === null) {
+        this.input = "";
+      }
+
+      // step 2-3
+      else {
+        // step 2-3-1
+        this.input = input;
+
+        // step 2-3-2
+      }
+
+
+
+    }
+  }
+
+  // https://url.spec.whatwg.org/#concept-url-parser
+  private URLParser(input: string, base?: jURL, encodingOverride?: string): any {
+    // step 1
+    var url = this.basicURLParser(input, base, encodingOverride);
+
+    // step 2
+    if (url === "failure") {
+      return "failure";
+    }
+
+    // step 3
+    if (url.scheme !== "blob") {
+      return url;
+    }
+
+    throw new Error("dont' support blob: url");
+    // step 4
+    // TODO: support blob URL store
+
+    // step 5
+    // TODO: support blob URL store
+
+    // step 6
+    // return url;
+  }
+
   // https://url.spec.whatwg.org/#concept-basic-url-parser
   private basicURLParser(input: string, base?: jURL, encodingOverride?: string, url?: jURL, stateOverride?: State): any {
     // step 1
