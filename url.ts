@@ -353,6 +353,18 @@ function isRelativeScheme(scheme: string): boolean {
 // https://url.spec.whatwg.org/#local-scheme
 var localScheme = [ "about", "blob", "data", "filesystem" ];
 
+
+function isIPv6(host: string): string {
+  // TODO:
+  return null;
+}
+
+function isDomain(host: string): string {
+  // TODO:
+  return null;
+}
+
+
 //[NoInterfaceObject, Exposed=(Window,Worker)]
 // interface URLUtilsReadOnly {
 //   stringifier readonly attribute USVString href;
@@ -1387,6 +1399,60 @@ class jURL implements IURL {
     }
 
     return url; // TODO: any
+  }
+
+  // https://url.spec.whatwg.org/#url-serializing
+  private URLSerialize(url: jURL, excludeFragmentFlag?: string) {
+    // step 1
+    var output: string = url.scheme + ":";
+
+    // step 2
+    if (url.relativeFlag === true) {
+      // step 2-1
+      output = output + "//";
+
+      // step 2-2
+      if (url.username !== "" || url.password !== null) {
+        // setp 2-2-1
+        output = output + url.username;
+
+        // step 2-2-2
+        if (url.password !== null) {
+          output = output + ":" + url.password;
+        }
+
+        // step 2-2-3
+        output = output + "@";
+      }
+
+      // step 2-3
+      output = output + this.serializeHost(url.host);
+
+    }
+  }
+
+  // https://url.spec.whatwg.org/#concept-host-serializer
+  private serializeHost(host: string): string {
+    // step 1
+    if (host === null) {
+      return "";
+    }
+
+    // step 2
+    if (isIPv6(host)) {
+      return "[" + this.serializeIPv6(host) + "]";
+    }
+
+    // step 3
+    else if(isDomain(host)) {
+      return host;
+    }
+  }
+
+  // https://url.spec.whatwg.org/#concept-ipv6-serializer
+  private serializeIPv6(adress: string): string {
+    // TODO
+    return null;
   }
 }
 
