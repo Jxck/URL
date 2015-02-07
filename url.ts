@@ -82,6 +82,7 @@ if (typeof window === 'undefined') { // in node.js
 
 // original type
 type CodePoint = number;
+var EOF: any = undefined;
 
 function toLower(codePoint: CodePoint): CodePoint{
   if (!inRange(65, codePoint, 90)) {
@@ -180,9 +181,210 @@ function domainToASCII(input: string): string {
   return input;
 }
 
+// https://url.spec.whatwg.org/#concept-ipv6-parser
 function parseIPv6(input: CodePoint[]): string {
-  // TODO: imple
-  return toString(input);
+
+  // step 1
+  var address: string; // TODO
+
+  // step 2
+  var piecePointer: number; // TODO
+  var piece: number; // TODO
+
+  // step 3
+  var compressPointer: number; // TODO
+
+  // step 4
+  var pointer: number = 0;
+  var c: number = input[pointer];
+
+  // step 5
+  if (c === 58) { // :
+    // step 5-1
+    if (input[pointer+1] !== 58) { // :
+      // TODO: parse error
+      return "failure";
+    }
+
+    // step 5-2
+    pointer = pointer + 2;
+
+    // step 5-3
+    piecePointer = piecePointer + 1;
+    compressPointer = piecePointer;
+  }
+
+  // step 6
+  // https://url.spec.whatwg.org/#concept-ipv6-parser-main
+  Main: while(c !== EOF) {
+    // step 6-1
+    if (piecePointer === 8) {
+      // TODO: parse error
+      return "failure";
+    }
+
+    // step 6-2
+    if (c === 58) { // :
+      // step 6-2-1
+      if (compressPointer !== null) {
+        // TODO: parse error
+        return "failure";
+      }
+
+      // step 6-2-2
+      pointer = pointer + 1;
+      piecePointer = piecePointer + 1;
+      compressPointer = piecePointer;
+      continue Main;
+    }
+
+    // step 6-3
+    var value = 0;
+    var len = 0; // length
+
+    // step 6-4
+    while (len < 4 && isASCIIHexDigits(c)) {
+      value = value * 0x10 + parseInt(String.fromCodePoint(c), 16);
+      pointer = pointer + 1;
+      len = len + 1;
+    }
+
+    // step 6-5
+    switch (c) {
+    case 46: // "."
+      if (len === 0) {
+        // TODO: parse error
+        return "failure";
+      }
+
+      pointer = pointer - len;
+      // continue IPv4 // TODO
+    case 58: // ":"
+      pointer = pointer + 1;
+      if (c === EOF) {
+        // TODO: parse error
+        return "failure";
+      }
+    default:
+      if (c === EOF) {
+        break;
+      }
+      // TODO: parse error
+      return "failure";
+    }
+
+    // step 6-6
+    piece = value;
+
+    // step 6-7
+    piecePointer = piecePointer + 1;
+  }
+
+  // step 7
+  if (c === EOF) {
+    // continue Finale
+  }
+
+  // step 8
+  IPv4:
+  if (piecePointer > 6) {
+    // TODO: parse error
+    return "failure";
+  }
+
+  // step 9
+  var dotsSeen = 0;
+
+  // step 10
+  while(c !== EOF) {
+    // step 10-1
+    var value: number = null;
+
+    // step 10-2
+    if (!isASCIIDigits(c)) {
+      // TODO: parse error
+      return "failure";
+    }
+
+    // step 10-3
+    while (isASCIIDigits(c)) {
+      c = input[pointer];
+
+      // step 10-3-1
+      var num: number = parseInt(String.fromCodePoint(c), 10); // number
+
+      // step 10-3-2
+      if (value === null) {
+        value = num;
+      }
+      else if (value === 0) {
+        // TODO: parse error
+        return "failure";
+      }
+      else {
+        value = value * 10 + num;
+      }
+
+      // step 10-3-3
+      pointer = pointer + 1;
+
+      // step 10-3-4
+      if (value > 255) {
+        // TODO: parse error
+        return "failure";
+      }
+    }
+
+    // step 10-4
+    if (dotsSeen < 3 && c !== 46) { // .
+      // TODO: parse error
+      return "failure";
+    }
+
+    // step 10-5
+    piece = piece * 0x100 + value;
+
+    // step 10-6
+    if (dotsSeen === 1 || dotsSeen === 3) {
+      piecePointer = piecePointer + 1;
+    }
+
+    // step 10-7
+    pointer = pointer + 1;
+
+    // step 10-8
+    if (dotsSeen === 3 && c !== EOF) {
+      // TODO: parse error
+      return "failure";
+    }
+
+    // step 10-9
+    dotsSeen = dotsSeen + 1;
+  }
+
+  // step 11
+  Finale:
+  if (compressPointer !== null) {
+    // step 11-1
+    var swaps = piecePointer - compressPointer;
+
+    // step 11-2
+    piecePointer = 7;
+
+    // step 11-3
+    while (piecePointer !== 0 && swaps > 0) {
+      // TODO:
+    }
+  }
+
+  // step 12
+  else if (compressPointer !== null && piecePointer !== 8) {
+    // TODO: parse error
+    return "failure";
+  }
+
+  // step 13
+  return address;
 }
 
 // https://url.spec.whatwg.org/#concept-host-parser
