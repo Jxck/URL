@@ -387,6 +387,10 @@ function parseIPv6(input: CodePoint[]): string {
   return address;
 }
 
+// https://url.spec.whatwg.org/#concept-ipv6-serializer
+function serializeIPv6() {
+}
+
 // https://url.spec.whatwg.org/#concept-host-parser
 function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
   // step 1
