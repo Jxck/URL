@@ -1402,7 +1402,7 @@ class jURL implements IURL {
   }
 
   // https://url.spec.whatwg.org/#url-serializing
-  private URLSerialize(url: jURL, excludeFragmentFlag?: string) {
+  private URLSerialize(url: jURL, excludeFragmentFlag?: boolean) {
     // step 1
     var output: string = url.scheme + ":";
 
@@ -1428,7 +1428,32 @@ class jURL implements IURL {
       // step 2-3
       output = output + this.serializeHost(url.host);
 
+      // step 2-4
+      if (url.port !== "") {
+        output = output + ":" + url.port;
+      }
+
+      // step 2-5
+      output = output + "/" + url.path.join("/");
     }
+
+    // step 3
+    else if (url.relativeFlag === false) {
+      output = output + url.schemeData;
+    }
+
+    // step 4
+    if (url.query !== null) {
+      output = output + "?" + url.query;
+    }
+
+    // step 5
+    if (excludeFragmentFlag === false && url.fragment !== null) {
+      output = "#" + url.fragment;
+    }
+
+    // step 6
+    return output;
   }
 
   // https://url.spec.whatwg.org/#concept-host-serializer
