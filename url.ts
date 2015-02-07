@@ -299,21 +299,6 @@ function isASCIIAlphaNumeric(codePoint: CodePoint): boolean {
   return isASCIIDigits(codePoint) || isASCIIAlpha(codePoint);
 }
 
-// https://url.spec.whatwg.org/#relative-scheme
-var relativeScheme: { [index: string] : string } = {
-  ftp   : "21",
-  file  : "",
-  gopher: "70",
-  http  : "80",
-  https : "443",
-  ws    : "80",
-  wss   : "443"
-}
-
-function isRelativeScheme(scheme: string): boolean {
-  return Object.keys(relativeScheme).includes(scheme);
-}
-
 // https://url.spec.whatwg.org/#url-code-points
 function isURLCodePoint(codePoint: CodePoint): boolean {
   if (isASCIIAlphaNumeric(codePoint)) {
@@ -349,6 +334,24 @@ function isURLCodePoint(codePoint: CodePoint): boolean {
 
   return false;
 }
+
+// https://url.spec.whatwg.org/#relative-scheme
+var relativeScheme: { [index: string] : string } = {
+  ftp   : "21",
+  file  : "",
+  gopher: "70",
+  http  : "80",
+  https : "443",
+  ws    : "80",
+  wss   : "443"
+}
+
+function isRelativeScheme(scheme: string): boolean {
+  return Object.keys(relativeScheme).includes(scheme);
+}
+
+// https://url.spec.whatwg.org/#local-scheme
+var localScheme = [ "about", "blob", "data", "filesystem" ];
 
 //[NoInterfaceObject, Exposed=(Window,Worker)]
 // interface URLUtilsReadOnly {
@@ -469,9 +472,8 @@ class jURL implements IURL {
   // https://url.spec.whatwg.org/#concept-url-object
   private object: Blob = null;
 
-  // TODO: このへんあとで
-
-
+  // https://url.spec.whatwg.org/#concept-urlutils-get-the-base
+  private _base: jURL = null;
 
   protocol:     USVString;
 
@@ -496,6 +498,11 @@ class jURL implements IURL {
 
   get origin(): USVString {
     return this._origin;
+  }
+
+  // https://url.spec.whatwg.org/#concept-urlutils-get-the-base
+  get base(): jURL {
+    return this._base;
   }
 
   static domainToASCII(domain: string):   string {
@@ -526,7 +533,17 @@ class jURL implements IURL {
       throw new TypeError("invalid url");
     }
 
-    console.log(parsedURL);
+    // step 5
+    var result = this;
+
+    // step 6
+    result._base = parsedBase;
+
+    // step 7
+    result.setTheInput("", parsedURL);
+
+    // step 8
+    return result;
   }
 
   // https://url.spec.whatwg.org/#concept-basic-url-parser
