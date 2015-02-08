@@ -388,7 +388,14 @@ function parseIPv6(input: CodePoint[]): string {
 }
 
 // https://url.spec.whatwg.org/#concept-ipv6-serializer
-function serializeIPv6() {
+function serializeIPv6(adress: string) {
+  // step 1
+  var output = "";
+
+  // step 2
+
+  // step 3
+
 }
 
 // https://url.spec.whatwg.org/#concept-host-parser
