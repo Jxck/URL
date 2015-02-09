@@ -195,17 +195,17 @@ function domainToASCII(input: string): string {
 }
 
 // https://url.spec.whatwg.org/#concept-ipv6-parser
-function parseIPv6(input: CodePoint[]): string {
+function parseIPv6(input: CodePoint[]): any {
 
   // step 1
-  var address: string; // TODO
+  var address: number[] = [0, 0, 0, 0, 0, 0, 0, 0]; // 16bit * 8
 
   // step 2
-  var piecePointer: number; // TODO
-  var piece: number; // TODO
+  var piecePointer: number = 0;
+  var piece: number = address[piecePointer];
 
   // step 3
-  var compressPointer: number; // TODO
+  var compressPointer: number = null;
 
   // step 4
   var pointer: number = 0;
@@ -386,7 +386,12 @@ function parseIPv6(input: CodePoint[]): string {
 
     // step 11-3
     while (piecePointer !== 0 && swaps > 0) {
-      // TODO:
+      var tmp = piece;
+      piece = address[compressPointer + swaps - 1];
+      address[compressPointer + swaps - 1] = tmp;
+
+      piecePointer = piecePointer - 1;
+      swaps = swaps - 1;
     }
   }
 
