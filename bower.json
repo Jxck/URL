@@ -1,0 +1,28 @@
+{
+  "name": "url-standard",
+  "version": "0.0.0",
+  "homepage": "https://github.com/Jxck/URL",
+  "description": "implementaion of URL at WHATWG Living Standard https://url.spec.whatwg.org/",
+  "main": "url.js",
+  "keywords": [
+    "url",
+    "urlsearchparams",
+    "whatwg",
+    "w3c"
+  ],
+  "authors": [
+    "Jxck"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "obtain-unicode": "~0.0.5",
+    "utf8-encoding": "~0.0.9"
+  }
+}
