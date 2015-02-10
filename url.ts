@@ -406,7 +406,7 @@ function parseIPv6(input: CodePoint[]): any {
 }
 
 // https://url.spec.whatwg.org/#concept-ipv6-serializer
-function serializeIPv6(address: []number) {
+function serializeIPv6(address: number[]) {
   // step 1
   var output = "";
 
@@ -442,7 +442,9 @@ function serializeIPv6(address: []number) {
   var compressPointer = find(address);
 
   // step 4
-  address.forEach((piece: number, index: number) => {
+  for (var index:number = 0; index < address.length; index ++) {
+    var piece: number = address[index];
+
     // step 4-1
     if (compressPointer === index) {
       if (index === 0) {
@@ -450,17 +452,23 @@ function serializeIPv6(address: []number) {
       } else {
         output = ":";
       }
+
+      while(address[index+1] === 0) {
+        index = index + 1;
+      }
+      continue;
     }
 
     // step 4-2
+    output = output + piece.toString(16);
 
     // step 4-3
     if (index !== address.length) {
       output = output + ":";
     }
+  };
 
-  });
-
+  return output;
 }
 
 // https://url.spec.whatwg.org/#concept-host-parser
