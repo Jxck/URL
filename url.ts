@@ -226,9 +226,13 @@ function parseIPv6(input: CodePoint[]): any {
     compressPointer = piecePointer;
   }
 
+  return Main();
+}
+
   // step 6
   // https://url.spec.whatwg.org/#concept-ipv6-parser-main
-  Main: while(input[pointer] !== EOF) {
+function  Main() {
+  while(input[pointer] !== EOF) {
     // step 6-1
     if (piecePointer === 8) {
       // TODO: parse error
@@ -247,7 +251,7 @@ function parseIPv6(input: CodePoint[]): any {
       pointer = pointer + 1;
       piecePointer = piecePointer + 1;
       compressPointer = piecePointer;
-      continue Main;
+      return Main();
     }
 
     // step 6-3
@@ -271,6 +275,7 @@ function parseIPv6(input: CodePoint[]): any {
 
       pointer = pointer - len;
       // goto IPv4; // TODO
+      IPv4();
     case 58: // ":"
       pointer = pointer + 1;
       if (input[pointer] === EOF) {
@@ -295,10 +300,14 @@ function parseIPv6(input: CodePoint[]): any {
   // step 7
   if (input[pointer] === EOF) {
     // goto Finale; // TODO
+    return Finale();
   }
 
+  return IPv4();
+}
+
   // step 8
-  IPv4:
+function  IPv4() {
   if (piecePointer > 6) {
     // TODO: parse error
     return "failure";
@@ -374,8 +383,11 @@ function parseIPv6(input: CodePoint[]): any {
     dotsSeen = dotsSeen + 1;
   }
 
+  return Finale();
+}
+
   // step 11
-  Finale:
+function Finale() {
   if (compressPointer !== null) {
     // step 11-1
     var swaps = piecePointer - compressPointer;
