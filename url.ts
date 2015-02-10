@@ -271,7 +271,7 @@ function parseIPv6(input: CodePoint[]): any {
       }
 
       pointer = pointer - len;
-      // continue IPv4 // TODO
+      goto IPv4; // TODO
     case 58: // ":"
       pointer = pointer + 1;
       if (c === EOF) {
@@ -295,7 +295,7 @@ function parseIPv6(input: CodePoint[]): any {
 
   // step 7
   if (c === EOF) {
-    // continue Finale
+    goto Finale; // TODO
   }
 
   // step 8
