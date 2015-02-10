@@ -406,13 +406,60 @@ function parseIPv6(input: CodePoint[]): any {
 }
 
 // https://url.spec.whatwg.org/#concept-ipv6-serializer
-function serializeIPv6(adress: string) {
+function serializeIPv6(address: []number) {
   // step 1
   var output = "";
 
-  // step 2
+  // step 2, 3
+  function find(arr) {
+    arr.push(1); // append 1 for end of input
 
-  // step 3
+    var pos = -1; // current seq of 0 position
+    var acc = 0;  // sum of 0
+    var result = { pos: -1, acc: 0 }; // current max result
+    for (var i=0; i<arr.length; i++) {
+      if (arr[i] === 0) {
+        if (pos === -1) {
+          // start of 0 seq
+          pos = i;
+        }
+        acc ++;
+      } else {
+        if (acc > 0) {
+          if (result.acc < acc) {
+            // update result
+            result = { pos: pos, acc: acc };
+          }
+          // clear
+          acc = 0;
+          pos = -1;
+        }
+      }
+    }
+
+    return result.acc > 1? result.pos: null;
+  }
+  var compressPointer = find(address);
+
+  // step 4
+  address.forEach((piece: number, index: number) => {
+    // step 4-1
+    if (compressPointer === index) {
+      if (index === 0) {
+        output = "::";
+      } else {
+        output = ":";
+      }
+    }
+
+    // step 4-2
+
+    // step 4-3
+    if (index !== address.length) {
+      output = output + ":";
+    }
+
+  });
 
 }
 
