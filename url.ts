@@ -209,10 +209,9 @@ function parseIPv6(input: CodePoint[]): any {
 
   // step 4
   var pointer: number = 0;
-  var c: number = input[pointer];
 
   // step 5
-  if (c === 58) { // :
+  if (input[pointer] === 58) { // :
     // step 5-1
     if (input[pointer+1] !== 58) { // :
       // TODO: parse error
@@ -229,7 +228,7 @@ function parseIPv6(input: CodePoint[]): any {
 
   // step 6
   // https://url.spec.whatwg.org/#concept-ipv6-parser-main
-  Main: while(c !== EOF) {
+  Main: while(input[pointer] !== EOF) {
     // step 6-1
     if (piecePointer === 8) {
       // TODO: parse error
@@ -237,7 +236,7 @@ function parseIPv6(input: CodePoint[]): any {
     }
 
     // step 6-2
-    if (c === 58) { // :
+    if (input[pointer] === 58) { // :
       // step 6-2-1
       if (compressPointer !== null) {
         // TODO: parse error
@@ -256,14 +255,14 @@ function parseIPv6(input: CodePoint[]): any {
     var len = 0; // length
 
     // step 6-4
-    while (len < 4 && isASCIIHexDigits(c)) {
-      value = value * 0x10 + parseInt(String.fromCodePoint(c), 16);
+    while (len < 4 && isASCIIHexDigits(input[pointer])) {
+      value = value * 0x10 + parseInt(String.fromCodePoint(input[pointer]), 16);
       pointer = pointer + 1;
       len = len + 1;
     }
 
     // step 6-5
-    switch (c) {
+    switch (input[pointer]) {
     case 46: // "."
       if (len === 0) {
         // TODO: parse error
@@ -271,15 +270,15 @@ function parseIPv6(input: CodePoint[]): any {
       }
 
       pointer = pointer - len;
-      goto IPv4; // TODO
+      // goto IPv4; // TODO
     case 58: // ":"
       pointer = pointer + 1;
-      if (c === EOF) {
+      if (input[pointer] === EOF) {
         // TODO: parse error
         return "failure";
       }
     default:
-      if (c === EOF) {
+      if (input[pointer] === EOF) {
         break;
       }
       // TODO: parse error
@@ -294,8 +293,8 @@ function parseIPv6(input: CodePoint[]): any {
   }
 
   // step 7
-  if (c === EOF) {
-    goto Finale; // TODO
+  if (input[pointer] === EOF) {
+    // goto Finale; // TODO
   }
 
   // step 8
@@ -309,22 +308,22 @@ function parseIPv6(input: CodePoint[]): any {
   var dotsSeen = 0;
 
   // step 10
-  while(c !== EOF) {
+  while(input[pointer] !== EOF) {
     // step 10-1
     var value: number = null;
 
     // step 10-2
-    if (!isASCIIDigits(c)) {
+    if (!isASCIIDigits(input[pointer])) {
       // TODO: parse error
       return "failure";
     }
 
     // step 10-3
-    while (isASCIIDigits(c)) {
-      c = input[pointer];
+    while (isASCIIDigits(input[pointer])) {
+      input[pointer] = input[pointer];
 
       // step 10-3-1
-      var num: number = parseInt(String.fromCodePoint(c), 10); // number
+      var num: number = parseInt(String.fromCodePoint(input[pointer]), 10); // number
 
       // step 10-3-2
       if (value === null) {
@@ -349,7 +348,7 @@ function parseIPv6(input: CodePoint[]): any {
     }
 
     // step 10-4
-    if (dotsSeen < 3 && c !== 46) { // .
+    if (dotsSeen < 3 && input[pointer] !== 46) { // .
       // TODO: parse error
       return "failure";
     }
@@ -366,7 +365,7 @@ function parseIPv6(input: CodePoint[]): any {
     pointer = pointer + 1;
 
     // step 10-8
-    if (dotsSeen === 3 && c !== EOF) {
+    if (dotsSeen === 3 && input[pointer] !== EOF) {
       // TODO: parse error
       return "failure";
     }
