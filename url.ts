@@ -841,7 +841,7 @@ class jURL implements IURL {
   // https://url.spec.whatwg.org/#constructors
   constructor(url:USVString, base:USVString = "about:blank") {
     // step 1
-    var parsedBase = this.basicURLParser(base);
+    var parsedBase = this.parseBasicURL(base);
 
     // step 2
     if (parsedBase === "failure") {
@@ -849,7 +849,7 @@ class jURL implements IURL {
     }
 
     // step 3
-    var parsedURL = this.basicURLParser(url, parsedBase);
+    var parsedURL = this.parseBasicURL(url, parsedBase);
 
     // step 4
     if (parsedURL === "failure") {
@@ -903,7 +903,7 @@ class jURL implements IURL {
   // https://url.spec.whatwg.org/#concept-url-parser
   private URLParser(input: string, base?: jURL, encodingOverride?: string): any {
     // step 1
-    var url = this.basicURLParser(input, base, encodingOverride);
+    var url = this.parseBasicURL(input, base, encodingOverride);
 
     // step 2
     if (url === "failure") {
@@ -927,7 +927,7 @@ class jURL implements IURL {
   }
 
   // https://url.spec.whatwg.org/#concept-basic-url-parser
-  private basicURLParser(input: string, base?: jURL, encodingOverride?: string, url?: jURL, stateOverride?: State): any {
+  private parseBasicURL(input: string, base?: jURL, encodingOverride?: string, url?: jURL, stateOverride?: State): any {
     // step 1
     if (url === undefined) {
       // step 1-1
