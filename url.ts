@@ -583,7 +583,7 @@ function isASCIIDigits(codePoint: CodePoint): boolean {
 
 // https://url.spec.whatwg.org/#ascii-hex-digits
 function isASCIIHexDigits(codePoint: CodePoint): boolean {
-  return inRange(0x41, codePoint, 0x46) || inRange(0x61, codePoint, 0x66);
+  return isASCIIDigits(codePoint) || inRange(0x41, codePoint, 0x46) || inRange(0x61, codePoint, 0x66);
 }
 
 // https://url.spec.whatwg.org/#ascii-alpha
@@ -1793,7 +1793,7 @@ var t = true, f = false;           [ 'a', 'f', 'z', 'A', 'F', 'Z', '0', '9', '!'
   .map((e) => e.charCodeAt(0))
   .forEach((a, i) => {
     assert(isASCIIDigits(a),       [  f ,  f ,  f ,  f ,  f ,  f ,  t ,  t ,  f ,  f ,  f ][i]);
-    assert(isASCIIHexDigits(a),    [  t ,  t ,  f ,  t ,  t ,  f ,  f ,  f ,  f ,  f ,  f ][i]);
+    assert(isASCIIHexDigits(a),    [  t ,  t ,  f ,  t ,  t ,  f ,  t ,  t ,  f ,  f ,  f ][i]);
     assert(isASCIIAlpha(a),        [  t ,  t ,  t ,  t ,  t ,  t ,  f ,  f ,  f ,  f ,  f ][i]);
     assert(isASCIIAlphaNumeric(a), [  t ,  t ,  t ,  t ,  t ,  t ,  t ,  t ,  f ,  f ,  f ][i]);
     assert(isURLCodePoint(a),      [  t ,  t ,  t ,  t ,  t ,  t ,  t ,  t ,  t ,  t ,  f ][i]);
