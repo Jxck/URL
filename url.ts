@@ -226,12 +226,12 @@ function parseIPv6(input: CodePoint[]): any {
     compressPointer = piecePointer;
   }
 
-  return Main();
+  return Main(address, input, pointer, piecePointer, compressPointer);
 }
 
   // step 6
   // https://url.spec.whatwg.org/#concept-ipv6-parser-main
-function  Main() {
+function Main(address, input, pointer, piecePointer, compressPointer) {
   while(input[pointer] !== EOF) {
     // step 6-1
     if (piecePointer === 8) {
@@ -251,7 +251,7 @@ function  Main() {
       pointer = pointer + 1;
       piecePointer = piecePointer + 1;
       compressPointer = piecePointer;
-      return Main();
+      return Main(address, input, pointer, piecePointer, compressPointer);
     }
 
     // step 6-3
@@ -275,13 +275,14 @@ function  Main() {
 
       pointer = pointer - len;
       // goto IPv4; // TODO
-      IPv4();
+      return IPv4(address, input, pointer, piecePointer, compressPointer);
     case 58: // ":"
       pointer = pointer + 1;
       if (input[pointer] === EOF) {
         // TODO: parse error
         return "failure";
       }
+      break;
     default:
       if (input[pointer] === EOF) {
         break;
@@ -291,7 +292,8 @@ function  Main() {
     }
 
     // step 6-6
-    piece = value;
+    // piece
+    address[piecePointer] = value;
 
     // step 6-7
     piecePointer = piecePointer + 1;
@@ -300,14 +302,14 @@ function  Main() {
   // step 7
   if (input[pointer] === EOF) {
     // goto Finale; // TODO
-    return Finale();
+    return Finale(address, input, pointer, piecePointer, compressPointer);
   }
 
-  return IPv4();
+  return IPv4(address, input, pointer, piecePointer, compressPointer);
 }
 
   // step 8
-function  IPv4() {
+function  IPv4(address, input, pointer, piecePointer, compressPointer) {
   if (piecePointer > 6) {
     // TODO: parse error
     return "failure";
@@ -363,7 +365,7 @@ function  IPv4() {
     }
 
     // step 10-5
-    piece = piece * 0x100 + value;
+    address[piecePointer] = address[piecePointer] * 0x100 + value;
 
     // step 10-6
     if (dotsSeen === 1 || dotsSeen === 3) {
@@ -383,11 +385,11 @@ function  IPv4() {
     dotsSeen = dotsSeen + 1;
   }
 
-  return Finale();
+  return Finale(address, input, pointer, piecePointer, compressPointer);
 }
 
-  // step 11
-function Finale() {
+// step 11
+function Finale(address, input, pointer, piecePointer, compressPointer) {
   if (compressPointer !== null) {
     // step 11-1
     var swaps = piecePointer - compressPointer;
@@ -397,8 +399,8 @@ function Finale() {
 
     // step 11-3
     while (piecePointer !== 0 && swaps > 0) {
-      var tmp = piece;
-      piece = address[compressPointer + swaps - 1];
+      var tmp = address[piecePointer];
+      address[piecePointer] = address[compressPointer + swaps - 1];
       address[compressPointer + swaps - 1] = tmp;
 
       piecePointer = piecePointer - 1;
@@ -448,6 +450,7 @@ function serializeIPv6(address: number[]) {
       }
     }
 
+    arr.pop(); // remove 1 added at top of this function
     return result.acc > 1? result.pos: null;
   }
   var compressPointer = find(address);
@@ -459,9 +462,9 @@ function serializeIPv6(address: number[]) {
     // step 4-1
     if (compressPointer === index) {
       if (index === 0) {
-        output = "::";
+        output = output + "::";
       } else {
-        output = ":";
+        output = output + ":";
       }
 
       while(address[index+1] === 0) {
@@ -474,7 +477,7 @@ function serializeIPv6(address: number[]) {
     output = output + piece.toString(16);
 
     // step 4-3
-    if (index !== address.length) {
+    if (index !== address.length - 1) {
       output = output + ":";
     }
   };
@@ -1827,3 +1830,12 @@ assert([1,2,3].includes(2), true);
 assert([1,2,3].includes(-1), false);
 
 new jURL('http://user:password@example.com');
+
+[
+//["2001:0db8:bd05:01d2:288a:1fc0:0001:10ee", "2001:db8:bd05:1d2:288a:1fc0:1:10ee"],
+//["2001:db8:0:1", "2001:db8::1"]
+].forEach((test) => {
+  assert(serializeIPv6(parseIPv6(obtainUnicode(test[0]))), test[1]);
+});
+
+console.log(serializeIPv6(parseIPv6(obtainUnicode("2001:db8:0:1"))));
