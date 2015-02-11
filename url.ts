@@ -4,6 +4,7 @@
 /// <reference path="types/utf8-encoding.d.ts" />
 /// <reference path="types/urlsearchparams.d.ts" />
 
+// TODO: Fixme does not exist on type 'string'... ?
 interface String {
   codePoint(): number;
 }
