@@ -766,7 +766,7 @@ class jURL implements IURL {
   private encoding:    string ; // support utf-8 only
 
   // https://url.spec.whatwg.org/#concept-urlutils-query-object
-  private queryObject: typeof URLSearchParams = null;
+  queryObject: typeof URLSearchParams = null;
 
   // https://url.spec.whatwg.org/#concept-urlutils-url
   private url:         jURL = null;
@@ -814,6 +814,9 @@ class jURL implements IURL {
   pathname:     USVString;
   search:       USVString;
   searchParams: typeof URLSearchParams;
+
+  // https://url.spec.whatwg.org/#concept-urlutils-query-encoding
+  queryEncoding: string;
 
   get hash(): USVString {
     return this._hash;
@@ -892,11 +895,11 @@ class jURL implements IURL {
         // step 2-3-1
         this.input = input;
 
-        // step 2-3-2
-        var url = this.parseURL(input, this.base(), this.queryEncodeing());
-
-        // step 2-3-3
-        if (url !== "failure") {
+        try {
+          // step 2-3-2
+          var url = this.parseURL(input, this.base, this.queryEncoding);
+        } catch(failure) {
+          // step 2-3-3
           this.url = url;
         }
       }
@@ -904,26 +907,26 @@ class jURL implements IURL {
 
     // setp 3
     var query: string;
-    if (url !== null && ur.query !== null) {
+    if (url !== null && url.query !== null) {
       query = url.query;
     } else {
       query = "";
     }
 
     // step 4
-    if (queryObject === null) {
-      queryObject = new URLSearchParams(query);
-      queryObject.urlObjects = this; // context object ?
+    if (this.queryObject === null) {
+      this.queryObject = new URLSearchParams(query);
+      // this.queryObject.urlObjects = this; // context object ?
     }
 
     // step 5
     else {
-      queryObject.list = parsing(query);
+    // this.queryObject.list = parsing(query);
     }
   }
 
   // https://url.spec.whatwg.org/#concept-url-parser
-  private parseURL(input: string, base?: jURL, encodingOverride?: string): any {
+  private parseURL(input: string, base?: jURL, encodingOverride?: string): jURL {
     try {
       // step 1
       var url = this.parseBasicURL(input, base, encodingOverride);
