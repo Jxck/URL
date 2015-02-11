@@ -533,6 +533,24 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
   }
 }
 
+// https://url.spec.whatwg.org/#concept-host-serializer
+function serializeHost(host: string): string {
+  // step 1
+  if (host === null) {
+    return "";
+  }
+
+  // step 2
+  if (isIPv6(host)) {
+    return "[" + serializeIPv6(obtainUnicode(host)) + "]";
+  }
+
+  // step 3
+  else if(isDomain(host)) {
+    return host;
+  }
+}
+
 /**
  * Encode Set
  */
@@ -1729,7 +1747,7 @@ class jURL implements IURL {
       }
 
       // step 2-3
-      output = output + this.serializeHost(url.host);
+      output = output + serializeHost(url.host);
 
       // step 2-4
       if (url.port !== "") {
@@ -1759,29 +1777,6 @@ class jURL implements IURL {
     return output;
   }
 
-  // https://url.spec.whatwg.org/#concept-host-serializer
-  private serializeHost(host: string): string {
-    // step 1
-    if (host === null) {
-      return "";
-    }
-
-    // step 2
-    if (isIPv6(host)) {
-      return "[" + this.serializeIPv6(host) + "]";
-    }
-
-    // step 3
-    else if(isDomain(host)) {
-      return host;
-    }
-  }
-
-  // https://url.spec.whatwg.org/#concept-ipv6-serializer
-  private serializeIPv6(adress: string): string {
-    // TODO
-    return null;
-  }
 }
 
 
