@@ -840,19 +840,19 @@ class jURL implements IURL {
 
   // https://url.spec.whatwg.org/#constructors
   constructor(url:USVString, base:USVString = "about:blank") {
-    // step 1
-    var parsedBase = this.parseBasicURL(base);
-
-    // step 2
-    if (parsedBase === "failure") {
+    try {
+      // step 1
+      var parsedBase = this.parseBasicURL(base);
+    } catch(failure) {
+      // step 2
       throw new TypeError("invalid url");
     }
 
-    // step 3
-    var parsedURL = this.parseBasicURL(url, parsedBase);
-
-    // step 4
-    if (parsedURL === "failure") {
+    try {
+      // step 3
+      var parsedURL = this.parseBasicURL(url, parsedBase);
+    } catch(failure) {
+      // step 4
       throw new TypeError("invalid url");
     }
 
@@ -893,21 +893,43 @@ class jURL implements IURL {
         this.input = input;
 
         // step 2-3-2
+        var url = this.parseURL(input, this.base(), this.queryEncodeing());
+
+        // step 2-3-3
+        if (url !== "failure") {
+          this.url = url;
+        }
       }
+    }
 
+    // setp 3
+    var query: string;
+    if (url !== null && ur.query !== null) {
+      query = url.query;
+    } else {
+      query = "";
+    }
 
+    // step 4
+    if (queryObject === null) {
+      queryObject = new URLSearchParams(query);
+      queryObject.urlObjects = this; // context object ?
+    }
 
+    // step 5
+    else {
+      queryObject.list = parsing(query);
     }
   }
 
   // https://url.spec.whatwg.org/#concept-url-parser
-  private URLParser(input: string, base?: jURL, encodingOverride?: string): any {
-    // step 1
-    var url = this.parseBasicURL(input, base, encodingOverride);
-
-    // step 2
-    if (url === "failure") {
-      return "failure";
+  private parseURL(input: string, base?: jURL, encodingOverride?: string): any {
+    try {
+      // step 1
+      var url = this.parseBasicURL(input, base, encodingOverride);
+    } catch(failure) {
+      // step 2
+      throw failure;
     }
 
     // step 3
@@ -927,7 +949,7 @@ class jURL implements IURL {
   }
 
   // https://url.spec.whatwg.org/#concept-basic-url-parser
-  private parseBasicURL(input: string, base?: jURL, encodingOverride?: string, url?: jURL, stateOverride?: State): any {
+  private parseBasicURL(input: string, base?: jURL, encodingOverride?: string, url?: jURL, stateOverride?: State): jURL {
     // step 1
     if (url === undefined) {
       // step 1-1
@@ -1092,7 +1114,7 @@ class jURL implements IURL {
       case State.NoSchemeState:
         if (base === null || !isRelativeScheme(base.scheme)) {
           // TODO: parse error
-          return "failure";
+          throw new Error("failure");
         }
 
         else {
@@ -1356,7 +1378,7 @@ class jURL implements IURL {
 
             // step 1-3-2
             if (host === "failure") {
-              return "failure";
+              throw new Error("failure");
             }
 
             // step 1-3-3
@@ -1389,7 +1411,7 @@ class jURL implements IURL {
 
           // step 1-2
           if (host === "failure") {
-            return "failure";
+            throw new Error("failure");
           }
 
           // step 1-3
@@ -1410,7 +1432,7 @@ class jURL implements IURL {
 
           // step 2-2
           if (host === "failure") {
-            return "failure";
+            throw new Error("failure");
           }
 
           // step 2-3
@@ -1494,7 +1516,7 @@ class jURL implements IURL {
         // step 4
         else {
           // TODO: parse error
-          return "failure";
+          throw new Error("failure");
         }
 
         break;
