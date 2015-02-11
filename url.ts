@@ -187,16 +187,6 @@ function percentDecode(input: CodePoint[]): CodePoint[] {
   return output;
 }
 
-function domainToUnicode(input: string): string {
- // TODO: imple
-  return input;
-}
-
-function domainToASCII(input: string): string {
- // TODO: imple
-  return input;
-}
-
 // https://url.spec.whatwg.org/#concept-ipv6-parser
 function parseIPv6(input: CodePoint[]): any {
 
@@ -496,9 +486,9 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
   }
 
   // step 2
-  if (input[0] === 91) {
+  if (input[0] === 91) { // [
     // step 2-1
-    if (input[input.length-1] !== 93) {
+    if (input[input.length-1] !== 93) { // ]
       // TODO: parse error
       return "failure";
     }
@@ -511,7 +501,7 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
   var domain: string = decode(percentDecode(encode(input)));
 
   // step 4
-  var asciiDomain: string = domainToASCII(domain);
+  var asciiDomain: string = jURL.domainToASCII(domain);
 
   // step 5
   if (asciiDomain === "failure") {
@@ -529,7 +519,7 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
   if (unicodeFlag) { // TODO: sent a bug to clearify default flag, so follow to update spec.
     return asciiDomain;
   } else {
-    return domainToUnicode(asciiDomain);
+    return jURL.domainToUnicode(asciiDomain);
   }
 }
 
