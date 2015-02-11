@@ -1830,6 +1830,10 @@ assert([1,2,3].includes(-1), false);
 new jURL('http://user:password@example.com');
 
 // http://www.gestioip.net/docu/ipv6_address_examples.html
+// TODO: https://bitbucket.org/kwi/py2-ipaddress/src/991cf901295a14e77c795691afbec552461865f0/test_ipaddress.py?at=default
+// TODO: https://github.com/golang/go/blob/master/src/net/ip_test.go
+// TODO: https://github.com/ruby/ruby/blob/trunk/test/test_ipaddr.rb
+// TODO: http://search.cpan.org/~luismunoz/NetAddr-IP-4.007/MANIFEST
 [
 ["2001:0db8:0a0b:12f0:0000:0000:0000:0001", "2001:db8:a0b:12f0::1"],
 ["3731:54:65fe:2::a7", "3731:54:65fe:2::a7"],
