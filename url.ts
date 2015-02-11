@@ -8,14 +8,16 @@ interface String {
   codePoint(): number;
 }
 
-Object.defineProperty(String.prototype, 'codePoint', {
-  enumerable: false,
-  configurable: false,
-  writable: false,
-  value: function(): number[] {
-    return obtainUnicode(this);
-  }
-});
+if (String.prototype.codePoint === undefined) {
+  Object.defineProperty(String.prototype, 'codePoint', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: function(): number[] {
+      return obtainUnicode(this);
+    }
+  });
+}
 
 // polyfill for String.fromCodePoint
 declare var String: {
@@ -1857,3 +1859,4 @@ new jURL('http://user:password@example.com');
   assert(serializeIPv6(parseIPv6(obtainUnicode(test[0]))), test[1]);
 });
 
+console.log(new jURL("http://example.com/a"));
