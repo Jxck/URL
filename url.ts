@@ -1131,6 +1131,60 @@ class jURL implements IURL {
     // return url;
   }
 
+  // https://url.spec.whatwg.org/#concept-url-serializer
+  private serializeURL(url: jURL, excludeFragmentFlag?: boolean): string {
+    // step 1
+    var output = url.scheme + ":";
+
+    // step 2
+    if (url.relativeFlag === true) {
+      // step 2-1
+      output = output + "//";
+
+      // step 2-2
+      if (url.username !== "" || url.password !== null) {
+        // step 2-2-1
+        output = output + url.username;
+
+        // step 2-2-2
+        if (url.password !== null) {
+          output = output + ":" + url.password;
+        }
+
+        // step 2-2-3
+        output = output + "@";
+      }
+
+      // step 2-3
+      output = output + serializeHost(url.host);
+
+      // step 2-4
+      if (url.port !== "") {
+        output = output + ":" + url.port;
+      }
+
+      // step 2-5
+      output = output + "/" + url.path.join("/");
+    }
+
+    // step 3
+    else if (url.relativeFlag === false) {
+      output = output + url.schemeData;
+    }
+
+    // step 4
+    if (url.query !== null) {
+      output = output + "?" + url.query;
+    }
+
+    // step 5
+    if (excludeFragmentFlag === false && url.fragment !== null) {
+      output = output + "#" + url.fragment;
+    }
+
+    return output;
+  }
+
   // https://url.spec.whatwg.org/#concept-basic-url-parser
   private parseBasicURL(input: string, base?: jURL, encodingOverride?: string, url?: jURL, stateOverride?: State): jURL {
     // step 1
