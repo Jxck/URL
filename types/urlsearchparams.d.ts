@@ -1,5 +1,5 @@
 declare module URLSearchParams {
-  interface URLSearchParams {
+  interface IURLSearchParams {
     append(name: USVString, value: USVString): void;
     delete(name: USVString):                   void;
     get(name: USVString):                      USVString;
@@ -8,12 +8,12 @@ declare module URLSearchParams {
     set(name: USVString, value: USVString):    void;
     toString():                                string; // stringifier;
     // iterable<USVString, USVString>;
-  }
+  };
   var URLSearchParams: {
-    prototype: URLSearchParams;
-    new (init?: string): URLSearchParams;
-    new (init?: URLSearchParams): URLSearchParams;
-    new (init?: any): URLSearchParams;
+    prototype: IURLSearchParams;
+    new (init?: string): IURLSearchParams;
+    new (init?: IURLSearchParams): IURLSearchParams;
+    new (init?: any): IURLSearchParams;
   }
 }
 
