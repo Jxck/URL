@@ -945,7 +945,16 @@ class jURL implements IURL {
   private url:         jURL = null;
 
   private _hash:       USVString;
+
+  get hash(): USVString {
+    return this._hash;
+  }
+
   private _origin:     USVString;
+
+  get origin(): USVString {
+    return this._origin;
+  }
 
   // https://url.spec.whatwg.org/#concept-url-scheme
   private scheme:      string = "";
@@ -971,6 +980,10 @@ class jURL implements IURL {
   // https://url.spec.whatwg.org/#concept-urlutils-get-the-base
   private _base: jURL = null;
 
+  get base(): jURL {
+    return this._base;
+  }
+
   protocol:     USVString;
 
   // https://url.spec.whatwg.org/#concept-url-username
@@ -983,26 +996,16 @@ class jURL implements IURL {
   host:         USVString = null;
 
   hostname:     USVString;
-  port:         USVString;
+
+  // https://url.spec.whatwg.org/#concept-url-port
+  port:         USVString = "";
+
   pathname:     USVString;
   search:       USVString;
   searchParams: typeof URLSearchParams;
 
   // https://url.spec.whatwg.org/#concept-urlutils-query-encoding
   queryEncoding: string;
-
-  get hash(): USVString {
-    return this._hash;
-  }
-
-  get origin(): USVString {
-    return this._origin;
-  }
-
-  // https://url.spec.whatwg.org/#concept-urlutils-get-the-base
-  get base(): jURL {
-    return this._base;
-  }
 
   static domainToASCII(domain: string):   string {
     // TODO: implement me
