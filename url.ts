@@ -682,7 +682,7 @@ interface IPair {
 }
 
 // https://url.spec.whatwg.org/#concept-urlencoded-parser
-function URLEncodedParse(input: CodePoint[], encodingOverride?: string, useCharset?: boolean, isIndex?: boolean): IPair[] {
+function parseURLEncoded(input: CodePoint[], encodingOverride?: string, useCharset?: boolean, isIndex?: boolean): IPair[] {
   "use strict";
 
   // step 1
@@ -759,7 +759,7 @@ function URLEncodedParse(input: CodePoint[], encodingOverride?: string, useChars
 }
 
 // https://url.spec.whatwg.org/#concept-urlencoded-serializer
-function URLEncodedSerialize(pairs: IPair[], encodingOverride?: string): string {
+function serializeURLEncoded(pairs: IPair[], encodingOverride?: string): string {
   "use strict";
 
   // step 1
@@ -785,8 +785,8 @@ function URLEncodedSerialize(pairs: IPair[], encodingOverride?: string): string 
     var encodedValue = encoder.encode(outputPair.value);
 
     // step 3-3
-    outputPair.name = URLEncodedByteSerialize(Array.prototype.slice.call(null, encodedName));
-    outputPair.value = URLEncodedByteSerialize(Array.prototype.slice.call(null, encodedValue));
+    outputPair.name = byteSerializeURLEncoded(Array.prototype.slice.call(null, encodedName));
+    outputPair.value = byteSerializeURLEncoded(Array.prototype.slice.call(null, encodedValue));
 
     // step 3-4
     if (index !== 0) {
@@ -802,7 +802,7 @@ function URLEncodedSerialize(pairs: IPair[], encodingOverride?: string): string 
 }
 
 // https://url.spec.whatwg.org/#concept-urlencoded-byte-serializer
-function URLEncodedByteSerialize(input: CodePoint[]): string {
+function byteSerializeURLEncoded(input: CodePoint[]): string {
   "use strict";
 
   // step 1
@@ -1096,8 +1096,13 @@ class jURL implements IURL {
 
     // step 5
     else {
-      // this.queryObject.list = parsing(query);
+      this.queryObject.list.push(this.parse(query));
     }
+  }
+
+  // https://url.spec.whatwg.org/#concept-urlencoded-string-parser
+  private parse(input: string): IPair[] {
+    return parseURLEncoded(Array.prototype.slice.call(encoder.encode(input)));
   }
 
   // https://url.spec.whatwg.org/#concept-url-parser
