@@ -892,9 +892,11 @@ class jURL implements IURL {
         try {
           // step 2-3-2
           var url = this.parseURL(input, this.base, this.queryEncoding);
-        } catch(failure) {
+
           // step 2-3-3
           this.url = url;
+        } catch(failure) {
+          throw failure;
         }
       }
     }
@@ -910,12 +912,12 @@ class jURL implements IURL {
     // step 4
     if (this.queryObject === null) {
       this.queryObject = new URLSearchParams(query);
-      // this.queryObject.urlObjects = this; // context object ?
+      this.queryObject.urlObject.push(this);
     }
 
     // step 5
     else {
-    // this.queryObject.list = parsing(query);
+      // this.queryObject.list = parsing(query);
     }
   }
 
