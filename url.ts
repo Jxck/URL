@@ -64,6 +64,9 @@ if (typeof window === 'undefined') { // in node.js
   TextDecoder = require('utf8-encoding').TextDecoder;
 }
 
+var encoder = new TextEncoder("utf-8");
+var decoder = new TextDecoder();
+
 // import only type info
 var URLSearchParams = require('urlsearchparams').URLSearchParams;
 
@@ -94,6 +97,11 @@ var URLSearchParams = require('urlsearchparams').URLSearchParams;
 type CodePoint = number;
 var EOF: any = undefined;
 
+function copy<T>(obj: T): T {
+  "use strict";
+  return JSON.parse(JSON.stringify(obj));
+}
+
 function toLower(codePoint: CodePoint): CodePoint{
   if (!inRange(65, codePoint, 90)) {
     return codePoint;
@@ -112,18 +120,17 @@ function toString(codePoints: CodePoint[]): string {
   return String.fromCodePoint.apply(null, codePoints);
 }
 
-// TODO:
 function encode(input: CodePoint[], encodingOverride: string = "utf-8"): CodePoint[] {
   if (encodingOverride !== "utf-8") {
     throw new Error("support utf-8 only");
   }
 
-  var encoded: Uint8Array = new TextEncoder("utf-8").encode(toString(input));
+  var encoded: Uint8Array = encoder.encode(toString(input));
   return Array.prototype.slice.call(encoded);
 }
 
 function decode(input: CodePoint[]): string {
-  return new TextDecoder().decode(new Uint8Array(input));
+  return decoder.decode(new Uint8Array(input));
 }
 
 function percentEncode(input: CodePoint[]): CodePoint[] {
@@ -669,6 +676,178 @@ function isDomain(host: string): string {
   return null;
 }
 
+interface IPair {
+  name:  USVString;
+  value: USVString;
+}
+
+// https://url.spec.whatwg.org/#concept-urlencoded-parser
+function URLEncodedParse(input: CodePoint[], encodingOverride?: string, useCharset?: boolean, isIndex?: boolean): IPair[] {
+  "use strict";
+
+  // step 1
+  if (encodingOverride === undefined) {
+    encodingOverride = "utf-8";
+  }
+
+  // step 2
+  if (encodingOverride !== "utf-8") {
+    // omit byte range checking (=<0x7F)
+    throw new Error("unsupported encoding");
+  }
+
+  // step 3
+  var sequences = [];
+  while (true) {
+    var i = input.indexOf(38); // &
+    if (i < 0) {
+      sequences.push(input);
+      break;
+    }
+    sequences.push(input.splice(0, i));
+    input.shift();
+  }
+
+  // step 4
+  if (isIndex === true) {
+    if (sequences[0].indexOf(61) === -1) { // =
+      sequences[0].unshift(61);
+    }
+  }
+
+  // step 5, 6
+  var pairs: IPair[] = sequences.map((bytes: number[]): IPair => {
+    // step 6-1
+    if (bytes.length === 0) return;
+
+    // step 6-2
+    var name, value;
+    var i = bytes.indexOf(61);
+    if (i > 0) { // =
+      name = bytes.splice(0, i);
+      bytes.shift();
+      value = bytes;
+    }
+
+    // step 6-3
+    else {
+      name  = bytes;
+      value = [];
+    }
+
+    // step 4
+    name.map((e: number) => {
+      if (e === 43) { // +
+        e = 0x20;
+      }
+      return e;
+    });
+
+    // step 5
+    if (useCharset && name === "_charset_") {
+      throw new Error("unsupported flug '_charset_'");
+    }
+
+    // step 8 parsent decode
+    name  = decode(percentDecode(name));
+    value = decode(percentDecode(value));
+
+    return { name: name, value: value };
+  });
+
+  return pairs;
+}
+
+// https://url.spec.whatwg.org/#concept-urlencoded-serializer
+function URLEncodedSerialize(pairs: IPair[], encodingOverride?: string): string {
+  "use strict";
+
+  // step 1
+  if (encodingOverride === undefined) {
+    encodingOverride = "utf-8";
+  }
+
+  // this imeplementation support only utf-8
+  if (encodingOverride !== "utf-8") {
+    throw new Error("unsupported encoding");
+  }
+
+  // step 2
+  var output = "";
+
+  // step 3
+  pairs.forEach((pair: IPair, index: number) => {
+    // step 3-1
+    var outputPair = copy(pair);
+
+    // step 3-2
+    var encodedName = encoder.encode(outputPair.name);
+    var encodedValue = encoder.encode(outputPair.value);
+
+    // step 3-3
+    outputPair.name = URLEncodedByteSerialize(Array.prototype.slice.call(null, encodedName));
+    outputPair.value = URLEncodedByteSerialize(Array.prototype.slice.call(null, encodedValue));
+
+    // step 3-4
+    if (index !== 0) {
+      output += "&";
+    }
+
+    // step 3-5
+    output += `${outputPair.name}=${outputPair.value}`;
+  });
+
+  // step 4
+  return output;
+}
+
+// https://url.spec.whatwg.org/#concept-urlencoded-byte-serializer
+function URLEncodedByteSerialize(input: CodePoint[]): string {
+  "use strict";
+
+  // step 1
+  var output: CodePoint[] = [];
+
+  // step 2
+  for (var i = 0; i < input.length; i++) {
+    var byt = input[i];
+    if (byt === 0x20) {
+      output.push(0x2B);
+      continue;
+    }
+
+    if ([0x2A, 0x2D, 0x2E].indexOf(byt) !== -1) {
+      output.push(byt);
+      continue;
+    }
+
+    if (0x30 <= byt && byt <= 0x39) {
+      output.push(byt);
+      continue;
+    }
+
+    if (0x41 <= byt && byt <= 0x5A) {
+      output.push(byt);
+      continue;
+    }
+
+    if (byt === 0x5F) {
+      output.push(byt);
+      continue;
+    }
+
+    if (0x61 <= byt && byt <= 0x7A) {
+      output.push(byt);
+      continue;
+    }
+
+    // otherwise
+    output = output.concat(percentEncode([byt]));
+  }
+
+  // step 3
+  return toString(output);
+}
 
 //[NoInterfaceObject, Exposed=(Window,Worker)]
 // interface URLUtilsReadOnly {
