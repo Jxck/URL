@@ -2,7 +2,6 @@
 /// <reference path="types/array.d.ts" />
 /// <reference path="types/obtain-unicode.d.ts" />
 /// <reference path="types/utf8-encoding.d.ts" />
-/// <reference path="types/urlsearchparams.d.ts" />
 
 // TODO: Fixme does not exist on type 'string'... ?
 interface String {
@@ -66,12 +65,7 @@ if (typeof window === 'undefined') { // in node.js
 }
 
 // import only type info
-import usp = require('urlsearchparams');
-
-var URLSearchParams: typeof usp.URLSearchParams;
-if (typeof window === 'undefined') { // in node.js
-  URLSearchParams = require('urlsearchparams').URLSearchParams;
-}
+var URLSearchParams = require('urlsearchparams').URLSearchParams;
 
 // MEMO: code point
 // ",  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,   -,  .,  /
