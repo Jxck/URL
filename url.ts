@@ -880,9 +880,10 @@ function byteSerializeURLEncoded(input: CodePoint[]): string {
 //           attribute USVString hash;
 //};
 interface URLUtils {
-  hash:         USVString; // stringifier
+  href:         USVString; // stringifier
 
   origin:       USVString; // readonly
+
   protocol:     USVString;
   username:     USVString;
   password:     USVString;
@@ -892,6 +893,7 @@ interface URLUtils {
   pathname:     USVString;
   search:       USVString;
   searchParams: typeof URLSearchParams;
+  hash:         USVString;
 }
 
 //[Constructor(USVString url, optional USVString base = "about:blank"), Exposed=(Window,Worker)]
@@ -982,6 +984,13 @@ class jURL implements IURL {
 
   get base(): jURL {
     return this._base;
+  }
+
+  get href(): string {
+    if (this.url === null) {
+      return this.input;
+    }
+    return this.serializeURL(this.url);
   }
 
   protocol:     USVString;
