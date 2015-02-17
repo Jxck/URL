@@ -208,7 +208,7 @@ function parseIPv6(input: CodePoint[]): any {
   if (input[pointer] === 58) { // :
     // step 5-1
     if (input[pointer+1] !== 58) { // :
-      // TODO: parse error
+      console.error("parse error");
       return "failure";
     }
 
@@ -229,7 +229,7 @@ function Main(address, input, pointer, piecePointer, compressPointer) {
   while(input[pointer] !== EOF) {
     // step 6-1
     if (piecePointer === 8) {
-      // TODO: parse error
+      console.error("parse error");
       return "failure";
     }
 
@@ -237,7 +237,7 @@ function Main(address, input, pointer, piecePointer, compressPointer) {
     if (input[pointer] === 58) { // :
       // step 6-2-1
       if (compressPointer !== null) {
-        // TODO: parse error
+        console.error("parse error");
         return "failure";
       }
 
@@ -263,7 +263,7 @@ function Main(address, input, pointer, piecePointer, compressPointer) {
     switch (input[pointer]) {
     case 46: // "."
       if (len === 0) {
-        // TODO: parse error
+        console.error("parse error");
         return "failure";
       }
 
@@ -273,7 +273,7 @@ function Main(address, input, pointer, piecePointer, compressPointer) {
     case 58: // ":"
       pointer = pointer + 1;
       if (input[pointer] === EOF) {
-        // TODO: parse error
+        console.error("parse error");
         return "failure";
       }
       break;
@@ -281,7 +281,7 @@ function Main(address, input, pointer, piecePointer, compressPointer) {
       if (input[pointer] === EOF) {
         break;
       }
-      // TODO: parse error
+      console.error("parse error");
       return "failure";
     }
 
@@ -305,7 +305,7 @@ function Main(address, input, pointer, piecePointer, compressPointer) {
   // step 8
 function  IPv4(address, input, pointer, piecePointer, compressPointer) {
   if (piecePointer > 6) {
-    // TODO: parse error
+    console.error("parse error");
     return "failure";
   }
 
@@ -319,7 +319,7 @@ function  IPv4(address, input, pointer, piecePointer, compressPointer) {
 
     // step 10-2
     if (!isASCIIDigits(input[pointer])) {
-      // TODO: parse error
+      console.error("parse error");
       return "failure";
     }
 
@@ -335,7 +335,7 @@ function  IPv4(address, input, pointer, piecePointer, compressPointer) {
         value = num;
       }
       else if (value === 0) {
-        // TODO: parse error
+        console.error("parse error");
         return "failure";
       }
       else {
@@ -347,14 +347,14 @@ function  IPv4(address, input, pointer, piecePointer, compressPointer) {
 
       // step 10-3-4
       if (value > 255) {
-        // TODO: parse error
+        console.error("parse error");
         return "failure";
       }
     }
 
     // step 10-4
     if (dotsSeen < 3 && input[pointer] !== 46) { // .
-      // TODO: parse error
+      console.error("parse error");
       return "failure";
     }
 
@@ -371,7 +371,7 @@ function  IPv4(address, input, pointer, piecePointer, compressPointer) {
 
     // step 10-8
     if (dotsSeen === 3 && input[pointer] !== EOF) {
-      // TODO: parse error
+      console.error("parse error");
       return "failure";
     }
 
@@ -404,7 +404,7 @@ function Finale(address, input, pointer, piecePointer, compressPointer) {
 
   // step 12
   else if (compressPointer !== null && piecePointer !== 8) {
-    // TODO: parse error
+    console.error("parse error");
     return "failure";
   }
 
@@ -490,7 +490,7 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
   if (input[0] === 91) { // [
     // step 2-1
     if (input[input.length-1] !== 93) { // ]
-      // TODO: parse error
+      console.error("parse error");
       return "failure";
     }
 
@@ -1241,7 +1241,7 @@ class jURL implements IURL {
 
         // step 3
         else {
-          // TODO: parse error;
+          console.error("parse error");
           return; // TODO: terminate
         }
 
@@ -1308,7 +1308,7 @@ class jURL implements IURL {
 
         // step 5
         else {
-          // TODO: parse error
+          console.error("parse error");
           return; // TODO: terminate
         }
 
@@ -1332,14 +1332,14 @@ class jURL implements IURL {
         else {
           // step 3-1
           if (isNaN(c) && !isURLCodePoint(c) && c !== 37) { // %
-            // TODO: parse error
+            console.error("parse error");
           }
 
           // step 3-2
           if (c === 37 // %
            && isASCIIHexDigits(encodedInput[pointer+1])
            && isASCIIHexDigits(encodedInput[pointer+2])) {
-              // TODO: parse error
+              console.error("parse error");
           }
 
           // step 3-3
@@ -1353,7 +1353,7 @@ class jURL implements IURL {
       // https://url.spec.whatwg.org/#no-scheme-state
       case State.NoSchemeState:
         if (base === null || !isRelativeScheme(base.scheme)) {
-          // TODO: parse error
+          console.error("parse error");
           throw new Error("failure");
         }
 
@@ -1372,7 +1372,7 @@ class jURL implements IURL {
         }
 
         else {
-          // TODO: parse error
+          console.error("parse error");
           state = State.RelativeState;
           pointer = pointer - 1;
         }
@@ -1392,7 +1392,7 @@ class jURL implements IURL {
         case 92: // \
           // step 1
           if (c === 97) { // \
-            // TODO: parse error
+            console.error("parse error");
           }
 
           // step 2
@@ -1455,7 +1455,7 @@ class jURL implements IURL {
         if ([47, 92].includes(c)) { // /, \
           // step 1
           if (c === 92) { // \
-            // TODO: parse error
+            console.error("parse error");
           }
 
           // step 2
@@ -1489,7 +1489,7 @@ class jURL implements IURL {
           state = State.AuthoritySecondSlashState;
         }
         else {
-          // TODO: parse error
+          console.error("parse error");
           state = State.AuthorityIgnoreSlashesState;
           pointer = pointer - 1;
         }
@@ -1502,7 +1502,7 @@ class jURL implements IURL {
           state = State.AuthorityIgnoreSlashesState;
         }
         else {
-          // TODO: parse error
+          console.error("parse error");
           state = State.AuthorityIgnoreSlashesState;
           pointer = pointer - 1;
         }
@@ -1517,7 +1517,7 @@ class jURL implements IURL {
         }
 
         else {
-          // TODO: parse error
+          console.error("parse error");
         }
 
         break;
@@ -1529,7 +1529,7 @@ class jURL implements IURL {
 
           // step 1-1
           if (flagAt === true) {
-            // TODO: parse error
+            console.error("parse error");
             buffer = [37, 52, 48].concat(buffer); // %40
           }
 
@@ -1542,13 +1542,13 @@ class jURL implements IURL {
 
             // step 1-3-1
             if ([0x9, 0xA, 0xD].includes(cp)) {
-              // TODO: parse error
+              console.error("parse error");
               continue;
             }
 
             // step 1-3-2
             if (!isURLCodePoint(cp) && cp !== 37) {
-              // TODO: parse error
+              console.error("parse error");
             }
 
             // step 1-3-3
@@ -1556,7 +1556,7 @@ class jURL implements IURL {
              && isASCIIHexDigits(buffer[i+1])
              && isASCIIHexDigits(buffer[i+2])
             ) {
-                // TODO: parse error
+                console.error("parse error");
             }
 
             // step 1-3-4
@@ -1630,7 +1630,7 @@ class jURL implements IURL {
 
         // step 2
         else if ([0x9, 0xA, 0xD].includes(c)) {
-          // TODO parse error
+          console.error("parse error");
         }
 
         // step 3
@@ -1688,7 +1688,7 @@ class jURL implements IURL {
 
         // step 3
         else if ([0x9, 0xA, 0xD].includes(c)) {
-          // TODO: parse error
+          console.error("parse error");
         }
 
         // step 4
@@ -1750,12 +1750,12 @@ class jURL implements IURL {
 
         // step 3
         else if ([0x9, 0xA, 0xD].includes(c)) {
-          // TODO: parse error
+          console.error("parse error");
         }
 
         // step 4
         else {
-          // TODO: parse error
+          console.error("parse error");
           throw new Error("failure");
         }
 
@@ -1766,7 +1766,7 @@ class jURL implements IURL {
 
         // step 1
         if (c === 92) {
-          // TODO: parse error
+          console.error("parse error");
         }
 
         // step 2
@@ -1785,7 +1785,7 @@ class jURL implements IURL {
 
           // step 1-1
           if (c === 92) {
-            // TODO: parse error
+            console.error("parse error");
           }
 
           var table: { [index:string]: CodePoint[] } = {
@@ -1847,21 +1847,21 @@ class jURL implements IURL {
 
         // step 2
         else if ([0x9, 0xA, 0xD].includes(c)) {
-          // TODO:  parse error
+          console.error("parse error");
         }
 
         // step 3
         else {
           // step 3-1
           if (!isURLCodePoint(c) && c !== 37) {
-            // TODO: parse error
+            console.error("parse error");
           }
 
           // step 3-2
           if (c === 37 // %
            && isASCIIHexDigits(encodedInput[pointer+1])
            && isASCIIHexDigits(encodedInput[pointer+2])) {
-              // TODO: parse error
+              console.error("parse error");
           }
 
           // step 3-3
@@ -1911,21 +1911,21 @@ class jURL implements IURL {
 
         // step 2
         else if ([0x9, 0xA, 0xD].includes(c)) {
-          // TODO: parse error
+          console.error("parse error");
         }
 
         // step 3
         else {
           // step 3-1
           if (!isURLCodePoint(c) && c !== 37) {
-            // TODO: parse error
+            console.error("parse error");
           }
 
           // step 3-2
           if (c === 37 // %
            && isASCIIHexDigits(encodedInput[pointer+1])
            && isASCIIHexDigits(encodedInput[pointer+2])) {
-              // TODO: parse error
+              console.error("parse error");
           }
 
           // step 3-3
@@ -1941,7 +1941,7 @@ class jURL implements IURL {
           case 0x0009:
           case 0x000A:
           case 0x000D:
-            // TODO: parse error
+            console.error("parse error");
           default:
             if (isNaN(c)) {
               // TODO: do nothing
@@ -1950,14 +1950,14 @@ class jURL implements IURL {
 
             // step 1
             if (!isURLCodePoint(c) && c !== 37) { // %
-              // TODO: parse error
+              console.error("parse error");
             }
 
             // step 2
             if (c === 37 // %
              && isASCIIHexDigits(encodedInput[pointer+1])
              && isASCIIHexDigits(encodedInput[pointer+2])) {
-                // TODO: parse error
+                console.error("parse error");
             }
 
             // step 3
