@@ -986,11 +986,43 @@ class jURL implements IURL {
     return this._base;
   }
 
+  // https://url.spec.whatwg.org/#dom-urlutils-href
   get href(): string {
+    // step 1
     if (this.url === null) {
       return this.input;
     }
+
+    // step 2
     return this.serializeURL(this.url);
+  }
+
+  set href(value: string) {
+    // step 1
+    var input = value;
+
+    // step 2
+    if (this instanceof jURL) {
+      var parsedURL: jURL;
+      try {
+        // step 1
+        parsedURL = this.parseBasicURL(input, this.base);
+      } catch(err) {
+        // step 2
+        throw new TypeError(err);
+      }
+
+      this.setTheInput("", parsedURL);
+    }
+
+    // step 3
+    else {
+      // step 3-1
+      this.setTheInput(input);
+
+      // step 3-2
+      this.preUpdateSteps(input);
+    }
   }
 
   protocol:     USVString;
