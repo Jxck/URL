@@ -1103,6 +1103,14 @@ class jURL implements IURL {
     }
   }
 
+  private preUpdateSteps(value: string) {
+    // CAUTION: ignore this imple cause URL itself doesn't require
+  }
+
+  private updateSteps() {
+    // CAUTION: ignore this imple cause URL itself doesn't require
+  }
+
   // https://url.spec.whatwg.org/#concept-urlencoded-string-parser
   private parse(input: string): IPair[] {
     return parseURLEncoded(Array.prototype.slice.call(encoder.encode(input)));
