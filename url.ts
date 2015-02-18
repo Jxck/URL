@@ -889,6 +889,25 @@ function setTheUsername(url: jURL, username: USVString) {
   }));
 }
 
+// https://url.spec.whatwg.org/#set-the-password
+function setThePassword(url: jURL, password: USVString) {
+  // step 1
+  if (password === "") {
+    url.password = null;
+  }
+
+  // step 2
+  else {
+    // step 2-1
+    url.password = "";
+
+    // step 2-2
+    url.password = String.fromCodePoint.apply(obtainUnicode(password).map((c) => {
+      return utf8PercentEncode(c, passwordEncodeSet);
+    }));
+  }
+}
+
 //[NoInterfaceObject, Exposed=(Window,Worker)]
 // interface URLUtilsReadOnly {
 //   stringifier readonly attribute USVString href;
