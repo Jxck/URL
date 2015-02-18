@@ -1247,7 +1247,31 @@ class jURL implements IURL {
   }
 
   // https://url.spec.whatwg.org/#concept-url-port
-  port:         USVString = "";
+  private _port:         USVString = "";
+
+  // https://url.spec.whatwg.org/#dom-urlutils-port
+  get port() {
+    // step 1
+    if (this.url === null) {
+      return "";
+    }
+
+    // step 2
+    return this._port;
+  }
+
+  set port(value: USVString) {
+    // step 1
+    if (this.url === null || this.relativeFlag === false || this.scheme === "file") {
+      return; // TODO: terminate
+    }
+
+    // step 2
+    var url = this.parseBasicURL(value, null, null, this.url, State.PortState);
+
+    // step 3
+    // TODO: ???
+  }
 
   pathname:     USVString;
   search:       USVString;
