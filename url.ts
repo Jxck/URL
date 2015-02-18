@@ -542,6 +542,13 @@ function serializeHost(host: string): string {
   }
 }
 
+// https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin
+function serializeOringinInUnicode(origin: string): string {
+  // TODO:
+  return origin;
+}
+
+
 /**
  * Encode Set
  */
@@ -955,7 +962,10 @@ class jURL implements IURL {
   private _origin:     USVString;
 
   get origin(): USVString {
-    return this._origin;
+    if (this.url === null) {
+      return "";
+    }
+    return serializeOringinInUnicode(this._origin);
   }
 
   // https://url.spec.whatwg.org/#concept-url-scheme
