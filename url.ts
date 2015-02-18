@@ -1152,6 +1152,7 @@ class jURL implements IURL {
   // https://url.spec.whatwg.org/#concept-url-username
   private _username:     USVString = "";
 
+  // https://url.spec.whatwg.org/#dom-urlutils-username
   get username(): USVString {
     // step 1
     if (this.url === null) {
@@ -1178,6 +1179,7 @@ class jURL implements IURL {
   // https://url.spec.whatwg.org/#concept-url-password
   private _password:     USVString = null;
 
+  // https://url.spec.whatwg.org/#dom-urlutils-password
   get password(): USVString {
     // step 1
     if (this.url === null || this._password === null) {
@@ -1202,7 +1204,23 @@ class jURL implements IURL {
   }
 
   // https://url.spec.whatwg.org/#concept-url-host
-  host:         USVString = null;
+  private _host:         USVString = null;
+
+  // https://url.spec.whatwg.org/#dom-urlutils-host
+  get host(): USVString {
+    // step 1
+    if(this.url === null) {
+      return "";
+    }
+
+    // step 2
+    if (this.port === "") {
+      return serializeHost(this._host);
+    }
+
+    // step 3
+    return serializeHost(this._host) + ":" + this.port;
+  }
 
   hostname:     USVString;
 
