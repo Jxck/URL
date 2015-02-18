@@ -1222,7 +1222,29 @@ class jURL implements IURL {
     return serializeHost(this._host) + ":" + this.port;
   }
 
-  hostname:     USVString;
+  // https://url.spec.whatwg.org/#dom-urlutils-hostname
+  get hostname(): USVString {
+    // step 1
+    if (this.url === null) {
+      return "";
+    }
+
+    // step 2
+    return serializeHost(this._host);
+  }
+
+  set hostname(value: USVString) {
+    // step 1
+    if (this.url === null || this.relativeFlag === false) {
+      return; // TODO: terminate
+    }
+
+    // step 2
+    var url = this.parseBasicURL(value, null, null, this.url, State.HostNameState);
+
+    // step 3
+    // TODO: ???
+  }
 
   // https://url.spec.whatwg.org/#concept-url-port
   port:         USVString = "";
