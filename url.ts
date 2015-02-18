@@ -1095,7 +1095,29 @@ class jURL implements IURL {
     }
   }
 
-  protocol:     USVString;
+  // https://url.spec.whatwg.org/#dom-urlutils-protocol
+  get protocol(): USVString {
+    // setp 1
+    if (this.url === null) {
+      return ":";
+    }
+
+    // step 2
+    return this.scheme + ":";
+  }
+
+  set protocol(value: string): USVString {
+    // step 1
+    if (this.url === null) {
+      return; // TODO: terminate
+    }
+
+    // step 2
+    var url = parseBasicURL(value + ":", null, null, this.url, State.SchemeStartState);
+
+    // step 3
+    // TODO: ????
+  }
 
   // https://url.spec.whatwg.org/#concept-url-username
   username:     USVString = "";
