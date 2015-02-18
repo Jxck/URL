@@ -543,9 +543,9 @@ function serializeHost(host: string): string {
 }
 
 // https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin
-function serializeOringinInUnicode(origin: string): string {
+function serializeOringinInUnicode(origin: string[]): string {
   // TODO:
-  return origin;
+  return "";
 }
 
 
@@ -959,8 +959,41 @@ class jURL implements IURL {
     return this._hash;
   }
 
-  private _origin:     USVString;
+  // https://url.spec.whatwg.org/#concept-url-origin
+  get _origin(): string[] {
 
+    var GUID = null; // TODO: golobally unique identifier
+
+    switch(this.scheme) {
+    case "blob":
+      var url;
+      try {
+        url = this.parseBasicURL(this.schemeData);
+      } catch(err) {
+        return GUID;
+      }
+      return url.origin;
+      break;
+    case "ftp":
+    case "gopher":
+    case "http":
+    case "https":
+    case "ws":
+    case "wss":
+      if (this.port === "") {
+        this.port = relativeScheme[this.scheme];
+      }
+      return [this.scheme, this.host, this.port];
+      break;
+    case "file":
+      return GUID;
+      break;
+    default:
+      return GUID;
+    }
+  }
+
+  // https://url.spec.whatwg.org/#dom-urlutils-origin
   get origin(): USVString {
     if (this.url === null) {
       return "";
