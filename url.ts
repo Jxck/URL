@@ -542,10 +542,32 @@ function serializeHost(host: string): string {
   }
 }
 
+
 // https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin
-function serializeOringinInUnicode(origin: string[]): string {
-  // TODO:
-  return "";
+// origin [scheme, host, port];
+function serializeOriginInUnicode(origin: { scheme: string; host: string; port: string; }): string {
+  // step 1
+  if (!origin) {
+    return "null";
+  }
+
+  // step 2
+  var result = origin.scheme;
+
+  // step 3
+  result = result + "://";
+
+  // step 4
+  result = result + origin.host.split(".").map((component) => {
+    return jURL.domainToUnicode(component);
+  }).join(".");
+
+  // step 5
+  if (origin.port !== relativeScheme[origin.scheme]) {
+    result = result + ":" + origin.port;
+  }
+
+  return result;
 }
 
 
@@ -960,7 +982,7 @@ class jURL implements IURL {
   }
 
   // https://url.spec.whatwg.org/#concept-url-origin
-  get _origin(): string[] {
+  get _origin(): { scheme: string; host: string; port: string; } {
 
     var GUID = null; // TODO: golobally unique identifier
 
@@ -983,7 +1005,12 @@ class jURL implements IURL {
       if (this.port === "") {
         this.port = relativeScheme[this.scheme];
       }
-      return [this.scheme, this.host, this.port];
+      var o = {
+        scheme: this.scheme,
+        host: this.host,
+        port: this.port
+      };
+      return o;
       break;
     case "file":
       return GUID;
@@ -998,7 +1025,7 @@ class jURL implements IURL {
     if (this.url === null) {
       return "";
     }
-    return serializeOringinInUnicode(this._origin);
+    return serializeOriginInUnicode(this._origin);
   }
 
   // https://url.spec.whatwg.org/#concept-url-scheme
