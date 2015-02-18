@@ -1005,12 +1005,6 @@ class jURL implements IURL {
   // https://url.spec.whatwg.org/#concept-urlutils-url
   private url:         jURL = null;
 
-  private _hash:       USVString;
-
-  get hash(): USVString {
-    return this._hash;
-  }
-
   // https://url.spec.whatwg.org/#concept-url-origin
   get _origin(): { scheme: string; host: string; port: string; } {
 
@@ -1346,7 +1340,28 @@ class jURL implements IURL {
     // TODO: query object update steps
   }
 
-  searchParams: typeof URLSearchParams;
+  // https://url.spec.whatwg.org/#dom-urlutils-searchparams
+  get searchParams(): typeof URLSearchParams {
+    return this.queryObject;
+  }
+
+  // TODO
+  set searchParams(value) {
+  }
+
+  // https://url.spec.whatwg.org/#dom-urlutils-hash
+  get hash(): USVString {
+    // step 1
+    if (this.url === null || this.fragment === null || this.fragment === "") {
+      return "";
+    }
+
+    // step 2
+    return "#" + this.fragment;
+  }
+
+  set hash(value) {
+  }
 
   // https://url.spec.whatwg.org/#concept-urlutils-query-encoding
   queryEncoding: string;
