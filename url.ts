@@ -1305,7 +1305,47 @@ class jURL implements IURL {
     // TODO: ???
   }
 
-  search:       USVString;
+  // https://url.spec.whatwg.org/#dom-urlutils-search
+  get search() {
+    // step 1
+    if (this.url === null || this.query === null || this.query === "") {
+      return "";
+    }
+
+    // step 2
+    return "?" + this.query;
+  }
+
+  set search(value: USVString) {
+    // step 1
+    if (this.url === null) {
+      return; // TODO: terminate
+    }
+
+    // step 2
+    if (value === "") {
+      this.query = null;
+      this.queryObject.list = null;
+      // TODO: update steps
+      return; // TODO: terminate
+    }
+
+    // step 3
+    var input = value[0] === "?" ? value: value.slice(1);
+
+    // step 4
+    this.query = "";
+
+    // step 5
+    var url = this.parseBasicURL(input, null, this.queryEncoding, this.url, State.QueryState);
+
+    // step 6
+    this.queryObject.list = this.parse(input);
+
+    // step 7
+    // TODO: query object update steps
+  }
+
   searchParams: typeof URLSearchParams;
 
   // https://url.spec.whatwg.org/#concept-urlutils-query-encoding
