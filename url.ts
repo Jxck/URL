@@ -1162,18 +1162,44 @@ class jURL implements IURL {
     return this._username;
   }
 
-  set username(username: USVString) {
+  set username(value: USVString) {
     // step 1
     if (this.url === null || this.relativeFlag === false) {
       return; // TODO: terminate
     }
 
     // step 2
+    setTheUsername(this.url, value);
 
+    // step 3
+    // TODO: ???
   }
 
   // https://url.spec.whatwg.org/#concept-url-password
-  password:     USVString = null;
+  private _password:     USVString = null;
+
+  get password(): USVString {
+    // step 1
+    if (this.url === null || this._password === null) {
+      return "";
+    }
+
+    // step 2
+    return this._password
+  }
+
+  set password(value: USVString) {
+    // step 1
+    if (this.url === null || this.relativeFlag === false) {
+      return; // TODO: terminate
+    }
+
+    // step 2
+    setThePassword(this.url, value);
+
+    // step 3
+    // TODO: ???
+  }
 
   // https://url.spec.whatwg.org/#concept-url-host
   host:         USVString = null;
