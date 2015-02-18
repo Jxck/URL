@@ -1273,7 +1273,38 @@ class jURL implements IURL {
     // TODO: ???
   }
 
-  pathname:     USVString;
+  // https://url.spec.whatwg.org/#dom-urlutils-pathname
+  get pathname() {
+    // step 1
+    if (this.url === null) {
+      return "";
+    }
+
+    // step 2
+    if (this.relativeFlag === false) {
+      return this.schemeData;
+    }
+
+    // step 3
+    return "/" + this.path.join("/");
+  }
+
+  set pathname(value: USVString) {
+    // step 1
+    if (this.url === null || this.relativeFlag === false) {
+      return; // TODO: terminate
+    }
+
+    // step 2
+    this.path = [];
+
+    // step 3
+    var url = this.parseBasicURL(value, null, null, this.url, State.RelativePathStartState);
+
+    // step 3
+    // TODO: ???
+  }
+
   search:       USVString;
   searchParams: typeof URLSearchParams;
 
