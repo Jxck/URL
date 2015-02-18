@@ -878,6 +878,17 @@ function byteSerializeURLEncoded(input: CodePoint[]): string {
   return toString(output);
 }
 
+// https://url.spec.whatwg.org/#set-the-username
+function setTheUsername(url: jURL, username: USVString) {
+  // step 1
+  url.username = "";
+
+  // step 2
+  url.username = String.fromCodePoint.apply(obtainUnicode(username).map((c) => {
+    return utf8PercentEncode(c, usernameEncodeSet);
+  }));
+}
+
 //[NoInterfaceObject, Exposed=(Window,Worker)]
 // interface URLUtilsReadOnly {
 //   stringifier readonly attribute USVString href;
@@ -1106,21 +1117,41 @@ class jURL implements IURL {
     return this.scheme + ":";
   }
 
-  set protocol(value: string): USVString {
+  set protocol(value: string) {
     // step 1
     if (this.url === null) {
       return; // TODO: terminate
     }
 
     // step 2
-    var url = parseBasicURL(value + ":", null, null, this.url, State.SchemeStartState);
+    var url = this.parseBasicURL(value + ":", null, null, this.url, State.SchemeStartState);
 
     // step 3
     // TODO: ????
   }
 
   // https://url.spec.whatwg.org/#concept-url-username
-  username:     USVString = "";
+  private _username:     USVString = "";
+
+  get username(): USVString {
+    // step 1
+    if (this.url === null) {
+      return "";
+    }
+
+    // step 2
+    return this._username;
+  }
+
+  set username(username: USVString) {
+    // step 1
+    if (this.url === null || this.relativeFlag === false) {
+      return; // TODO: terminate
+    }
+
+    // step 2
+
+  }
 
   // https://url.spec.whatwg.org/#concept-url-password
   password:     USVString = null;
