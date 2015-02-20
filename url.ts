@@ -2447,4 +2447,5 @@ new jURL('http://user:password@example.com');
   assert(serializeIPv6(parseIPv6(obtainUnicode(test[0]))), test[1]);
 });
 
-console.log(new jURL("http://example.com/a"));
+var a = new jURL("http://example.com/");
+console.log(a.host);
