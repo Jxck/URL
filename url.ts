@@ -1391,12 +1391,12 @@ class jURL implements IURL {
 
   static domainToASCII(domain: string):   string {
     // TODO: implement me
-    return "";
+    return domain;
   }
 
   static domainToUnicode(domain: string): string {
     // TODO: implement me
-    return "";
+    return domain;
   }
 
   // https://url.spec.whatwg.org/#constructors
@@ -1882,7 +1882,7 @@ class jURL implements IURL {
             }
 
             // step 1-3-2
-            if (!isURLCodePoint(cp) && cp !== 37) {
+            if (!isURLCodePoint(cp) && cp !== 37) { // %
               console.error("parse error");
             }
 
