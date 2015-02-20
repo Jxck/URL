@@ -1486,11 +1486,11 @@ class jURL implements IURL {
   }
 
   private preUpdateSteps(value: string) {
-    // CAUTION: ignore this imple cause URL itself doesn't require
+    // TODO: implement me
   }
 
   private updateSteps() {
-    // CAUTION: ignore this imple cause URL itself doesn't require
+    // TODO: implement me
   }
 
   // https://url.spec.whatwg.org/#concept-urlencoded-string-parser
@@ -1513,7 +1513,6 @@ class jURL implements IURL {
       return url;
     }
 
-    throw new Error("dont' support blob: url");
     // step 4
     // TODO: support blob URL store
 
@@ -1521,7 +1520,7 @@ class jURL implements IURL {
     // TODO: support blob URL store
 
     // step 6
-    // return url;
+    return url;
   }
 
   // https://url.spec.whatwg.org/#concept-basic-url-parser
