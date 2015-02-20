@@ -702,7 +702,7 @@ function isIPv6(host: string): string {
 
 function isDomain(host: string): string {
   // TODO:
-  return null;
+  return host;
 }
 
 interface IPair {
@@ -1031,7 +1031,7 @@ class jURL implements IURL {
       }
       var o = {
         scheme: this.scheme,
-        host: this.host,
+        host: this._host,
         port: this.port
       };
       return o;
@@ -1723,6 +1723,9 @@ class jURL implements IURL {
         }
 
         switch(c) {
+
+        // EOF is cared at default:
+
         case 47: // /
         case 92: // \
           // step 1
@@ -1735,15 +1738,15 @@ class jURL implements IURL {
 
           break;
         case 63: // ?
-          url.host = base.host;
-          url.port = base.port;
+          url._host = base._host;
+          url._port = base._port;
           url.path = base.path;
           url.query = "";
           state = State.QueryState;
 
           break;
         case 35: // #
-          url.host = base.host;
+          url._host = base._host;
           url.port = base.port;
           url.path = base.path;
           url.query = base.query;
@@ -1754,7 +1757,7 @@ class jURL implements IURL {
         default:
           // EOF code point
           if (isNaN(c)) {
-            url.host = base.host;
+            url._host = base._host;
             url.port = base.port;
             url.path = base.path;
             url.query = base.query;
@@ -1769,7 +1772,7 @@ class jURL implements IURL {
              || encodedInput.length - (pointer+1) === 1 // remaining.length = 1
              || ![47, 92, 63, 35].includes(encodedInput[pointer+2]) // /, \, ?, #
             ) {
-              url.host = base.host;
+              url._host = base._host;
               url.port = base.port;
               url.path = base.path;
               url.path = url.path.slice(0, -1); // remove last
@@ -1807,7 +1810,7 @@ class jURL implements IURL {
         else {
           // step 1
           if (url.scheme !== "file") {
-            url.host = base.host;
+            url._host = base._host;
             url.port = base.port;
           }
 
@@ -1957,7 +1960,7 @@ class jURL implements IURL {
             }
 
             // step 1-3-3
-            url.host = host;
+            url._host = host;
             buffer = [];
             state = State.RelativePathStartState;
           }
@@ -1990,7 +1993,7 @@ class jURL implements IURL {
           }
 
           // step 1-3
-          url.host = host;
+          url._host = host;
           buffer = [];
           state = State.PortState;
 
@@ -2011,7 +2014,7 @@ class jURL implements IURL {
           }
 
           // step 2-3
-          url.host = host;
+          url._host = host;
           buffer = [];
           state = State.RelativePathStartState;
 
@@ -2334,7 +2337,7 @@ class jURL implements IURL {
       }
 
       // step 2-3
-      output = output + serializeHost(url.host);
+      output = output + serializeHost(url._host);
 
       // step 2-4
       if (url.port !== "") {
