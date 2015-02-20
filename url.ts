@@ -1026,13 +1026,10 @@ class jURL implements IURL {
     case "https":
     case "ws":
     case "wss":
-      if (this.port === "") {
-        this.port = relativeScheme[this.scheme];
-      }
       var o = {
         scheme: this.scheme,
         host: this._host,
-        port: this.port
+        port: this._port !== "" ? this._port: relativeScheme[this.scheme]
       };
       return o;
       break;
@@ -1208,12 +1205,12 @@ class jURL implements IURL {
     }
 
     // step 2
-    if (this.port === "") {
+    if (this._port === "") {
       return serializeHost(this._host);
     }
 
     // step 3
-    return serializeHost(this._host) + ":" + this.port;
+    return serializeHost(this._host) + ":" + this._port;
   }
 
   // https://url.spec.whatwg.org/#dom-urlutils-hostname
@@ -1747,7 +1744,7 @@ class jURL implements IURL {
           break;
         case 35: // #
           url._host = base._host;
-          url.port = base.port;
+          url._port = base._port;
           url.path = base.path;
           url.query = base.query;
           url.fragment = "";
@@ -1758,7 +1755,7 @@ class jURL implements IURL {
           // EOF code point
           if (isNaN(c)) {
             url._host = base._host;
-            url.port = base.port;
+            url._port = base._port;
             url.path = base.path;
             url.query = base.query;
           }
@@ -1773,7 +1770,7 @@ class jURL implements IURL {
              || ![47, 92, 63, 35].includes(encodedInput[pointer+2]) // /, \, ?, #
             ) {
               url._host = base._host;
-              url.port = base.port;
+              url._port = base._port;
               url.path = base.path;
               url.path = url.path.slice(0, -1); // remove last
             }
@@ -1811,7 +1808,7 @@ class jURL implements IURL {
           // step 1
           if (url.scheme !== "file") {
             url._host = base._host;
-            url.port = base.port;
+            url._port = base._port;
           }
 
           // step 2
@@ -2078,7 +2075,7 @@ class jURL implements IURL {
           }
 
           // step 2-3
-          url.port = toString(buffer);
+          url._port = toString(buffer);
 
           // step 2-4
           if (stateOverride !== undefined) {
@@ -2340,8 +2337,8 @@ class jURL implements IURL {
       output = output + serializeHost(url._host);
 
       // step 2-4
-      if (url.port !== "") {
-        output = output + ":" + url.port;
+      if (url._port !== "") {
+        output = output + ":" + url._port;
       }
 
       // step 2-5
@@ -2450,17 +2447,16 @@ new jURL('http://user:password@example.com');
   assert(serializeIPv6(parseIPv6(obtainUnicode(test[0]))), test[1]);
 });
 
-var u = new jURL("http://example.com/");
+var u = new jURL("http://example.com:3000/");
 //console.log(u.href);
 //console.log(u.origin);
 //console.log(u.protocol);
 //console.log(u.username);
 //console.log(u.password);
-console.log(u.host);
+assert(u.host, "example.com:3000");
 //console.log(u.hostname);
-//console.log(u.port);
+assert(u.port, "3000");
 //console.log(u.pathname);
 //console.log(u.search);
 //console.log(u.searchParams);
 //console.log(u.hash);
-
