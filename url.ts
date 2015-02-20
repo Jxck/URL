@@ -1361,6 +1361,29 @@ class jURL implements IURL {
   }
 
   set hash(value) {
+    // step 1
+    if (this.url === null || this.scheme === "javascript") {
+      return; // TODO: terminate
+    }
+
+    // step 2
+    if (value === "") {
+      this.fragment = null;
+      // TODO: pre-update
+      return; // TODO: terminate
+    }
+
+    // step 3
+    var input = value[0] === "#" ? value: value.slice(1);
+
+    // step 4
+    this.fragment = "";
+
+    // step 5
+    this.parseBasicURL(input, null, null, this.url, State.FragmentState);
+
+    // step 6
+    // TODO: pre-update
   }
 
   // https://url.spec.whatwg.org/#concept-urlutils-query-encoding
