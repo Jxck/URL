@@ -2447,5 +2447,17 @@ new jURL('http://user:password@example.com');
   assert(serializeIPv6(parseIPv6(obtainUnicode(test[0]))), test[1]);
 });
 
-var a = new jURL("http://example.com/");
-console.log(a.host);
+var u = new jURL("http://example.com/");
+//console.log(u.href);
+//console.log(u.origin);
+//console.log(u.protocol);
+//console.log(u.username);
+//console.log(u.password);
+console.log(u.host);
+//console.log(u.hostname);
+//console.log(u.port);
+//console.log(u.pathname);
+//console.log(u.search);
+//console.log(u.searchParams);
+//console.log(u.hash);
+
