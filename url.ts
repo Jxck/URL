@@ -2231,12 +2231,12 @@ class jURL implements IURL {
             if (byt < 0x21
              || byt > 0x7E
              || [0x22, 0x23, 0x3C, 0x3E, 0x60].includes(byt)) {
-              url.query = toString(percentEncode([byt]));
+              url.query = url.query + toString(percentEncode([byt]));
             }
 
             // step 1-3-2
             else {
-              url.query = String.fromCodePoint(byt);
+              url.query = url.query + String.fromCodePoint(byt);
             }
           }
 
@@ -2244,7 +2244,7 @@ class jURL implements IURL {
           buffer = [];
 
           // step 1-5
-          if (c === 35) {
+          if (c === 35) { // #
             url.fragment = "";
             state = State.FragmentState;
           }
@@ -2258,7 +2258,7 @@ class jURL implements IURL {
         // step 3
         else {
           // step 3-1
-          if (!isURLCodePoint(c) && c !== 37) {
+          if (!isURLCodePoint(c) && c !== 37) { // %
             console.error("parse error");
           }
 
@@ -2451,7 +2451,7 @@ assert([1,2,3].includes(-1), false);
   assert(serializeIPv6(parseIPv6(obtainUnicode(test[0]))), test[1]);
 });
 
-var u = new jURL("http://jxck:fooo@example.com:3000/a/b/c#yey");
+var u = new jURL("http://jxck:fooo@example.com:3000/a/b/c?key1=value1&key2=value2#yey");
 //console.log(u.href);
 assert(u.origin, "http://example.com:3000");
 assert(u.protocol, "http:");
@@ -2461,6 +2461,7 @@ assert(u.host, "example.com:3000");
 assert(u.hostname, "example.com");
 assert(u.port, "3000");
 assert(u.pathname, "/a/b/c");
-console.log(u.search);
-//console.log(u.searchParams);
+assert(u.search, "?key1=value1&key2=value2");
+assert(u.searchParams.get("key1"), "value1");
+assert(u.searchParams.get("key2"), "value2");
 assert(u.hash, "#yey");
