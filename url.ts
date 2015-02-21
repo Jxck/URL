@@ -579,7 +579,7 @@ type EncodeSet = (p: CodePoint) => boolean;
 // https://url.spec.whatwg.org/#simple-encode-set
 function simpleEncodeSet(codePoint: CodePoint): boolean {
   // all code points less than U+0020 (i.e. excluding U+0020) and all code points greater than U+007E.
-  return codePoint < 0x20 && 0x007 < codePoint;
+  return codePoint < 0x0020 || 0x007E < codePoint;
 }
 
 // https://url.spec.whatwg.org/#default-encode-set
@@ -2082,6 +2082,11 @@ class jURL implements IURL {
           if (stateOverride !== undefined) {
             return; // terminate
           }
+
+          // step 2-5
+          buffer = [];
+          state = State.RelativePathStartState;
+          pointer = pointer - 1;
         }
 
         // step 3
@@ -2448,12 +2453,12 @@ new jURL('http://user:password@example.com');
   assert(serializeIPv6(parseIPv6(obtainUnicode(test[0]))), test[1]);
 });
 
-var u = new jURL("http://jxck:hoge@example.com:3000/");
+var u = new jURL("http://jxck:fooo@example.com:3000/a");
 //console.log(u.href);
 assert(u.origin, "http://example.com:3000");
 assert(u.protocol, "http:");
-console.log(u.username);
-console.log(u.password);
+assert(u.username, "jxck");
+assert(u.password, "fooo");
 assert(u.host, "example.com:3000");
 assert(u.hostname, "example.com");
 assert(u.port, "3000");
