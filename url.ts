@@ -2316,7 +2316,7 @@ class jURL implements IURL {
   }
 
   // https://url.spec.whatwg.org/#url-serializing
-  private serializeURL(url: jURL, excludeFragmentFlag?: boolean) {
+  private serializeURL(url: jURL, excludeFragmentFlag: boolean = false) {
     // step 1
     var output: string = url.scheme + ":";
 
@@ -2451,8 +2451,9 @@ assert([1,2,3].includes(-1), false);
   assert(serializeIPv6(parseIPv6(obtainUnicode(test[0]))), test[1]);
 });
 
-var u = new jURL("http://jxck:fooo@example.com:3000/a/b/c?key1=value1&key2=value2#yey");
-//console.log(u.href);
+var href = "http://jxck:fooo@example.com:3000/a/b/c?key1=value1&key2=value2#yey";
+var u = new jURL(href);
+assert(u.href, href);
 assert(u.origin, "http://example.com:3000");
 assert(u.protocol, "http:");
 assert(u.username, "jxck");
