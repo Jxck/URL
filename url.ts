@@ -2453,7 +2453,7 @@ new jURL('http://user:password@example.com');
   assert(serializeIPv6(parseIPv6(obtainUnicode(test[0]))), test[1]);
 });
 
-var u = new jURL("http://jxck:fooo@example.com:3000/a");
+var u = new jURL("http://jxck:fooo@example.com:3000/a/b/c#yey");
 //console.log(u.href);
 assert(u.origin, "http://example.com:3000");
 assert(u.protocol, "http:");
@@ -2462,7 +2462,7 @@ assert(u.password, "fooo");
 assert(u.host, "example.com:3000");
 assert(u.hostname, "example.com");
 assert(u.port, "3000");
-console.log(u.pathname);
+assert(u.pathname, "/a/b/c");
 //console.log(u.search);
 //console.log(u.searchParams);
-//console.log(u.hash);
+assert(u.hash, "#yey");
