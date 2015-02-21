@@ -2125,7 +2125,7 @@ class jURL implements IURL {
          || stateOverride === undefined && [63, 35].includes(c)) {
 
           // step 1-1
-          if (c === 92) {
+          if (c === 92) { // \
             console.error("parse error");
           }
 
@@ -2194,7 +2194,7 @@ class jURL implements IURL {
         // step 3
         else {
           // step 3-1
-          if (!isURLCodePoint(c) && c !== 37) {
+          if (!isURLCodePoint(c) && c !== 37) { // %
             console.error("parse error");
           }
 
@@ -2462,7 +2462,7 @@ assert(u.password, "fooo");
 assert(u.host, "example.com:3000");
 assert(u.hostname, "example.com");
 assert(u.port, "3000");
-//console.log(u.pathname);
+console.log(u.pathname);
 //console.log(u.search);
 //console.log(u.searchParams);
 //console.log(u.hash);
