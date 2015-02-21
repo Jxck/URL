@@ -2106,7 +2106,7 @@ class jURL implements IURL {
       case State.RelativePathStartState:
 
         // step 1
-        if (c === 92) {
+        if (c === 92) { // \
           console.error("parse error");
         }
 
@@ -2130,10 +2130,10 @@ class jURL implements IURL {
           }
 
           var table: { [index:string]: CodePoint[] } = {
-            "%2e":    [46],
-            ".%2e":   [46, 46],
-            "%2e.":   [46, 46],
-            "%2e%2e": [46, 46]
+            "%2e":    [46], // .
+            ".%2e":   [46, 46], // ..
+            "%2e.":   [46, 46], // ..
+            "%2e%2e": [46, 46]  // ..
           }
 
           // step 1-2
@@ -2151,7 +2151,7 @@ class jURL implements IURL {
           }
 
           // step 1-4
-          else if (toString(buffer) === "." && ![47, 92].includes(c)) {
+          else if (toString(buffer) === "." && ![47, 92].includes(c)) { // /, \
             url.path.push("");
           }
 
@@ -2163,7 +2163,7 @@ class jURL implements IURL {
              && buffer.length === 2
              && isASCIIAlpha(buffer[0])
              && buffer[1] === 124) { // |
-              buffer[1] = 58;
+                buffer[1] = 58; // :
             }
 
             // step 1-5-2
@@ -2174,13 +2174,13 @@ class jURL implements IURL {
           buffer = [];
 
           // step 1-7
-          if (c === 63) {
+          if (c === 63) { // ?
             url.query = "";
             state = State.QueryState;
           }
 
           // step 1-8
-          if (c === 35) {
+          if (c === 35) { // #
             url.fragment = "";
             state = State.FragmentState;
           }
@@ -2214,7 +2214,7 @@ class jURL implements IURL {
       // https://url.spec.whatwg.org/#query-state
       case State.QueryState:
         // step 1
-        if (isNaN(c) || (stateOverride === undefined && c === 35)) {
+        if (isNaN(c) || (stateOverride === undefined && c === 35)) { // #
           // step 1-1
           if (url.relativeFlag === false || ["ws", "wss"].includes(url.scheme)) {
             encodingOverride = "utf-8";
@@ -2421,8 +2421,6 @@ assert("𠮟", decode(percentDecode(utf8PercentEncode(obtainUnicode("𠮟")[0], 
 assert([1,2,3].includes(2), true);
 assert([1,2,3].includes(-1), false);
 
-new jURL('http://user:password@example.com');
-
 // http://www.gestioip.net/docu/ipv6_address_examples.html
 // TODO: https://bitbucket.org/kwi/py2-ipaddress/src/991cf901295a14e77c795691afbec552461865f0/test_ipaddress.py?at=default
 // TODO: https://github.com/golang/go/blob/master/src/net/ip_test.go
@@ -2463,6 +2461,6 @@ assert(u.host, "example.com:3000");
 assert(u.hostname, "example.com");
 assert(u.port, "3000");
 assert(u.pathname, "/a/b/c");
-//console.log(u.search);
+console.log(u.search);
 //console.log(u.searchParams);
 assert(u.hash, "#yey");
