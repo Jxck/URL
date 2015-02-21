@@ -2453,16 +2453,27 @@ assert([1,2,3].includes(-1), false);
 
 var href = "http://jxck:fooo@example.com:3000/a/b/c?key1=value1&key2=value2#yey";
 var u = new jURL(href);
-assert(u.href, href);
-assert(u.origin, "http://example.com:3000");
+assert(u.href,     href);
+assert(u.origin,   "http://example.com:3000");
 assert(u.protocol, "http:");
 assert(u.username, "jxck");
 assert(u.password, "fooo");
-assert(u.host, "example.com:3000");
+assert(u.host,     "example.com:3000");
 assert(u.hostname, "example.com");
-assert(u.port, "3000");
+assert(u.port,     "3000");
 assert(u.pathname, "/a/b/c");
-assert(u.search, "?key1=value1&key2=value2");
+assert(u.search,   "?key1=value1&key2=value2");
+assert(u.hash,     "#yey");
 assert(u.searchParams.get("key1"), "value1");
 assert(u.searchParams.get("key2"), "value2");
-assert(u.hash, "#yey");
+
+var href = "http://ゆーざ:パスワード@host.com:3000/ぱす/です/よ/?きー=ばりゅー&もう=いっこ#いぇーい"
+var u = new jURL(href);
+assert(u.href,     "http://%E3%82%86%E3%83%BC%E3%81%96:%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89@host.com:3000/%E3%81%B1%E3%81%99/%E3%81%A7%E3%81%99/%E3%82%88/?%E3%81%8D%E3%83%BC=%E3%81%B0%E3%82%8A%E3%82%85%E3%83%BC&%E3%82%82%E3%81%86=%E3%81%84%E3%81%A3%E3%81%93#いぇーい");
+assert(u.username, "%E3%82%86%E3%83%BC%E3%81%96");
+assert(u.password, "%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89");
+assert(u.pathname, "/%E3%81%B1%E3%81%99/%E3%81%A7%E3%81%99/%E3%82%88/");
+assert(u.search,   "?%E3%81%8D%E3%83%BC=%E3%81%B0%E3%82%8A%E3%82%85%E3%83%BC&%E3%82%82%E3%81%86=%E3%81%84%E3%81%A3%E3%81%93");
+assert(u.hash,     "#いぇーい");
+assert(u.searchParams.get("きー"), "ばりゅー");
+assert(u.searchParams.get("もう"), "いっこ");
