@@ -603,7 +603,7 @@ function usernameEncodeSet(codePoint: CodePoint): boolean {
 // https://url.spec.whatwg.org/#utf_8-percent-encode
 function utf8PercentEncode(codePoint: CodePoint, encodeSet: EncodeSet): CodePoint[] {
   // step 1
-  if (encodeSet(codePoint)) {
+  if (encodeSet(codePoint) === false) {
     return [codePoint];
   }
 
