@@ -1553,7 +1553,7 @@ class jURL implements IURL {
     var encodedInput: CodePoint[] = obtainUnicode(input);
 
     // step 8
-    while (pointer < encodedInput.length) {
+    while (pointer < encodedInput.length + 1) {
       var c: CodePoint = encodedInput[pointer];
 
       switch(state) {
@@ -1664,7 +1664,7 @@ class jURL implements IURL {
         // step 3
         else {
           // step 3-1
-          if (isNaN(c) && !isURLCodePoint(c) && c !== 37) { // %
+          if (!isNaN(c) && !isURLCodePoint(c) && c !== 37) { // %
             console.error("parse error");
           }
 
@@ -2156,7 +2156,7 @@ class jURL implements IURL {
           }
 
           // step 1-5
-          else if (toString(buffer) === ".") {
+          else if (toString(buffer) !== ".") {
             // step 1-5-1
             if (url.scheme === "file"
              && url.path.length === 0
