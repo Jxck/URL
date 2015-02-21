@@ -1896,17 +1896,17 @@ class jURL implements IURL {
             }
 
             // step 1-3-4
-            if (cp === 58 && url.password === null) { // :
-              url.password = "";
+            if (cp === 58 && url._password === null) { // :
+              url._password = "";
               continue;
             }
 
             // step 1-3-5
             var result: string = toString(utf8PercentEncode(cp, defaultEncodeSet));
-            if (url.password !== null) {
-              url.password += result;
+            if (url._password !== null) {
+              url._password += result;
             } else {
-              url.username += result;
+              url._username += result;
             }
           }
 
@@ -2321,13 +2321,13 @@ class jURL implements IURL {
       output = output + "//";
 
       // step 2-2
-      if (url.username !== "" || url.password !== null) {
+      if (url._username !== "" || url._password !== null) {
         // setp 2-2-1
-        output = output + url.username;
+        output = output + url._username;
 
         // step 2-2-2
-        if (url.password !== null) {
-          output = output + ":" + url.password;
+        if (url._password !== null) {
+          output = output + ":" + url._password;
         }
 
         // step 2-2-3
