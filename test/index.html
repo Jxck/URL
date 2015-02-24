@@ -5,3 +5,47 @@
 <script src="../bower_components/obtain-unicode/obtain-unicode.js"></script>
 <script src="../node_modules/urlsearchparams/urlsearchparams.js"></script>
 <script src="../url.js"></script>
+
+<script src=https://rawgit.com/w3c/testharness.js/master/testharness.js></script>
+<script src=https://rawgit.com/w3c/testharness.js/master/testharnessreport.js></script>
+<script src=urltestparser.js></script>
+<div id=log></div>
+<script>
+
+// https://github.com/w3c/web-platform-tests/tree/master/url
+
+var setup = async_test("Loading data…")
+setup.step(function() {
+  var request = new XMLHttpRequest()
+  request.open("GET", "urltestdata.txt")
+  request.send()
+  request.responseType = "text"
+  request.onload = setup.step_func(function() {
+    runURLTests(request.response);
+    setup.done()
+  })
+})
+
+function setBase(base) {
+  document.getElementById("base").href = base
+}
+
+function runURLTests(raw) {
+  var urltests = URLTestParser(raw)
+  for(var i = 0, l = urltests.length; i < l; i++) {
+    var expected = urltests[i]
+    test(function() {
+      var url = jURL(expected.input, expected.base)
+      if(expected.protocol === ':' && url.protocol !== ':')
+        assert_unreached('Expected URL to fail parsing')
+      assert_equals(url.protocol, expected.protocol, "scheme")
+      assert_equals(url.hostname, expected.host, "host")
+      assert_equals(url.port, expected.port, "port")
+      assert_equals(url.pathname, expected.path, "path")
+      assert_equals(url.search, expected.search, "search")
+      assert_equals(url.hash, expected.hash, "hash")
+      assert_equals(url.href, expected.href, "href")
+    }, "Parsing: <" + expected.input + "> against <" + expected.base + ">")
+  }
+}
+</script>
