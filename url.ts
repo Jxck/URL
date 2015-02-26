@@ -501,12 +501,14 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
   // step 3
   var domain: string = decode(percentDecode(encode(input)));
 
-  // step 4
-  var asciiDomain: string = jURL.domainToASCII(domain);
+  var asciiDomain: string;
 
-  // step 5
-  if (asciiDomain === "failure") {
-    return "failure";
+  try {
+    // step 4
+    asciiDomain = jURL.domainToASCII(domain);
+  } catch (failure) {
+    // step 5
+    throw failure;
   }
 
   // step 6
@@ -1949,12 +1951,14 @@ class jURL implements IURL {
 
           // step 1-3
           else {
-            // step 1-3-1
-            var host: string = parseHost(buffer);
+            var host: string
 
-            // step 1-3-2
-            if (host === "failure") {
-              throw new Error("failure");
+            try {
+              // step 1-3-1
+              host = parseHost(buffer);
+            } catch (failure) {
+              // step 1-3-2
+              throw failure;
             }
 
             // step 1-3-3
@@ -1982,12 +1986,14 @@ class jURL implements IURL {
       case State.HostNameState:
         // step 1
         if (c === 58 && flagParen === false) {
-          // step 1-1
-          var host: string = parseHost(buffer);
+          var host: string
 
-          // step 1-2
-          if (host === "failure") {
-            throw new Error("failure");
+          try {
+            // step 1-1
+            host = parseHost(buffer);
+          } catch (failure) {
+            // step 1-2
+            throw failure;
           }
 
           // step 1-3
@@ -2003,12 +2009,14 @@ class jURL implements IURL {
 
         // step 2
         else if (isNaN(c) || [47, 92, 63, 35].includes(c)) { // / \ ? #
-          // step 2-1
-          var host: string = parseHost(buffer);
+          var host: string
 
-          // step 2-2
-          if (host === "failure") {
-            throw new Error("failure");
+          try {
+            // step 2-1
+            host = parseHost(buffer);
+          } catch (failure) {
+            // step 2-2
+            throw failure;
           }
 
           // step 2-3
