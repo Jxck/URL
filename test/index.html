@@ -4,6 +4,13 @@
 
 <script src="../bower_components/obtain-unicode/obtain-unicode.js"></script>
 <script src="../node_modules/urlsearchparams/urlsearchparams.js"></script>
+<script>
+function require(name) {
+  if (name === "urlsearchparams") {
+    return { URLSearchParams: URLSearchParams };
+  }
+}
+</script>
 <script src="../url.js"></script>
 
 <script src=https://rawgit.com/w3c/testharness.js/master/testharness.js></script>
