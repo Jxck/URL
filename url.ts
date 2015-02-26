@@ -225,7 +225,7 @@ function parseIPv6(input: CodePoint[]): number[] {
 
   // step 6
   // https://url.spec.whatwg.org/#concept-ipv6-parser-main
-function Main(address, input, pointer, piecePointer, compressPointer): number[] {
+function Main(address: number[], input: CodePoint[], pointer: number, piecePointer: number, compressPointer: number): number[] {
   while(input[pointer] !== EOF) {
     // step 6-1
     if (piecePointer === 8) {
@@ -302,8 +302,8 @@ function Main(address, input, pointer, piecePointer, compressPointer): number[] 
   return IPv4(address, input, pointer, piecePointer, compressPointer);
 }
 
-  // step 8
-function  IPv4(address, input, pointer, piecePointer, compressPointer): number[] {
+// step 8
+function IPv4(address: number[], input: CodePoint[], pointer: number, piecePointer: number, compressPointer: number): number[] {
   if (piecePointer > 6) {
     console.error("parse error");
     throw new Error("failure");
@@ -383,7 +383,7 @@ function  IPv4(address, input, pointer, piecePointer, compressPointer): number[]
 }
 
 // step 11
-function Finale(address, input, pointer, piecePointer, compressPointer): number[] {
+function Finale(address: number[], input: CodePoint[], pointer: number, piecePointer: number, compressPointer: number): number[] {
   if (compressPointer !== null) {
     // step 11-1
     var swaps = piecePointer - compressPointer;
@@ -418,7 +418,7 @@ function serializeIPv6(address: number[]): string {
   var output: string  = "";
 
   // step 2, 3
-  function find(arr) {
+  function find(arr: number[]): number {
     arr.push(1); // append 1 for end of input
 
     var pos = -1; // current seq of 0 position
@@ -445,7 +445,7 @@ function serializeIPv6(address: number[]): string {
     }
 
     arr.pop(); // remove 1 added at top of this function
-    return result.acc > 1? result.pos: null;
+    return result.acc > 1 ? result.pos: null;
   }
   var compressPointer = find(address);
 
@@ -732,7 +732,7 @@ function parseURLEncoded(input: CodePoint[], encodingOverride?: string, useChars
   }
 
   // step 3
-  var sequences = [];
+  var sequences: CodePoint[][] = [];
   while (true) {
     var i = input.indexOf(38); // &
     if (i < 0) {
@@ -756,7 +756,7 @@ function parseURLEncoded(input: CodePoint[], encodingOverride?: string, useChars
     if (bytes.length === 0) return;
 
     // step 6-2
-    var name, value;
+    var name: number[], value: number[];
     var i = bytes.indexOf(61);
     if (i > 0) { // =
       name = bytes.splice(0, i);
@@ -779,15 +779,15 @@ function parseURLEncoded(input: CodePoint[], encodingOverride?: string, useChars
     });
 
     // step 5
-    if (useCharset && name === "_charset_") {
+    if (useCharset && toString(name) === "_charset_") {
       throw new Error("unsupported flug '_charset_'");
     }
 
     // step 8 parsent decode
-    name  = decode(percentDecode(name));
-    value = decode(percentDecode(value));
-
-    return { name: name, value: value };
+    return {
+      name: decode(percentDecode(name)),
+      value: decode(percentDecode(value))
+    };
   });
 
   return pairs;
@@ -985,17 +985,18 @@ class jURL implements IURL {
   // https://url.spec.whatwg.org/#concept-url-origin
   get _origin(): { scheme: string; host: Host; port: string; } {
 
-    var GUID = null; // TODO: golobally unique identifier
+    // TODO: golobally unique identifier
+    var GUID: { scheme: string; host: Host; port: string; } = null;
 
     switch(this.scheme) {
     case "blob":
-      var url;
+      var url: jURL;
       try {
         url = this.parseBasicURL(this.schemeData);
       } catch(err) {
         return GUID;
       }
-      return url.origin;
+      return url._origin;
       break;
     case "ftp":
     case "gopher":
