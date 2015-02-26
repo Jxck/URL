@@ -2489,3 +2489,8 @@ assert(u.search,   "?%E3%81%8D%E3%83%BC=%E3%81%B0%E3%82%8A%E3%82%85%E3%83%BC&%E3
 assert(u.hash,     "#いぇーい");
 assert(u.searchParams.get("きー"), "ばりゅー");
 assert(u.searchParams.get("もう"), "いっこ");
+
+var href = "http://[2001:0db8:0a0b:12f0:0000:0000:0000:0001]";
+var u = new jURL(href);
+assert(u.origin, "http://[2001:db8:a0b:12f0::1]");
+assert(u.host, "[2001:db8:a0b:12f0::1]");
