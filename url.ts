@@ -209,7 +209,7 @@ function parseIPv6(input: CodePoint[]): any {
     // step 5-1
     if (input[pointer+1] !== 58) { // :
       console.error("parse error");
-      return "failure";
+      throw new Error("failure");
     }
 
     // step 5-2
@@ -230,7 +230,7 @@ function Main(address, input, pointer, piecePointer, compressPointer) {
     // step 6-1
     if (piecePointer === 8) {
       console.error("parse error");
-      return "failure";
+      throw new Error("failure");
     }
 
     // step 6-2
@@ -238,7 +238,7 @@ function Main(address, input, pointer, piecePointer, compressPointer) {
       // step 6-2-1
       if (compressPointer !== null) {
         console.error("parse error");
-        return "failure";
+        throw new Error("failure");
       }
 
       // step 6-2-2
@@ -264,7 +264,7 @@ function Main(address, input, pointer, piecePointer, compressPointer) {
     case 46: // "."
       if (len === 0) {
         console.error("parse error");
-        return "failure";
+        throw new Error("failure");
       }
 
       pointer = pointer - len;
@@ -274,7 +274,7 @@ function Main(address, input, pointer, piecePointer, compressPointer) {
       pointer = pointer + 1;
       if (input[pointer] === EOF) {
         console.error("parse error");
-        return "failure";
+        throw new Error("failure");
       }
       break;
     default:
@@ -282,7 +282,7 @@ function Main(address, input, pointer, piecePointer, compressPointer) {
         break;
       }
       console.error("parse error");
-      return "failure";
+      throw new Error("failure");
     }
 
     // step 6-6
@@ -306,7 +306,7 @@ function Main(address, input, pointer, piecePointer, compressPointer) {
 function  IPv4(address, input, pointer, piecePointer, compressPointer) {
   if (piecePointer > 6) {
     console.error("parse error");
-    return "failure";
+    throw new Error("failure");
   }
 
   // step 9
@@ -320,7 +320,7 @@ function  IPv4(address, input, pointer, piecePointer, compressPointer) {
     // step 10-2
     if (!isASCIIDigits(input[pointer])) {
       console.error("parse error");
-      return "failure";
+      throw new Error("failure");
     }
 
     // step 10-3
@@ -336,7 +336,7 @@ function  IPv4(address, input, pointer, piecePointer, compressPointer) {
       }
       else if (value === 0) {
         console.error("parse error");
-        return "failure";
+        throw new Error("failure");
       }
       else {
         value = value * 10 + num;
@@ -348,14 +348,14 @@ function  IPv4(address, input, pointer, piecePointer, compressPointer) {
       // step 10-3-4
       if (value > 255) {
         console.error("parse error");
-        return "failure";
+        throw new Error("failure");
       }
     }
 
     // step 10-4
     if (dotsSeen < 3 && input[pointer] !== 46) { // .
       console.error("parse error");
-      return "failure";
+      throw new Error("failure");
     }
 
     // step 10-5
@@ -372,7 +372,7 @@ function  IPv4(address, input, pointer, piecePointer, compressPointer) {
     // step 10-8
     if (dotsSeen === 3 && input[pointer] !== EOF) {
       console.error("parse error");
-      return "failure";
+      throw new Error("failure");
     }
 
     // step 10-9
@@ -405,7 +405,7 @@ function Finale(address, input, pointer, piecePointer, compressPointer) {
   // step 12
   else if (compressPointer !== null && piecePointer !== 8) {
     console.error("parse error");
-    return "failure";
+    throw new Error("failure");
   }
 
   // step 13
@@ -483,7 +483,7 @@ function serializeIPv6(address: number[]) {
 function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
   // step 1
   if (input.length === 0) {
-    return "failure";
+    throw new Error("failure");
   }
 
   // step 2
@@ -491,7 +491,7 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
     // step 2-1
     if (input[input.length-1] !== 93) { // ]
       console.error("parse error");
-      return "failure";
+      throw new Error("failure");
     }
 
     // step 2-2
@@ -513,7 +513,7 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
   if ([ "\u0000", "\t", "\n", "\r", " ", "#", "%", "/", ":", "?", "@", "[", "\\", "]" ].some((s) => {
     return asciiDomain.indexOf(s) !== -1;
   })) {
-    return "failure";
+    throw new Error("failure");
   }
 
   // step 7
