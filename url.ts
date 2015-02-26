@@ -189,7 +189,7 @@ function percentDecode(input: CodePoint[]): CodePoint[] {
 }
 
 // https://url.spec.whatwg.org/#concept-ipv6-parser
-function parseIPv6(input: CodePoint[]): any {
+function parseIPv6(input: CodePoint[]): number[] {
 
   // step 1
   var address: number[] = [0, 0, 0, 0, 0, 0, 0, 0]; // 16bit * 8
@@ -225,7 +225,7 @@ function parseIPv6(input: CodePoint[]): any {
 
   // step 6
   // https://url.spec.whatwg.org/#concept-ipv6-parser-main
-function Main(address, input, pointer, piecePointer, compressPointer) {
+function Main(address, input, pointer, piecePointer, compressPointer): number[] {
   while(input[pointer] !== EOF) {
     // step 6-1
     if (piecePointer === 8) {
@@ -303,7 +303,7 @@ function Main(address, input, pointer, piecePointer, compressPointer) {
 }
 
   // step 8
-function  IPv4(address, input, pointer, piecePointer, compressPointer) {
+function  IPv4(address, input, pointer, piecePointer, compressPointer): number[] {
   if (piecePointer > 6) {
     console.error("parse error");
     throw new Error("failure");
@@ -383,7 +383,7 @@ function  IPv4(address, input, pointer, piecePointer, compressPointer) {
 }
 
 // step 11
-function Finale(address, input, pointer, piecePointer, compressPointer) {
+function Finale(address, input, pointer, piecePointer, compressPointer): number[] {
   if (compressPointer !== null) {
     // step 11-1
     var swaps = piecePointer - compressPointer;
@@ -413,9 +413,9 @@ function Finale(address, input, pointer, piecePointer, compressPointer) {
 }
 
 // https://url.spec.whatwg.org/#concept-ipv6-serializer
-function serializeIPv6(address: number[]) {
+function serializeIPv6(address: number[]): string {
   // step 1
-  var output = "";
+  var output: string  = "";
 
   // step 2, 3
   function find(arr) {
@@ -479,8 +479,11 @@ function serializeIPv6(address: number[]) {
   return output;
 }
 
+// https://url.spec.whatwg.org/#concept-host
+type Host = string | number[];
+
 // https://url.spec.whatwg.org/#concept-host-parser
-function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
+function parseHost(input: CodePoint[], unicodeFlag?: boolean): Host {
   // step 1
   if (input.length === 0) {
     throw new Error("failure");
@@ -512,9 +515,10 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
   }
 
   // step 6
-  if ([ "\u0000", "\t", "\n", "\r", " ", "#", "%", "/", ":", "?", "@", "[", "\\", "]" ].some((s) => {
+  var check = [ "\u0000", "\t", "\n", "\r", " ", "#", "%", "/", ":", "?", "@", "[", "\\", "]" ].some((s) => {
     return asciiDomain.indexOf(s) !== -1;
-  })) {
+  });
+  if (check === true) {
     throw new Error("failure");
   }
 
@@ -527,7 +531,7 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): string {
 }
 
 // https://url.spec.whatwg.org/#concept-host-serializer
-function serializeHost(host: string): string {
+function serializeHost(host: Host): string {
   // step 1
   if (host === null) {
     return "";
@@ -535,19 +539,19 @@ function serializeHost(host: string): string {
 
   // step 2
   if (isIPv6(host)) {
-    return "[" + serializeIPv6(obtainUnicode(host)) + "]";
+    return "[" + serializeIPv6(<Array<number>> host) + "]";
   }
 
   // step 3
   else if(isDomain(host)) {
-    return host;
+    return <string>host;
   }
 }
 
 
 // https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin
 // origin [scheme, host, port];
-function serializeOriginInUnicode(origin: { scheme: string; host: string; port: string; }): string {
+function serializeOriginInUnicode(origin: { scheme: string; host: Host; port: string; }): string {
   // step 1
   if (!origin) {
     return "null";
@@ -560,9 +564,11 @@ function serializeOriginInUnicode(origin: { scheme: string; host: string; port: 
   result = result + "://";
 
   // step 4
-  result = result + origin.host.split(".").map((component) => {
-    return jURL.domainToUnicode(component);
-  }).join(".");
+  // TODO: how to handle if Host is Array?
+  // result = result + origin.host.split(".").map((component) => {
+  //    return jURL.domainToUnicode(component);
+  //  }).join(".");
+  result = result + serializeHost(origin.host);
 
   // step 5
   if (origin.port !== relativeScheme[origin.scheme]) {
@@ -697,14 +703,12 @@ function isRelativeScheme(scheme: string): boolean {
 var localScheme = [ "about", "blob", "data", "filesystem" ];
 
 
-function isIPv6(host: string): string {
-  // TODO:
-  return null;
+function isIPv6(host: Host): boolean {
+  return (Array.isArray(host) && host.length === 8);
 }
 
-function isDomain(host: string): string {
-  // TODO:
-  return host;
+function isDomain(host: Host): boolean {
+  return (typeof host === "string");
 }
 
 interface IPair {
@@ -979,7 +983,7 @@ class jURL implements IURL {
   private url:         jURL = null;
 
   // https://url.spec.whatwg.org/#concept-url-origin
-  get _origin(): { scheme: string; host: string; port: string; } {
+  get _origin(): { scheme: string; host: Host; port: string; } {
 
     var GUID = null; // TODO: golobally unique identifier
 
@@ -1168,7 +1172,7 @@ class jURL implements IURL {
   }
 
   // https://url.spec.whatwg.org/#concept-url-host
-  private _host:         USVString = null;
+  private _host: Host = null;
 
   // https://url.spec.whatwg.org/#dom-urlutils-host
   get host(): USVString {
@@ -1951,7 +1955,7 @@ class jURL implements IURL {
 
           // step 1-3
           else {
-            var host: string
+            var host: Host;
 
             try {
               // step 1-3-1
@@ -1986,7 +1990,7 @@ class jURL implements IURL {
       case State.HostNameState:
         // step 1
         if (c === 58 && flagParen === false) {
-          var host: string
+          var host: Host;
 
           try {
             // step 1-1
@@ -2009,7 +2013,7 @@ class jURL implements IURL {
 
         // step 2
         else if (isNaN(c) || [47, 92, 63, 35].includes(c)) { // / \ ? #
-          var host: string
+          var host: Host;
 
           try {
             // step 2-1
