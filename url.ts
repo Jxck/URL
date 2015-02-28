@@ -915,7 +915,7 @@ function byteSerializeURLEncoded(input: CodePoint[]): string {
 //           attribute URLSearchParams searchParams;
 //           attribute USVString hash;
 //};
-interface URLUtils {
+interface IURLUtils {
   href:         USVString; // stringifier
 
   origin:       USVString; // readonly
@@ -939,7 +939,7 @@ interface URLUtils {
 //};
 
 //URL implements URLUtils;
-interface IURL extends URLUtils {
+interface IURL extends IURLUtils {
   // static domainToASCII(domain: string):   string;
   // static domainToUnicode(domain: string): string;
 }
