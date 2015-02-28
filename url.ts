@@ -2466,34 +2466,46 @@ assert([1,2,3].includes(-1), false);
   assert(serializeIPv6(parseIPv6(obtainUnicode(test[0]))), test[1]);
 });
 
-var href = "http://jxck:fooo@example.com:3000/a/b/c?key1=value1&key2=value2#yey";
-var u = new jURL(href);
-assert(u.href,     href);
-assert(u.origin,   "http://example.com:3000");
-assert(u.protocol, "http:");
-assert(u.username, "jxck");
-assert(u.password, "fooo");
-assert(u.host,     "example.com:3000");
-assert(u.hostname, "example.com");
-assert(u.port,     "3000");
-assert(u.pathname, "/a/b/c");
-assert(u.search,   "?key1=value1&key2=value2");
-assert(u.hash,     "#yey");
-assert(u.searchParams.get("key1"), "value1");
-assert(u.searchParams.get("key2"), "value2");
+//var href = "http://jxck:fooo@example.com:3000/a/b/c?key1=value1&key2=value2#yey";
+//var u = new jURL(href);
+//assert(u.href,     href);
+//assert(u.origin,   "http://example.com:3000");
+//assert(u.protocol, "http:");
+//assert(u.username, "jxck");
+//assert(u.password, "fooo");
+//assert(u.host,     "example.com:3000");
+//assert(u.hostname, "example.com");
+//assert(u.port,     "3000");
+//assert(u.pathname, "/a/b/c");
+//assert(u.search,   "?key1=value1&key2=value2");
+//assert(u.hash,     "#yey");
+//assert(u.searchParams.get("key1"), "value1");
+//assert(u.searchParams.get("key2"), "value2");
+//
+//var href = "http://ゆーざ:パスワード@host.com:3000/ぱす/です/よ/?きー=ばりゅー&もう=いっこ#いぇーい"
+//var u = new jURL(href);
+//assert(u.href,     "http://%E3%82%86%E3%83%BC%E3%81%96:%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89@host.com:3000/%E3%81%B1%E3%81%99/%E3%81%A7%E3%81%99/%E3%82%88/?%E3%81%8D%E3%83%BC=%E3%81%B0%E3%82%8A%E3%82%85%E3%83%BC&%E3%82%82%E3%81%86=%E3%81%84%E3%81%A3%E3%81%93#いぇーい");
+//assert(u.username, "%E3%82%86%E3%83%BC%E3%81%96");
+//assert(u.password, "%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89");
+//assert(u.pathname, "/%E3%81%B1%E3%81%99/%E3%81%A7%E3%81%99/%E3%82%88/");
+//assert(u.search,   "?%E3%81%8D%E3%83%BC=%E3%81%B0%E3%82%8A%E3%82%85%E3%83%BC&%E3%82%82%E3%81%86=%E3%81%84%E3%81%A3%E3%81%93");
+//assert(u.hash,     "#いぇーい");
+//assert(u.searchParams.get("きー"), "ばりゅー");
+//assert(u.searchParams.get("もう"), "いっこ");
+//
+//var href = "http://[2001:0db8:0a0b:12f0:0000:0000:0000:0001]";
+//var u = new jURL(href);
+//assert(u.origin, "http://[2001:db8:a0b:12f0::1]");
+//assert(u.host, "[2001:db8:a0b:12f0::1]");
 
-var href = "http://ゆーざ:パスワード@host.com:3000/ぱす/です/よ/?きー=ばりゅー&もう=いっこ#いぇーい"
-var u = new jURL(href);
-assert(u.href,     "http://%E3%82%86%E3%83%BC%E3%81%96:%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89@host.com:3000/%E3%81%B1%E3%81%99/%E3%81%A7%E3%81%99/%E3%82%88/?%E3%81%8D%E3%83%BC=%E3%81%B0%E3%82%8A%E3%82%85%E3%83%BC&%E3%82%82%E3%81%86=%E3%81%84%E3%81%A3%E3%81%93#いぇーい");
-assert(u.username, "%E3%82%86%E3%83%BC%E3%81%96");
-assert(u.password, "%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89");
-assert(u.pathname, "/%E3%81%B1%E3%81%99/%E3%81%A7%E3%81%99/%E3%82%88/");
-assert(u.search,   "?%E3%81%8D%E3%83%BC=%E3%81%B0%E3%82%8A%E3%82%85%E3%83%BC&%E3%82%82%E3%81%86=%E3%81%84%E3%81%A3%E3%81%93");
-assert(u.hash,     "#いぇーい");
-assert(u.searchParams.get("きー"), "ばりゅー");
-assert(u.searchParams.get("もう"), "いっこ");
 
-var href = "http://[2001:0db8:0a0b:12f0:0000:0000:0000:0001]";
-var u = new jURL(href);
-assert(u.origin, "http://[2001:db8:a0b:12f0::1]");
-assert(u.host, "[2001:db8:a0b:12f0::1]");
+var href = "http://example\t.\norg";
+var base = "http://example.org/foo/bar";
+// s:http h:example.org p:/
+
+var u = new jURL(href, base);
+console.log(u.protocol, 'http:');
+console.log(u.port, '');
+console.log(u.hostname, 'example.org');
+console.log(u.pathname, '/');
+console.log(u.href, 'http://example.org/');
