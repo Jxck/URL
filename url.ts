@@ -971,16 +971,16 @@ enum State {
 class jURL implements IURL {
 
   // https://url.spec.whatwg.org/#concept-urlutils-input
-  private input:       string;
+  private input: string;
 
   // https://url.spec.whatwg.org/#concept-urlutils-query-encoding
-  private encoding:    string ; // support utf-8 only
+  private encoding: string; // support utf-8 only
 
   // https://url.spec.whatwg.org/#concept-urlutils-query-object
   queryObject: typeof URLSearchParams = null;
 
   // https://url.spec.whatwg.org/#concept-urlutils-url
-  private url:         jURL = null;
+  private url: jURL = null;
 
   // https://url.spec.whatwg.org/#concept-url-origin
   get _origin(): { scheme: string; host: Host; port: string; } {
@@ -1563,6 +1563,8 @@ class jURL implements IURL {
     while (pointer < encodedInput.length + 1) {
       var c: CodePoint = encodedInput[pointer];
 
+      // console.log(toString(buffer));
+
       switch(state) {
 
       // https://url.spec.whatwg.org/#scheme-start-state
@@ -1990,7 +1992,7 @@ class jURL implements IURL {
       // https://url.spec.whatwg.org/#hostname-state
       case State.HostNameState:
         // step 1
-        if (c === 58 && flagParen === false) {
+        if (c === 58 && flagParen === false) { // :
           var host: Host;
 
           try {
@@ -2036,7 +2038,7 @@ class jURL implements IURL {
         }
 
         // step 3
-        else if ([0x9, 0xA, 0xD].includes(c)) {
+        else if ([0x9, 0xA, 0xD].includes(c)) { // \t, \n, \r
           console.error("parse error");
         }
 

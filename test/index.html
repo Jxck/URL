@@ -42,7 +42,7 @@ function runURLTests(raw) {
   for(var i = 0, l = urltests.length; i < l; i++) {
     var expected = urltests[i]
     test(function() {
-      var url = jURL(expected.input, expected.base)
+      var url = new jURL(expected.input, expected.base)
       if(expected.protocol === ':' && url.protocol !== ':')
         assert_unreached('Expected URL to fail parsing')
       assert_equals(url.protocol, expected.protocol, "scheme")
