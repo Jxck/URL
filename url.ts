@@ -967,6 +967,52 @@ enum State {
   FragmentState,
 }
 
+// https://url.spec.whatwg.org/#urls
+class innerURL {
+  // https://url.spec.whatwg.org/#concept-url-scheme
+  scheme: string = '';
+
+  // https://url.spec.whatwg.org/#concept-url-scheme-data
+  schemeData: string = '';
+
+  // https://url.spec.whatwg.org/#concept-url-username
+  username: string = '';
+
+  // https://url.spec.whatwg.org/#concept-url-password
+  password: string = null;
+
+  // https://url.spec.whatwg.org/#concept-url-host
+  host: string = null;
+
+  // https://url.spec.whatwg.org/#concept-url-port
+  port: string = '';
+
+  // https://url.spec.whatwg.org/#concept-url-path
+  path: string[] = [];
+
+  // https://url.spec.whatwg.org/#concept-url-query
+  query: string = null;
+
+  // https://url.spec.whatwg.org/#concept-url-fragment
+  fragment: string = null;
+
+  // https://url.spec.whatwg.org/#relative-flag
+  private relativeFlag = false;
+
+  // https://url.spec.whatwg.org/#concept-url-object
+  private object: Blob = null;
+
+  // https://url.spec.whatwg.org/#concept-url-object
+  get isLocal(): boolean {
+    return ["about", "blob", "data", "filesystem"].indexOf(this.scheme) > -1;
+  }
+
+  // https://url.spec.whatwg.org/#include-credentials
+  get includeCredentials(): boolean {
+    return this.username !== '' || this.password !== null;
+  }
+}
+
 // CAUTION: URL already in lib.d.ts
 class jURL implements IURL {
 
