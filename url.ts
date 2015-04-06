@@ -479,9 +479,6 @@ function serializeIPv6(address: number[]): string {
   return output;
 }
 
-// https://url.spec.whatwg.org/#concept-host
-type Host = string | number[];
-
 // https://url.spec.whatwg.org/#concept-host-parser
 function parseHost(input: CodePoint[], unicodeFlag?: boolean): Host {
   // step 1
@@ -884,6 +881,35 @@ function byteSerializeURLEncoded(input: CodePoint[]): string {
   return toString(output);
 }
 
+// https://url.spec.whatwg.org/#set-the-username
+function setTheUsername(url: innerURL, username: USVString) {
+  // step 1
+  url.username = "";
+
+  // step 2
+  url.username = String.fromCodePoint.apply(obtainUnicode(username).map((c) => {
+    return utf8PercentEncode(c, usernameEncodeSet);
+  }));
+}
+
+// https://url.spec.whatwg.org/#set-the-password
+function setThePassword(url: innerURL, password: USVString) {
+  // step 1
+  if (password === "") {
+    url.password = null;
+  }
+
+  // step 2
+  else {
+    // step 2-1
+    url.password = "";
+
+    // step 2-2
+    url.password = String.fromCodePoint.apply(obtainUnicode(password).map((c) => {
+      return utf8PercentEncode(c, passwordEncodeSet);
+    }));
+  }
+}
 
 //[NoInterfaceObject, Exposed=(Window,Worker)]
 // interface URLUtilsReadOnly {
@@ -967,25 +993,28 @@ enum State {
   FragmentState,
 }
 
+// https://url.spec.whatwg.org/#concept-host
+type Host = string | number[];
+
 // https://url.spec.whatwg.org/#urls
 class innerURL {
   // https://url.spec.whatwg.org/#concept-url-scheme
-  scheme: string = '';
+  scheme: string = "";
 
   // https://url.spec.whatwg.org/#concept-url-scheme-data
-  schemeData: string = '';
+  schemeData: string = "";
 
   // https://url.spec.whatwg.org/#concept-url-username
-  username: string = '';
+  username: string = "";
 
   // https://url.spec.whatwg.org/#concept-url-password
   password: string = null;
 
   // https://url.spec.whatwg.org/#concept-url-host
-  host: string = null;
+  host: Host = null;
 
   // https://url.spec.whatwg.org/#concept-url-port
-  port: string = '';
+  port: string = "";
 
   // https://url.spec.whatwg.org/#concept-url-path
   path: string[] = [];
@@ -997,10 +1026,10 @@ class innerURL {
   fragment: string = null;
 
   // https://url.spec.whatwg.org/#relative-flag
-  private relativeFlag = false;
+  relativeFlag = false;
 
   // https://url.spec.whatwg.org/#concept-url-object
-  private object: Blob = null;
+  object: Blob = null;
 
   // https://url.spec.whatwg.org/#concept-url-object
   get isLocal(): boolean {
@@ -1011,38 +1040,21 @@ class innerURL {
   get includeCredentials(): boolean {
     return this.username !== '' || this.password !== null;
   }
-}
-
-// CAUTION: URL already in lib.d.ts
-class jURL implements IURL {
-
-  // https://url.spec.whatwg.org/#concept-urlutils-input
-  private input: string;
-
-  // https://url.spec.whatwg.org/#concept-urlutils-query-encoding
-  private encoding: string; // support utf-8 only
-
-  // https://url.spec.whatwg.org/#concept-urlutils-query-object
-  queryObject: typeof URLSearchParams = null;
-
-  // https://url.spec.whatwg.org/#concept-urlutils-url
-  private url: jURL = null;
 
   // https://url.spec.whatwg.org/#concept-url-origin
-  get _origin(): { scheme: string; host: Host; port: string; } {
-
+  get origin(): { scheme: string; host: Host; port: string; } {
     // TODO: golobally unique identifier
     var GUID: { scheme: string; host: Host; port: string; } = null;
 
     switch(this.scheme) {
     case "blob":
-      var url: jURL;
+      var url: innerURL;
       try {
-        url = this.parseBasicURL(this.schemeData);
+        // TODO: url = this.parseBasicURL(this.schemeData);
       } catch(err) {
         return GUID;
       }
-      return url._origin;
+      return url.origin;
       break;
     case "ftp":
     case "gopher":
@@ -1052,8 +1064,8 @@ class jURL implements IURL {
     case "wss":
       var o = {
         scheme: this.scheme,
-        host: this._host,
-        port: this._port !== "" ? this._port: relativeScheme[this.scheme]
+        host: this.host,
+        port: this.port !== "" ? this.port: relativeScheme[this.scheme]
       };
       return o;
       break;
@@ -1065,40 +1077,26 @@ class jURL implements IURL {
     }
   }
 
-  // https://url.spec.whatwg.org/#dom-urlutils-origin
-  get origin(): USVString {
-    if (this.url === null) {
-      return "";
-    }
-    return serializeOriginInUnicode(this._origin);
-  }
+}
 
-  // https://url.spec.whatwg.org/#concept-url-scheme
-  private scheme:      string = "";
+// CAUTION: URL already in lib.d.ts
+class jURL implements IURL {
 
-  // https://url.spec.whatwg.org/#concept-url-scheme-data
-  private schemeData:  string = "";
+  // https://url.spec.whatwg.org/#concept-urlutils-input
+  private input: string;
 
-  // https://url.spec.whatwg.org/#concept-url-path
-  private path:        string[] = [];
+  // https://url.spec.whatwg.org/#concept-urlutils-query-encoding
+  queryEncoding: string; // support utf-8 only
 
-  // https://url.spec.whatwg.org/#concept-url-query
-  private query:       string = null;
+  // https://url.spec.whatwg.org/#concept-urlutils-query-object
+  queryObject: typeof URLSearchParams = null;
 
-  // https://url.spec.whatwg.org/#concept-url-fragment
-  private fragment:    string = null;
-
-  // https://url.spec.whatwg.org/#relative-flag
-  private relativeFlag: boolean = false;
-
-  // https://url.spec.whatwg.org/#concept-url-object
-  private object: Blob = null;
+  // https://url.spec.whatwg.org/#concept-urlutils-url
+  private url: innerURL = null;
 
   // https://url.spec.whatwg.org/#concept-urlutils-get-the-base
-  private _base: jURL = null;
-
-  get base(): jURL {
-    return this._base;
+  get base(): innerURL {
+    return this.url;
   }
 
   // https://url.spec.whatwg.org/#dom-urlutils-href
@@ -1118,7 +1116,7 @@ class jURL implements IURL {
 
     // step 2
     if (this instanceof jURL) {
-      var parsedURL: jURL;
+      var parsedURL: innerURL;
       try {
         // step 1
         parsedURL = this.parseBasicURL(input, this.base);
@@ -1140,6 +1138,14 @@ class jURL implements IURL {
     }
   }
 
+  // https://url.spec.whatwg.org/#dom-urlutils-origin
+  get origin(): USVString {
+    if (this.url === null) {
+      return "";
+    }
+    return serializeOriginInUnicode(this.url.origin);
+  }
+
   // https://url.spec.whatwg.org/#dom-urlutils-protocol
   get protocol(): USVString {
     // setp 1
@@ -1148,7 +1154,7 @@ class jURL implements IURL {
     }
 
     // step 2
-    return this.scheme + ":";
+    return this.url.scheme + ":";
   }
 
   set protocol(value: string) {
@@ -1164,9 +1170,6 @@ class jURL implements IURL {
     // TODO: ????
   }
 
-  // https://url.spec.whatwg.org/#concept-url-username
-  private _username:     USVString = "";
-
   // https://url.spec.whatwg.org/#dom-urlutils-username
   get username(): USVString {
     // step 1
@@ -1175,51 +1178,45 @@ class jURL implements IURL {
     }
 
     // step 2
-    return this._username;
+    return this.url.username;
   }
 
   set username(value: USVString) {
     // step 1
-    if (this.url === null || this.relativeFlag === false) {
+    if (this.url === null || this.url.relativeFlag === false) {
       return; // TODO: terminate
     }
 
     // step 2
-    this.setTheUsername(value);
+    setTheUsername(this.url, value);
 
     // step 3
     // TODO: ???
   }
-
-  // https://url.spec.whatwg.org/#concept-url-password
-  private _password:     USVString = null;
 
   // https://url.spec.whatwg.org/#dom-urlutils-password
   get password(): USVString {
     // step 1
-    if (this.url === null || this._password === null) {
+    if (this.url === null || this.url.password === null) {
       return "";
     }
 
     // step 2
-    return this._password
+    return this.url.password
   }
 
   set password(value: USVString) {
     // step 1
-    if (this.url === null || this.relativeFlag === false) {
+    if (this.url === null || this.url.relativeFlag === false) {
       return; // TODO: terminate
     }
 
     // step 2
-    this.setThePassword(value);
+    setThePassword(this.url, value);
 
     // step 3
     // TODO: ???
   }
-
-  // https://url.spec.whatwg.org/#concept-url-host
-  private _host: Host = null;
 
   // https://url.spec.whatwg.org/#dom-urlutils-host
   get host(): USVString {
@@ -1229,12 +1226,12 @@ class jURL implements IURL {
     }
 
     // step 2
-    if (this._port === "") {
-      return serializeHost(this._host);
+    if (this.url.port === "") {
+      return serializeHost(this.url.host);
     }
 
     // step 3
-    return serializeHost(this._host) + ":" + this._port;
+    return serializeHost(this.url.host) + ":" + this.url.port;
   }
 
   // https://url.spec.whatwg.org/#dom-urlutils-hostname
@@ -1245,12 +1242,12 @@ class jURL implements IURL {
     }
 
     // step 2
-    return serializeHost(this._host);
+    return serializeHost(this.url.host);
   }
 
   set hostname(value: USVString) {
     // step 1
-    if (this.url === null || this.relativeFlag === false) {
+    if (this.url === null || this.url.relativeFlag === false) {
       return; // TODO: terminate
     }
 
@@ -1261,9 +1258,6 @@ class jURL implements IURL {
     // TODO: ???
   }
 
-  // https://url.spec.whatwg.org/#concept-url-port
-  private _port:         USVString = "";
-
   // https://url.spec.whatwg.org/#dom-urlutils-port
   get port() {
     // step 1
@@ -1272,12 +1266,12 @@ class jURL implements IURL {
     }
 
     // step 2
-    return this._port;
+    return this.url.port;
   }
 
   set port(value: USVString) {
     // step 1
-    if (this.url === null || this.relativeFlag === false || this.scheme === "file") {
+    if (this.url === null || this.url.relativeFlag === false || this.url.scheme === "file") {
       return; // TODO: terminate
     }
 
@@ -1296,22 +1290,22 @@ class jURL implements IURL {
     }
 
     // step 2
-    if (this.relativeFlag === false) {
-      return this.schemeData;
+    if (this.url.relativeFlag === false) {
+      return this.url.schemeData;
     }
 
     // step 3
-    return "/" + this.path.join("/");
+    return "/" + this.url.path.join("/");
   }
 
   set pathname(value: USVString) {
     // step 1
-    if (this.url === null || this.relativeFlag === false) {
+    if (this.url === null || this.url.relativeFlag === false) {
       return; // TODO: terminate
     }
 
     // step 2
-    this.path = [];
+    this.url.path = [];
 
     // step 3
     var url = this.parseBasicURL(value, null, null, this.url, State.RelativePathStartState);
@@ -1323,12 +1317,12 @@ class jURL implements IURL {
   // https://url.spec.whatwg.org/#dom-urlutils-search
   get search() {
     // step 1
-    if (this.url === null || this.query === null || this.query === "") {
+    if (this.url === null || this.url.query === null || this.url.query === "") {
       return "";
     }
 
     // step 2
-    return "?" + this.query;
+    return "?" + this.url.query;
   }
 
   set search(value: USVString) {
@@ -1339,7 +1333,7 @@ class jURL implements IURL {
 
     // step 2
     if (value === "") {
-      this.query = null;
+      this.url.query = null;
       this.queryObject.list = null;
       // TODO: update steps
       return; // TODO: terminate
@@ -1349,7 +1343,7 @@ class jURL implements IURL {
     var input = value[0] === "?" ? value: value.slice(1);
 
     // step 4
-    this.query = "";
+    this.url.query = "";
 
     // step 5
     var url = this.parseBasicURL(input, null, this.queryEncoding, this.url, State.QueryState);
@@ -1373,23 +1367,23 @@ class jURL implements IURL {
   // https://url.spec.whatwg.org/#dom-urlutils-hash
   get hash(): USVString {
     // step 1
-    if (this.url === null || this.fragment === null || this.fragment === "") {
+    if (this.url === null || this.url.fragment === null || this.url.fragment === "") {
       return "";
     }
 
     // step 2
-    return "#" + this.fragment;
+    return "#" + this.url.fragment;
   }
 
   set hash(value) {
     // step 1
-    if (this.url === null || this.scheme === "javascript") {
+    if (this.url === null || this.url.scheme === "javascript") {
       return; // TODO: terminate
     }
 
     // step 2
     if (value === "") {
-      this.fragment = null;
+      this.url.fragment = null;
       // TODO: pre-update
       return; // TODO: terminate
     }
@@ -1398,7 +1392,7 @@ class jURL implements IURL {
     var input = value[0] === "#" ? value: value.slice(1);
 
     // step 4
-    this.fragment = "";
+    this.url.fragment = "";
 
     // step 5
     this.parseBasicURL(input, null, null, this.url, State.FragmentState);
@@ -1406,9 +1400,6 @@ class jURL implements IURL {
     // step 6
     // TODO: pre-update
   }
-
-  // https://url.spec.whatwg.org/#concept-urlutils-query-encoding
-  queryEncoding: string;
 
   static domainToASCII(domain: string):   string {
     // TODO: implement me
@@ -1442,7 +1433,8 @@ class jURL implements IURL {
     var result = this;
 
     // step 6
-    result._base = parsedBase;
+    // TODO: ??
+    result.url = parsedBase;
 
     // step 7
     result.setTheInput("", parsedURL);
@@ -1452,7 +1444,7 @@ class jURL implements IURL {
   }
 
   // https://url.spec.whatwg.org/#concept-urlutils-set-the-input
-  private setTheInput(input: string, url?: jURL) {
+  private setTheInput(input: string, url?: innerURL) {
     // step 1
     if (url !== undefined) {
       this.url = url;
@@ -1506,36 +1498,6 @@ class jURL implements IURL {
     }
   }
 
-  // https://url.spec.whatwg.org/#set-the-username
-  setTheUsername(username: USVString) {
-    // step 1
-    this._username = "";
-
-    // step 2
-    this._username = String.fromCodePoint.apply(obtainUnicode(username).map((c) => {
-      return utf8PercentEncode(c, usernameEncodeSet);
-    }));
-  }
-
-  // https://url.spec.whatwg.org/#set-the-password
-  setThePassword(password: USVString) {
-    // step 1
-    if (password === "") {
-      this._password = null;
-    }
-
-    // step 2
-    else {
-      // step 2-1
-      this._password = "";
-
-      // step 2-2
-      this._password = String.fromCodePoint.apply(obtainUnicode(password).map((c) => {
-        return utf8PercentEncode(c, passwordEncodeSet);
-      }));
-    }
-  }
-
   private preUpdateSteps(value: string) {
     // TODO: implement me
   }
@@ -1550,7 +1512,7 @@ class jURL implements IURL {
   }
 
   // https://url.spec.whatwg.org/#concept-url-parser
-  private parseURL(input: string, base?: jURL, encodingOverride?: string): jURL {
+  private parseURL(input: string, base?: innerURL, encodingOverride?: string): innerURL {
     try {
       // step 1
       var url = this.parseBasicURL(input, base, encodingOverride);
@@ -1575,11 +1537,11 @@ class jURL implements IURL {
   }
 
   // https://url.spec.whatwg.org/#concept-basic-url-parser
-  private parseBasicURL(input: string, base?: jURL, encodingOverride?: string, url?: jURL, stateOverride?: State): jURL {
+  private parseBasicURL(input: string, base?: innerURL, encodingOverride?: string, url?: innerURL, stateOverride?: State): innerURL {
     // step 1
     if (url === undefined) {
       // step 1-1
-      url = this; // new URL
+      url = new innerURL(); // new URL
 
       // step 1-2
       input = input.trim();
@@ -1791,16 +1753,16 @@ class jURL implements IURL {
 
           break;
         case 63: // ?
-          url._host = base._host;
-          url._port = base._port;
+          url.host = base.host;
+          url.port = base.port;
           url.path = base.path;
           url.query = "";
           state = State.QueryState;
 
           break;
         case 35: // #
-          url._host = base._host;
-          url._port = base._port;
+          url.host = base.host;
+          url.port = base.port;
           url.path = base.path;
           url.query = base.query;
           url.fragment = "";
@@ -1810,8 +1772,8 @@ class jURL implements IURL {
         default:
           // EOF code point
           if (isNaN(c)) {
-            url._host = base._host;
-            url._port = base._port;
+            url.host = base.host;
+            url.port = base.port;
             url.path = base.path;
             url.query = base.query;
           }
@@ -1825,8 +1787,8 @@ class jURL implements IURL {
              || encodedInput.length - (pointer+1) === 1 // remaining.length = 1
              || ![47, 92, 63, 35].includes(encodedInput[pointer+2]) // /, \, ?, #
             ) {
-              url._host = base._host;
-              url._port = base._port;
+              url.host = base.host;
+              url.port = base.port;
               url.path = base.path;
               url.path = url.path.slice(0, -1); // remove last
             }
@@ -1863,8 +1825,8 @@ class jURL implements IURL {
         else {
           // step 1
           if (url.scheme !== "file") {
-            url._host = base._host;
-            url._port = base._port;
+            url.host = base.host;
+            url.port = base.port;
           }
 
           // step 2
@@ -1951,17 +1913,17 @@ class jURL implements IURL {
             }
 
             // step 1-3-4
-            if (cp === 58 && url._password === null) { // :
-              url._password = "";
+            if (cp === 58 && url.password === null) { // :
+              url.password = "";
               continue;
             }
 
             // step 1-3-5
             var result: string = toString(utf8PercentEncode(cp, defaultEncodeSet));
-            if (url._password !== null) {
-              url._password += result;
+            if (url.password !== null) {
+              url.password += result;
             } else {
-              url._username += result;
+              url.username += result;
             }
           }
 
@@ -2015,7 +1977,7 @@ class jURL implements IURL {
             }
 
             // step 1-3-3
-            url._host = host;
+            url.host = host;
             buffer = [];
             state = State.RelativePathStartState;
           }
@@ -2050,7 +2012,7 @@ class jURL implements IURL {
           }
 
           // step 1-3
-          url._host = host;
+          url.host = host;
           buffer = [];
           state = State.PortState;
 
@@ -2073,7 +2035,7 @@ class jURL implements IURL {
           }
 
           // step 2-3
-          url._host = host;
+          url.host = host;
           buffer = [];
           state = State.RelativePathStartState;
 
@@ -2137,7 +2099,7 @@ class jURL implements IURL {
           }
 
           // step 2-3
-          url._port = toString(buffer);
+          url.port = toString(buffer);
 
           // step 2-4
           if (stateOverride !== undefined) {
@@ -2377,7 +2339,7 @@ class jURL implements IURL {
   }
 
   // https://url.spec.whatwg.org/#url-serializing
-  private serializeURL(url: jURL, excludeFragmentFlag: boolean = false) {
+  private serializeURL(url: innerURL, excludeFragmentFlag: boolean = false) {
     // step 1
     var output: string = url.scheme + ":";
 
@@ -2387,13 +2349,13 @@ class jURL implements IURL {
       output = output + "//";
 
       // step 2-2
-      if (url._username !== "" || url._password !== null) {
+      if (url.username !== "" || url.password !== null) {
         // setp 2-2-1
-        output = output + url._username;
+        output = output + url.username;
 
         // step 2-2-2
-        if (url._password !== null) {
-          output = output + ":" + url._password;
+        if (url.password !== null) {
+          output = output + ":" + url.password;
         }
 
         // step 2-2-3
@@ -2401,11 +2363,11 @@ class jURL implements IURL {
       }
 
       // step 2-3
-      output = output + serializeHost(url._host);
+      output = output + serializeHost(url.host);
 
       // step 2-4
-      if (url._port !== "") {
-        output = output + ":" + url._port;
+      if (url.port !== "") {
+        output = output + ":" + url.port;
       }
 
       // step 2-5
@@ -2512,37 +2474,37 @@ assert([1,2,3].includes(-1), false);
   assert(serializeIPv6(parseIPv6(obtainUnicode(test[0]))), test[1]);
 });
 
-//var href = "http://jxck:fooo@example.com:3000/a/b/c?key1=value1&key2=value2#yey";
-//var u = new jURL(href);
-//assert(u.href,     href);
-//assert(u.origin,   "http://example.com:3000");
-//assert(u.protocol, "http:");
-//assert(u.username, "jxck");
-//assert(u.password, "fooo");
-//assert(u.host,     "example.com:3000");
-//assert(u.hostname, "example.com");
-//assert(u.port,     "3000");
-//assert(u.pathname, "/a/b/c");
-//assert(u.search,   "?key1=value1&key2=value2");
-//assert(u.hash,     "#yey");
-//assert(u.searchParams.get("key1"), "value1");
-//assert(u.searchParams.get("key2"), "value2");
-//
-//var href = "http://ゆーざ:パスワード@host.com:3000/ぱす/です/よ/?きー=ばりゅー&もう=いっこ#いぇーい"
-//var u = new jURL(href);
-//assert(u.href,     "http://%E3%82%86%E3%83%BC%E3%81%96:%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89@host.com:3000/%E3%81%B1%E3%81%99/%E3%81%A7%E3%81%99/%E3%82%88/?%E3%81%8D%E3%83%BC=%E3%81%B0%E3%82%8A%E3%82%85%E3%83%BC&%E3%82%82%E3%81%86=%E3%81%84%E3%81%A3%E3%81%93#いぇーい");
-//assert(u.username, "%E3%82%86%E3%83%BC%E3%81%96");
-//assert(u.password, "%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89");
-//assert(u.pathname, "/%E3%81%B1%E3%81%99/%E3%81%A7%E3%81%99/%E3%82%88/");
-//assert(u.search,   "?%E3%81%8D%E3%83%BC=%E3%81%B0%E3%82%8A%E3%82%85%E3%83%BC&%E3%82%82%E3%81%86=%E3%81%84%E3%81%A3%E3%81%93");
-//assert(u.hash,     "#いぇーい");
-//assert(u.searchParams.get("きー"), "ばりゅー");
-//assert(u.searchParams.get("もう"), "いっこ");
-//
-//var href = "http://[2001:0db8:0a0b:12f0:0000:0000:0000:0001]";
-//var u = new jURL(href);
-//assert(u.origin, "http://[2001:db8:a0b:12f0::1]");
-//assert(u.host, "[2001:db8:a0b:12f0::1]");
+var href = "http://jxck:fooo@example.com:3000/a/b/c?key1=value1&key2=value2#yey";
+var u = new jURL(href);
+assert(u.href,     href);
+assert(u.origin,   "http://example.com:3000");
+assert(u.protocol, "http:");
+assert(u.username, "jxck");
+assert(u.password, "fooo");
+assert(u.host,     "example.com:3000");
+assert(u.hostname, "example.com");
+assert(u.port,     "3000");
+assert(u.pathname, "/a/b/c");
+assert(u.search,   "?key1=value1&key2=value2");
+assert(u.hash,     "#yey");
+assert(u.searchParams.get("key1"), "value1");
+assert(u.searchParams.get("key2"), "value2");
+
+var href = "http://ゆーざ:パスワード@host.com:3000/ぱす/です/よ/?きー=ばりゅー&もう=いっこ#いぇーい"
+var u = new jURL(href);
+assert(u.href,     "http://%E3%82%86%E3%83%BC%E3%81%96:%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89@host.com:3000/%E3%81%B1%E3%81%99/%E3%81%A7%E3%81%99/%E3%82%88/?%E3%81%8D%E3%83%BC=%E3%81%B0%E3%82%8A%E3%82%85%E3%83%BC&%E3%82%82%E3%81%86=%E3%81%84%E3%81%A3%E3%81%93#いぇーい");
+assert(u.username, "%E3%82%86%E3%83%BC%E3%81%96");
+assert(u.password, "%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89");
+assert(u.pathname, "/%E3%81%B1%E3%81%99/%E3%81%A7%E3%81%99/%E3%82%88/");
+assert(u.search,   "?%E3%81%8D%E3%83%BC=%E3%81%B0%E3%82%8A%E3%82%85%E3%83%BC&%E3%82%82%E3%81%86=%E3%81%84%E3%81%A3%E3%81%93");
+assert(u.hash,     "#いぇーい");
+assert(u.searchParams.get("きー"), "ばりゅー");
+assert(u.searchParams.get("もう"), "いっこ");
+
+var href = "http://[2001:0db8:0a0b:12f0:0000:0000:0000:0001]";
+var u = new jURL(href);
+assert(u.origin, "http://[2001:db8:a0b:12f0::1]");
+assert(u.host, "[2001:db8:a0b:12f0::1]");
 
 
 var href = "http://example\t.\norg";
@@ -2550,8 +2512,8 @@ var base = "http://example.org/foo/bar";
 // s:http h:example.org p:/
 
 var u = new jURL(href, base);
-console.log(u.protocol, 'http:');
-console.log(u.port, '');
-console.log(u.hostname, 'example.org');
-console.log(u.pathname, '/');
-console.log(u.href, 'http://example.org/');
+assert(u.protocol, 'http:');
+assert(u.port, '');
+assert(u.hostname, 'example.org');
+assert(u.pathname, '/');
+assert(u.href, 'http://example.org/');
