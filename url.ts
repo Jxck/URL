@@ -2395,8 +2395,12 @@ class jURL implements IURL {
 
 }
 
+// export
+this.jURL = jURL;
 
-
+/**
+ * Testing
+ */
 function assert(actual: any, expected: any): void {
   console.log('.');
   console.assert(actual === expected, '\nact: ' + actual + '\nexp: ' + expected);

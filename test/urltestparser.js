@@ -78,3 +78,6 @@ function URLTestParser(input) {
   }
   return results
 }
+
+// export
+this.URLTestParser = URLTestParser;
