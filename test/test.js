@@ -8,7 +8,7 @@ function assert(actual, expected) {
 }
 
 function runURLTests(raw) {
-  var urltests = URLTestParser(raw)
+  var urltests = URLTestParser(raw);
   for(var i = 0, l = urltests.length; i < l; i++) {
     var expected = urltests[i]
     var url = new jURL(expected.input, expected.base)

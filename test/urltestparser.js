@@ -5,6 +5,8 @@ function URLTestParser(input) {
       resultMap = { s: "scheme", u: "username", pass: "password", h: "host", port: "port", p: "path", q: "query", f: "fragment" },
       results = []
   function Test() {
+    this.invalid = false;
+
     this.input = ""
     this.base = ""
     this.scheme = ""
@@ -58,6 +60,11 @@ function URLTestParser(input) {
     var pieces = line.split(" "),
         result = new Test()
     result.input = normalize(pieces.shift())
+
+    if(pieces.length === 0) {
+      result.invalid = true;
+    }
+
     var base = pieces.shift()
     if(base === "" || base === undefined) {
       result.base = results[results.length - 1].base
