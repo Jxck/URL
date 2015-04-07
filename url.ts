@@ -1418,7 +1418,7 @@ class jURL implements IURL {
       var parsedBase = this.parseBasicURL(base);
     } catch(failure) {
       // step 2
-      throw new TypeError("invalid url");
+      throw new TypeError(`invalid url, base: ${base}`);
     }
 
     try {
@@ -1426,7 +1426,7 @@ class jURL implements IURL {
       var parsedURL = this.parseBasicURL(url, parsedBase);
     } catch(failure) {
       // step 4
-      throw new TypeError("invalid url");
+      throw new TypeError(`invalid url, url: ${url}`);
     }
 
     // step 5
