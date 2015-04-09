@@ -9,19 +9,19 @@ function assert(actual, expected) {
 
 function runURLTests(raw) {
   var urltests = URLTestParser(raw);
-  for(var i = 0, l = urltests.length; i < l; i++) {
-    var expected = urltests[i]
-    var url = new jURL(expected.input, expected.base)
-    if(expected.protocol === ':' && url.protocol !== ':') {
-      assert.fail('Expected URL to fail parsing')
+  for (var i = 0, l = urltests.length; i < l; i++) {
+    var expected = urltests[i];
+    var url = new jURL(expected.input, expected.base);
+    if (expected.protocol === ':' && url.protocol !== ':') {
+      assert.fail('Expected URL to fail parsing');
     }
-    assert(url.protocol, expected.protocol, "scheme")
-    assert(url.hostname, expected.host, "host")
-    assert(url.port, expected.port, "port")
-    assert(url.pathname, expected.path, "path")
-    assert(url.search, expected.search, "search")
-    assert(url.hash, expected.hash, "hash")
-    assert(url.href, expected.href, "href")
+    assert(url.protocol, expected.protocol, 'scheme');
+    assert(url.hostname, expected.host, 'host');
+    assert(url.port, expected.port, 'port');
+    assert(url.pathname, expected.path, 'path');
+    assert(url.search, expected.search, 'search');
+    assert(url.hash, expected.hash, 'hash');
+    assert(url.href, expected.href, 'href');
   }
 }
 
