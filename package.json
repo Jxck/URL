@@ -44,6 +44,6 @@
     "type": "cp node_modules/utf8-encoding/utf8-encoding.d.ts types/ && cp node_modules/urlsearchparams/urlsearchparams.d.ts types/",
     "prepublish": "npm run tsc",
     "test": "npm run tsc && node url.js && \\rm -f npm-debug.log && echo open test/index.html in your browser",
-    "tsc": "tsc url.ts --target ES5 --module commonjs --noImplicitAny"
+    "tsc": "tsc url.ts --target ES5 --module commonjs --noImplicitAny --sourceMap"
   }
 }
