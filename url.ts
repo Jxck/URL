@@ -2212,7 +2212,7 @@ class jURL implements IURL {
         }
 
         // step 2
-        else if ([0x9, 0xA, 0xD].includes(c)) { // HT, LF/NL, VT
+        else if ([0x9, 0xA, 0xD].includes(c)) { // \t, \n, \r
           console.error("parse error");
         }
 
