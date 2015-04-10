@@ -982,7 +982,6 @@ enum State {
   AuthoritySecondSlashState,
   AuthorityIgnoreSlashesState,
   AuthorityState,
-  FlagmentState,
   FileHostState,
   HostState,
   HostNameState,
@@ -1675,7 +1674,7 @@ class jURL implements IURL {
         // step 2
         else if (c === 35) { // #
           url.fragment = "";
-          state = State.FlagmentState;
+          state = State.FragmentState;
         }
 
         // step 3
@@ -1766,7 +1765,7 @@ class jURL implements IURL {
           url.path = base.path;
           url.query = base.query;
           url.fragment = "";
-          state = State.FlagmentState;
+          state = State.FragmentState;
 
           break;
         default:
