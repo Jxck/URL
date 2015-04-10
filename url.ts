@@ -2528,10 +2528,10 @@ assert(u.protocol, "file:");
 assert(u.pathname, "/c:/foo/bar.html");
 
 
-var base = "about:blank";
-var href = "http://example.com/././foo";
+var base = "http://example.org/foo/bar";
+var href = "data:text/html,text#test";
 debugger;
 var u = new jURL(href, base);
-assert(u.protocol, "http:");
-assert(u.hostname, "example.com");
-assert(u.pathname, "/foo");
+assert(u.protocol, "data:");
+assert(u.pathname, "text/html,text");
+assert(u.hash, "#test");
