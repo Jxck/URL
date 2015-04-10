@@ -2144,8 +2144,10 @@ class jURL implements IURL {
       // https://url.spec.whatwg.org/#relative-path-state
       case State.RelativePathState:
         // step 1
-        if ((isNaN(c) || [49, 92].includes(c)) // /, \
-         || stateOverride === undefined && [63, 35].includes(c)) {
+        if (
+                (isNaN(c) || [47, 92].includes(c)) // EOS or / or \
+             || (stateOverride === undefined && [63, 35].includes(c)) // ?, #
+           ) {
 
           // step 1-1
           if (c === 92) { // \
@@ -2210,7 +2212,7 @@ class jURL implements IURL {
         }
 
         // step 2
-        else if ([0x9, 0xA, 0xD].includes(c)) {
+        else if ([0x9, 0xA, 0xD].includes(c)) { // HT, LF/NL, VT
           console.error("parse error");
         }
 
