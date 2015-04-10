@@ -2526,11 +2526,15 @@ var u = new jURL(href, base);
 assert(u.protocol, "file:");
 assert(u.pathname, "/c:/foo/bar.html");
 
-
 var base = "http://example.org/foo/bar";
 var href = "data:text/html,text#test";
-debugger;
 var u = new jURL(href, base);
 assert(u.protocol, "data:");
 assert(u.pathname, "text/html,text");
 assert(u.hash, "#test");
+
+var base = "http://other.com/";
+var href = "http://ExAmPlE.CoM";
+var u = new jURL(href, base);
+assert(u.protocol, "http:");
+assert(u.hostname, "example.com");
