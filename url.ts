@@ -2510,31 +2510,3 @@ var href = "http://[2001:0db8:0a0b:12f0:0000:0000:0000:0001]";
 var u = new jURL(href);
 assert(u.origin, "http://[2001:db8:a0b:12f0::1]");
 assert(u.host, "[2001:db8:a0b:12f0::1]");
-
-var href = "http://example\t.\norg";
-var base = "http://example.org/foo/bar";
-var u = new jURL(href, base);
-assert(u.protocol, 'http:');
-assert(u.port, '');
-assert(u.hostname, 'example.org');
-assert(u.pathname, '/');
-assert(u.href, 'http://example.org/');
-
-var href = "file:c:\\foo\\bar.html"
-var base = "file:///tmp/mock/path"
-var u = new jURL(href, base);
-assert(u.protocol, "file:");
-assert(u.pathname, "/c:/foo/bar.html");
-
-var base = "http://example.org/foo/bar";
-var href = "data:text/html,text#test";
-var u = new jURL(href, base);
-assert(u.protocol, "data:");
-assert(u.pathname, "text/html,text");
-assert(u.hash, "#test");
-
-var base = "http://other.com/";
-var href = "http://ExAmPlE.CoM";
-var u = new jURL(href, base);
-assert(u.protocol, "http:");
-assert(u.hostname, "example.com");
