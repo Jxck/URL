@@ -1,9 +1,8 @@
-var fs = require('fs');
-var jURL = require('../url').jURL;
-var URLTestParser = require('./urltestparser').URLTestParser;
+// https://github.com/w3c/web-platform-tests/tree/master/url
+var jURL = jURL || require('../url').jURL;
+var URLTestParser = URLTestParser || require('./urltestparser').URLTestParser;
 
 function assert(actual, expected) {
-  console.log('.');
   console.assert(actual === expected, '\nact: ' + actual + '\nexp: ' + expected);
 }
 
@@ -27,8 +26,7 @@ function t(urltests) {
     assert(url.href, expected.href, 'href');
   } catch(err) {
     if (expected.invalid === false) {
-      console.log(expected, urltests.length);
-      console.log(err);
+      console.log(err.message);
     }
   } finally {
     setTimeout(function() {
@@ -44,6 +42,16 @@ function runURLTests(raw) {
   t(urltests);
 }
 
-fs.readFile('./test/urltestdata.txt', function(err, data) {
-  runURLTests(data.toString());
-});
+if (typeof window !== 'undefined') {
+  var request = new XMLHttpRequest();
+  request.open('GET', 'urltestdata.txt');
+  request.send();
+  request.responseType = 'text';
+  request.onload = function() {
+    runURLTests(request.response);
+  };
+} else {
+  require('fs').readFile('./test/urltestdata.txt', function(err, data) {
+    runURLTests(data.toString());
+  });
+}
