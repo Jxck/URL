@@ -3,27 +3,28 @@
 /// <reference path="types/obtain-unicode.d.ts" />
 /// <reference path="types/utf8-encoding.d.ts" />
 
-// MEMO: code point
-// ",  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,   -,  .,  /
-// 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47
-
-//  0, ...,  9
-// 48, ..., 57
-
-//  :,  ;,  <,  =,  >,  ?,  @
-// 58, 59, 60, 61, 62, 63, 64
-
-//  A, ...,  Z
-// 65, ..., 90
-
-//  [,  \,  ],  ^,  _,  `
-// 91, 92, 93, 94, 95, 96
-
-//  a, ...,   z
-// 97, ..., 122
-
-//   {,   |,   },   ~
-// 123, 124, 125, 126
+/** MEMO: code point
+ *  ",  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,   -,  .,  /
+ *  34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47
+ *
+ *   0, ...,  9
+ *  48, ..., 57
+ *
+ *   :,  ;,  <,  =,  >,  ?,  @
+ *  58, 59, 60, 61, 62, 63, 64
+ *
+ *   A, ...,  Z
+ *  65, ..., 90
+ *
+ *   [,  \,  ],  ^,  _,  `
+ *  91, 92, 93, 94, 95, 96
+ *
+ *   a, ...,   z
+ *  97, ..., 122
+ *
+ *    {,   |,   },   ~
+ *  123, 124, 125, 126
+ */
 
 // TODO: Fixme does not exist on type 'string'... ?
 interface String {
@@ -31,7 +32,7 @@ interface String {
 }
 
 if (String.prototype.codePoint === undefined) {
-  Object.defineProperty(String.prototype, 'codePoint', {
+  Object.defineProperty(String.prototype, "codePoint", {
     enumerable: false,
     configurable: false,
     writable: false,
@@ -55,12 +56,12 @@ declare var String: {
 
 // polyfill for Array.prototype.includes
 if (Array.prototype.includes === undefined) {
-  Object.defineProperty(Array.prototype, 'includes', {
+  Object.defineProperty(Array.prototype, "includes", {
     enumerable: false,
     configurable: false,
     writable: false,
     value: function(e: number): boolean {
-      return this.indexOf(e) !== -1
+      return this.indexOf(e) !== -1;
     }
   });
 }
@@ -77,20 +78,20 @@ if (typeof window === "undefined") { // in node.js
 }
 
 // import only type info
-import te = require('utf8-encoding');
+import te = require("utf8-encoding");
 
 var TextEncoder: typeof te.TextEncoder;
 var TextDecoder: typeof te.TextDecoder;
-if (typeof window === 'undefined') { // in node.js
-  TextEncoder = require('utf8-encoding').TextEncoder;
-  TextDecoder = require('utf8-encoding').TextDecoder;
+if (typeof window === "undefined") { // in node.js
+  TextEncoder = require("utf8-encoding").TextEncoder;
+  TextDecoder = require("utf8-encoding").TextDecoder;
 }
 
 var encoder = new TextEncoder("utf-8");
 var decoder = new TextDecoder();
 
 // import only type info
-var URLSearchParams = require('urlsearchparams').URLSearchParams;
+var URLSearchParams = require("urlsearchparams").URLSearchParams;
 
 // original type
 type CodePoint = number;
@@ -101,7 +102,8 @@ function copy<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
-function toLower(codePoint: CodePoint): CodePoint{
+function toLower(codePoint: CodePoint): CodePoint {
+  "use strict";
   if (!inRange(65, codePoint, 90)) {
     return codePoint;
   }
@@ -109,6 +111,7 @@ function toLower(codePoint: CodePoint): CodePoint{
 }
 
 function toUpper(codePoint: CodePoint): CodePoint {
+  "use strict";
   if (!inRange(97, codePoint, 122)) {
     return codePoint;
   }
@@ -116,10 +119,12 @@ function toUpper(codePoint: CodePoint): CodePoint {
 }
 
 function toString(codePoints: CodePoint[]): string {
+  "use strict";
   return String.fromCodePoint.apply(null, codePoints);
 }
 
 function encode(input: CodePoint[], encodingOverride: string = "utf-8"): CodePoint[] {
+  "use strict";
   if (encodingOverride !== "utf-8") {
     throw new Error("support utf-8 only");
   }
@@ -129,10 +134,12 @@ function encode(input: CodePoint[], encodingOverride: string = "utf-8"): CodePoi
 }
 
 function decode(input: CodePoint[]): string {
+  "use strict";
   return decoder.decode(new Uint8Array(input));
 }
 
 function percentEncode(input: CodePoint[]): CodePoint[] {
+  "use strict";
   var result: CodePoint[] = [];
   for (var i = 0; i < input.length; i ++) {
     var hex = input[i].toString(16).toUpperCase();
@@ -145,17 +152,18 @@ function percentEncode(input: CodePoint[]): CodePoint[] {
 }
 
 function percentDecode(input: CodePoint[]): CodePoint[] {
+  "use strict";
   function range(b: number): boolean {
     return !inRange(0x30, b, 0x39)
         && !inRange(0x41, b, 0x46)
-        && !inRange(0x61, b, 0x66)
+        && !inRange(0x61, b, 0x66);
   }
 
   // step 1
   var output: CodePoint[] = [];
 
   // step 2
-  for (var i=0; i<input.length; i++) {
+  for (var i = 0; i < input.length; i++) {
     var byt = input[i];
 
     // setp 2-1
@@ -165,8 +173,8 @@ function percentDecode(input: CodePoint[]): CodePoint[] {
 
     // step 2-2
     else if (byt === 37
-          && range(input[i+1])
-          && range(input[i+2])
+          && range(input[i + 1])
+          && range(input[i + 2])
     ) { // %
       output.push(byt);
     }
@@ -174,7 +182,7 @@ function percentDecode(input: CodePoint[]): CodePoint[] {
     // step 2-3
     else {
       // step 2-3-1
-      var bytePoint = parseInt(decode([input[i+1], input[i+2]]), 16);
+      var bytePoint = parseInt(decode([input[i + 1], input[i + 2]]), 16);
 
       // step 2-3-2
       output.push(bytePoint);
@@ -189,6 +197,7 @@ function percentDecode(input: CodePoint[]): CodePoint[] {
 
 // https://url.spec.whatwg.org/#concept-ipv6-parser
 function parseIPv6(input: CodePoint[]): number[] {
+  "use strict";
 
   // step 1
   var address: number[] = [0, 0, 0, 0, 0, 0, 0, 0]; // 16bit * 8
@@ -206,7 +215,7 @@ function parseIPv6(input: CodePoint[]): number[] {
   // step 5
   if (input[pointer] === 58) { // :
     // step 5-1
-    if (input[pointer+1] !== 58) { // :
+    if (input[pointer + 1] !== 58) { // :
       console.error("parse error");
       throw new Error("failure");
     }
@@ -225,7 +234,8 @@ function parseIPv6(input: CodePoint[]): number[] {
   // step 6
   // https://url.spec.whatwg.org/#concept-ipv6-parser-main
 function Main(address: number[], input: CodePoint[], pointer: number, piecePointer: number, compressPointer: number): number[] {
-  while(input[pointer] !== EOF) {
+  "use strict";
+  while (input[pointer] !== EOF) {
     // step 6-1
     if (piecePointer === 8) {
       console.error("parse error");
@@ -303,6 +313,7 @@ function Main(address: number[], input: CodePoint[], pointer: number, piecePoint
 
 // step 8
 function IPv4(address: number[], input: CodePoint[], pointer: number, piecePointer: number, compressPointer: number): number[] {
+  "use strict";
   if (piecePointer > 6) {
     console.error("parse error");
     throw new Error("failure");
@@ -312,7 +323,7 @@ function IPv4(address: number[], input: CodePoint[], pointer: number, piecePoint
   var dotsSeen = 0;
 
   // step 10
-  while(input[pointer] !== EOF) {
+  while (input[pointer] !== EOF) {
     // step 10-1
     var value: number = null;
 
@@ -383,6 +394,7 @@ function IPv4(address: number[], input: CodePoint[], pointer: number, piecePoint
 
 // step 11
 function Finale(address: number[], input: CodePoint[], pointer: number, piecePointer: number, compressPointer: number): number[] {
+  "use strict";
   if (compressPointer !== null) {
     // step 11-1
     var swaps = piecePointer - compressPointer;
@@ -413,6 +425,8 @@ function Finale(address: number[], input: CodePoint[], pointer: number, piecePoi
 
 // https://url.spec.whatwg.org/#concept-ipv6-serializer
 function serializeIPv6(address: number[]): string {
+  "use strict";
+
   // step 1
   var output: string  = "";
 
@@ -423,7 +437,7 @@ function serializeIPv6(address: number[]): string {
     var pos = -1; // current seq of 0 position
     var acc = 0;  // sum of 0
     var result = { pos: -1, acc: 0 }; // current max result
-    for (var i=0; i<arr.length; i++) {
+    for (var i = 0; i < arr.length; i++) {
       if (arr[i] === 0) {
         if (pos === -1) {
           // start of 0 seq
@@ -444,12 +458,12 @@ function serializeIPv6(address: number[]): string {
     }
 
     arr.pop(); // remove 1 added at top of this function
-    return result.acc > 1 ? result.pos: null;
+    return result.acc > 1 ? result.pos : null;
   }
   var compressPointer = find(address);
 
   // step 4
-  for (var index:number = 0; index < address.length; index ++) {
+  for (var index: number = 0; index < address.length; index ++) {
     var piece: number = address[index];
 
     // step 4-1
@@ -460,7 +474,7 @@ function serializeIPv6(address: number[]): string {
         output = output + ":";
       }
 
-      while(address[index+1] === 0) {
+      while (address[index + 1] === 0) {
         index = index + 1;
       }
       continue;
@@ -480,6 +494,8 @@ function serializeIPv6(address: number[]): string {
 
 // https://url.spec.whatwg.org/#concept-host-parser
 function parseHost(input: CodePoint[], unicodeFlag?: boolean): Host {
+  "use strict";
+
   // step 1
   if (input.length === 0) {
     throw new Error("failure");
@@ -488,7 +504,7 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): Host {
   // step 2
   if (input[0] === 91) { // [
     // step 2-1
-    if (input[input.length-1] !== 93) { // ]
+    if (input[input.length - 1] !== 93) { // ]
       console.error("parse error");
       throw new Error("failure");
     }
@@ -511,7 +527,7 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): Host {
   }
 
   // step 6
-  var check = [ "\u0000", "\t", "\n", "\r", " ", "#", "%", "/", ":", "?", "@", "[", "\\", "]" ].some((s) => {
+  var check = [ "\u0000", "\t", "\n", "\r", " ", "#", "%", "/", ":", "?", "@", "[", "\\", "]" ].some((s: string) => {
     return asciiDomain.indexOf(s) !== -1;
   });
   if (check === true) {
@@ -528,6 +544,8 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): Host {
 
 // https://url.spec.whatwg.org/#concept-host-serializer
 function serializeHost(host: Host): string {
+  "use strict";
+
   // step 1
   if (host === null) {
     return "";
@@ -539,7 +557,7 @@ function serializeHost(host: Host): string {
   }
 
   // step 3
-  else if(isDomain(host)) {
+  else if (isDomain(host)) {
     return <string>host;
   }
 }
@@ -548,6 +566,8 @@ function serializeHost(host: Host): string {
 // https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin
 // origin [scheme, host, port];
 function serializeOriginInUnicode(origin: { scheme: string; host: Host; port: string; }): string {
+  "use strict";
+
   // step 1
   if (!origin) {
     return "null";
@@ -582,30 +602,35 @@ type EncodeSet = (p: CodePoint) => boolean;
 
 // https://url.spec.whatwg.org/#simple-encode-set
 function simpleEncodeSet(codePoint: CodePoint): boolean {
+  "use strict";
   // all code points less than U+0020 (i.e. excluding U+0020) and all code points greater than U+007E.
   return codePoint < 0x0020 || 0x007E < codePoint;
 }
 
 // https://url.spec.whatwg.org/#default-encode-set
 function defaultEncodeSet(codePoint: CodePoint): boolean {
+  "use strict";
   // simple encode set and code points U+0020, '"', "#", "<", ">", "?", and "`".
   return simpleEncodeSet(codePoint) || ([0x20, 34, 35, 60, 62, 63, 96].includes(codePoint));
 }
 
 // https://url.spec.whatwg.org/#username-encode-set
 function passwordEncodeSet(codePoint: CodePoint): boolean {
+  "use strict";
   // default encode set and code points "/", "@", and "\".
   return defaultEncodeSet(codePoint) || ([0x47, 0x64, 0x92].includes(codePoint));
 }
 
 // https://url.spec.whatwg.org/#username-encode-set
 function usernameEncodeSet(codePoint: CodePoint): boolean {
+  "use strict";
   // password encode set and code point ":".
   return passwordEncodeSet(codePoint) || codePoint === 58;
 }
 
 // https://url.spec.whatwg.org/#utf_8-percent-encode
 function utf8PercentEncode(codePoint: CodePoint, encodeSet: EncodeSet): CodePoint[] {
+  "use strict";
   // step 1
   if (encodeSet(codePoint) === false) {
     return [codePoint];
@@ -621,31 +646,37 @@ function utf8PercentEncode(codePoint: CodePoint, encodeSet: EncodeSet): CodePoin
 }
 
 function inRange(from: number, tar: number, to: number): boolean {
+  "use strict";
   return (from <= tar && tar <= to);
 }
 
 // https://url.spec.whatwg.org/#ascii-digits
 function isASCIIDigits(codePoint: CodePoint): boolean {
+  "use strict";
   return inRange(0x30, codePoint, 0x39);
 }
 
 // https://url.spec.whatwg.org/#ascii-hex-digits
 function isASCIIHexDigits(codePoint: CodePoint): boolean {
+  "use strict";
   return isASCIIDigits(codePoint) || inRange(0x41, codePoint, 0x46) || inRange(0x61, codePoint, 0x66);
 }
 
 // https://url.spec.whatwg.org/#ascii-alpha
 function isASCIIAlpha(codePoint: CodePoint): boolean {
+  "use strict";
   return inRange(0x41, codePoint, 0x5A) || inRange(0x61, codePoint, 0x7A);
 }
 
 // https://url.spec.whatwg.org/#ascii-alphanumeric
 function isASCIIAlphaNumeric(codePoint: CodePoint): boolean {
+  "use strict";
   return isASCIIDigits(codePoint) || isASCIIAlpha(codePoint);
 }
 
 // https://url.spec.whatwg.org/#url-code-points
 function isURLCodePoint(codePoint: CodePoint): boolean {
+  "use strict";
   if (isASCIIAlphaNumeric(codePoint)) {
     return true;
   }
@@ -657,25 +688,25 @@ function isURLCodePoint(codePoint: CodePoint): boolean {
     return true;
   }
 
-  if (inRange(0x00A0  , codePoint, 0xD7FF  )) return true;
-  if (inRange(0xE000  , codePoint, 0xFDCF  )) return true;
-  if (inRange(0xFDF0  , codePoint, 0xFFFD  )) return true;
-  if (inRange(0x10000 , codePoint, 0x1FFFD )) return true;
-  if (inRange(0x20000 , codePoint, 0x2FFFD )) return true;
-  if (inRange(0x30000 , codePoint, 0x3FFFD )) return true;
-  if (inRange(0x40000 , codePoint, 0x4FFFD )) return true;
-  if (inRange(0x50000 , codePoint, 0x5FFFD )) return true;
-  if (inRange(0x60000 , codePoint, 0x6FFFD )) return true;
-  if (inRange(0x70000 , codePoint, 0x7FFFD )) return true;
-  if (inRange(0x80000 , codePoint, 0x8FFFD )) return true;
-  if (inRange(0x90000 , codePoint, 0x9FFFD )) return true;
-  if (inRange(0xA0000 , codePoint, 0xAFFFD )) return true;
-  if (inRange(0xB0000 , codePoint, 0xBFFFD )) return true;
-  if (inRange(0xC0000 , codePoint, 0xCFFFD )) return true;
-  if (inRange(0xD0000 , codePoint, 0xDFFFD )) return true;
-  if (inRange(0xE0000 , codePoint, 0xEFFFD )) return true;
-  if (inRange(0xF0000 , codePoint, 0xFFFFD )) return true;
-  if (inRange(0x100000, codePoint, 0x10FFFD)) return true;
+  if (inRange(0x00A0  , codePoint, 0xD7FF  )) { return true; }
+  if (inRange(0xE000  , codePoint, 0xFDCF  )) { return true; }
+  if (inRange(0xFDF0  , codePoint, 0xFFFD  )) { return true; }
+  if (inRange(0x10000 , codePoint, 0x1FFFD )) { return true; }
+  if (inRange(0x20000 , codePoint, 0x2FFFD )) { return true; }
+  if (inRange(0x30000 , codePoint, 0x3FFFD )) { return true; }
+  if (inRange(0x40000 , codePoint, 0x4FFFD )) { return true; }
+  if (inRange(0x50000 , codePoint, 0x5FFFD )) { return true; }
+  if (inRange(0x60000 , codePoint, 0x6FFFD )) { return true; }
+  if (inRange(0x70000 , codePoint, 0x7FFFD )) { return true; }
+  if (inRange(0x80000 , codePoint, 0x8FFFD )) { return true; }
+  if (inRange(0x90000 , codePoint, 0x9FFFD )) { return true; }
+  if (inRange(0xA0000 , codePoint, 0xAFFFD )) { return true; }
+  if (inRange(0xB0000 , codePoint, 0xBFFFD )) { return true; }
+  if (inRange(0xC0000 , codePoint, 0xCFFFD )) { return true; }
+  if (inRange(0xD0000 , codePoint, 0xDFFFD )) { return true; }
+  if (inRange(0xE0000 , codePoint, 0xEFFFD )) { return true; }
+  if (inRange(0xF0000 , codePoint, 0xFFFFD )) { return true; }
+  if (inRange(0x100000, codePoint, 0x10FFFD)) { return true; }
 
   return false;
 }
@@ -689,9 +720,10 @@ var relativeScheme: { [index: string] : string } = {
   https : "443",
   ws    : "80",
   wss   : "443"
-}
+};
 
 function isRelativeScheme(scheme: string): boolean {
+  "use strict";
   return Object.keys(relativeScheme).includes(scheme);
 }
 
@@ -700,10 +732,12 @@ var localScheme = [ "about", "blob", "data", "filesystem" ];
 
 
 function isIPv6(host: Host): boolean {
+  "use strict";
   return (Array.isArray(host) && host.length === 8);
 }
 
 function isDomain(host: Host): boolean {
+  "use strict";
   return (typeof host === "string");
 }
 
@@ -749,7 +783,7 @@ function parseURLEncoded(input: CodePoint[], encodingOverride?: string, useChars
   // step 5, 6
   var pairs: IPair[] = sequences.map((bytes: number[]): IPair => {
     // step 6-1
-    if (bytes.length === 0) return;
+    if (bytes.length === 0) { return; }
 
     // step 6-2
     var name: number[], value: number[];
@@ -882,17 +916,21 @@ function byteSerializeURLEncoded(input: CodePoint[]): string {
 
 // https://url.spec.whatwg.org/#set-the-username
 function setTheUsername(url: innerURL, username: USVString) {
+  "use strict";
+
   // step 1
   url.username = "";
 
   // step 2
-  url.username = String.fromCodePoint.apply(obtainUnicode(username).map((c) => {
+  url.username = String.fromCodePoint.apply(obtainUnicode(username).map((c: CodePoint) => {
     return utf8PercentEncode(c, usernameEncodeSet);
   }));
 }
 
 // https://url.spec.whatwg.org/#set-the-password
 function setThePassword(url: innerURL, password: USVString) {
+  "use strict";
+
   // step 1
   if (password === "") {
     url.password = null;
@@ -904,42 +942,42 @@ function setThePassword(url: innerURL, password: USVString) {
     url.password = "";
 
     // step 2-2
-    url.password = String.fromCodePoint.apply(obtainUnicode(password).map((c) => {
+    url.password = String.fromCodePoint.apply(obtainUnicode(password).map((c: CodePoint) => {
       return utf8PercentEncode(c, passwordEncodeSet);
     }));
   }
 }
 
-//[NoInterfaceObject, Exposed=(Window,Worker)]
-// interface URLUtilsReadOnly {
-//   stringifier readonly attribute USVString href;
+// [NoInterfaceObject, Exposed=(Window,Worker)]
+//  interface URLUtilsReadOnly {
+//    stringifier readonly attribute USVString href;
+//    readonly attribute USVString origin;
+//
+//    readonly attribute USVString protocol;
+//    readonly attribute USVString host;
+//    readonly attribute USVString hostname;
+//    readonly attribute USVString port;
+//    readonly attribute USVString pathname;
+//    readonly attribute USVString search;
+//    readonly attribute USVString hash;
+//  };
+
+// [NoInterfaceObject, Exposed=(Window,Worker)]
+// interface URLUtils {
+//   stringifier attribute USVString href;
 //   readonly attribute USVString origin;
 //
-//   readonly attribute USVString protocol;
-//   readonly attribute USVString host;
-//   readonly attribute USVString hostname;
-//   readonly attribute USVString port;
-//   readonly attribute USVString pathname;
-//   readonly attribute USVString search;
-//   readonly attribute USVString hash;
+//            attribute USVString protocol;
+//            attribute USVString username;
+//            attribute USVString password;
+//            attribute USVString host;
+//            attribute USVString hostname;
+//            attribute USVString port;
+//            attribute USVString pathname;
+//            attribute USVString search;
+//            attribute URLSearchParams searchParams;
+//            attribute USVString hash;
 // };
-
-//[NoInterfaceObject, Exposed=(Window,Worker)]
-//interface URLUtils {
-//  stringifier attribute USVString href;
-//  readonly attribute USVString origin;
-//
-//           attribute USVString protocol;
-//           attribute USVString username;
-//           attribute USVString password;
-//           attribute USVString host;
-//           attribute USVString hostname;
-//           attribute USVString port;
-//           attribute USVString pathname;
-//           attribute USVString search;
-//           attribute URLSearchParams searchParams;
-//           attribute USVString hash;
-//};
 interface IURLUtils {
   href:         USVString; // stringifier
 
@@ -957,11 +995,11 @@ interface IURLUtils {
   hash:         USVString;
 }
 
-//[Constructor(USVString url, optional USVString base = "about:blank"), Exposed=(Window,Worker)]
-//interface URL {
-//  static USVString domainToASCII(USVString domain);
-//  static USVString domainToUnicode(USVString domain);
-//};
+// [Constructor(USVString url, optional USVString base = "about:blank"), Exposed=(Window,Worker)]
+// interface URL {
+//   static USVString domainToASCII(USVString domain);
+//   static USVString domainToUnicode(USVString domain);
+// };
 
 //URL implements URLUtils;
 interface IURL extends IURLUtils {
@@ -1036,7 +1074,7 @@ class innerURL {
 
   // https://url.spec.whatwg.org/#include-credentials
   get includeCredentials(): boolean {
-    return this.username !== '' || this.password !== null;
+    return this.username !== "" || this.password !== null;
   }
 
   // https://url.spec.whatwg.org/#concept-url-origin
@@ -1044,16 +1082,15 @@ class innerURL {
     // TODO: golobally unique identifier
     var GUID: { scheme: string; host: Host; port: string; } = null;
 
-    switch(this.scheme) {
+    switch (this.scheme) {
     case "blob":
       var url: innerURL;
       try {
         // TODO: url = this.parseBasicURL(this.schemeData);
-      } catch(err) {
+      } catch (err) {
         return GUID;
       }
       return url.origin;
-      break;
     case "ftp":
     case "gopher":
     case "http":
@@ -1063,13 +1100,11 @@ class innerURL {
       var o = {
         scheme: this.scheme,
         host: this.host,
-        port: this.port !== "" ? this.port: relativeScheme[this.scheme]
+        port: this.port !== "" ? this.port : relativeScheme[this.scheme]
       };
       return o;
-      break;
     case "file":
       return GUID;
-      break;
     default:
       return GUID;
     }
@@ -1118,7 +1153,7 @@ class jURL implements IURL {
       try {
         // step 1
         parsedURL = this.parseBasicURL(input, this.base);
-      } catch(err) {
+      } catch (err) {
         // step 2
         throw new TypeError(err);
       }
@@ -1200,7 +1235,7 @@ class jURL implements IURL {
     }
 
     // step 2
-    return this.url.password
+    return this.url.password;
   }
 
   set password(value: USVString) {
@@ -1219,7 +1254,7 @@ class jURL implements IURL {
   // https://url.spec.whatwg.org/#dom-urlutils-host
   get host(): USVString {
     // step 1
-    if(this.url === null) {
+    if (this.url === null) {
       return "";
     }
 
@@ -1338,7 +1373,7 @@ class jURL implements IURL {
     }
 
     // step 3
-    var input = value[0] === "?" ? value: value.slice(1);
+    var input = value[0] === "?" ? value : value.slice(1);
 
     // step 4
     this.url.query = "";
@@ -1387,7 +1422,7 @@ class jURL implements IURL {
     }
 
     // step 3
-    var input = value[0] === "#" ? value: value.slice(1);
+    var input = value[0] === "#" ? value : value.slice(1);
 
     // step 4
     this.url.fragment = "";
@@ -1410,11 +1445,11 @@ class jURL implements IURL {
   }
 
   // https://url.spec.whatwg.org/#constructors
-  constructor(url:USVString, base:USVString = "about:blank") {
+  constructor(url: USVString, base: USVString = "about:blank") {
     try {
       // step 1
       var parsedBase = this.parseBasicURL(base);
-    } catch(failure) {
+    } catch (failure) {
       // step 2
       throw new TypeError(`invalid url, base: ${base}`);
     }
@@ -1422,7 +1457,7 @@ class jURL implements IURL {
     try {
       // step 3
       var parsedURL = this.parseBasicURL(url, parsedBase);
-    } catch(failure) {
+    } catch (failure) {
       // step 4
       throw new TypeError(`invalid url, url: ${url}`);
     }
@@ -1470,7 +1505,7 @@ class jURL implements IURL {
 
           // step 2-3-3
           this.url = url;
-        } catch(failure) {
+        } catch (failure) {
           throw failure;
         }
       }
@@ -1514,7 +1549,7 @@ class jURL implements IURL {
     try {
       // step 1
       var url = this.parseBasicURL(input, base, encodingOverride);
-    } catch(failure) {
+    } catch (failure) {
       // step 2
       throw failure;
     }
@@ -1546,10 +1581,10 @@ class jURL implements IURL {
     }
 
     // step 2
-    var state: State = (stateOverride !== undefined)? stateOverride : State.SchemeStartState;
+    var state: State = (stateOverride !== undefined) ? stateOverride : State.SchemeStartState;
 
     // step 3
-    base = (base !== undefined)? base : null;
+    base = (base !== undefined) ? base : null;
 
     // step4
     encodingOverride = (encodingOverride !== undefined) ? encodingOverride : "utf-8";
@@ -1571,7 +1606,7 @@ class jURL implements IURL {
 
       // console.log(toString(buffer));
 
-      switch(state) {
+      switch (state) {
 
       // https://url.spec.whatwg.org/#scheme-start-state
       case State.SchemeStartState:
@@ -1685,8 +1720,8 @@ class jURL implements IURL {
 
           // step 3-2
           if (c === 37 // %
-           && isASCIIHexDigits(encodedInput[pointer+1])
-           && isASCIIHexDigits(encodedInput[pointer+2])) {
+           && isASCIIHexDigits(encodedInput[pointer + 1])
+           && isASCIIHexDigits(encodedInput[pointer + 2])) {
               console.error("parse error");
           }
 
@@ -1714,7 +1749,7 @@ class jURL implements IURL {
 
       // https://url.spec.whatwg.org/#relative-or-authority-state
       case State.RelativeOrAuthorityState:
-        if (c === 47 && encodedInput[pointer+1] === 47) { // /
+        if (c === 47 && encodedInput[pointer + 1] === 47) { // /
           state = State.AuthorityIgnoreSlashesState;
           pointer = pointer + 1;
         }
@@ -1735,7 +1770,7 @@ class jURL implements IURL {
           url.scheme = base.scheme;
         }
 
-        switch(c) {
+        switch (c) {
 
         // EOF is cared at default:
 
@@ -1776,14 +1811,14 @@ class jURL implements IURL {
             url.query = base.query;
           }
 
-          // [x, x, o, x] 2+1  4
+          // [x, x, o, x] 2 + 1  4
           else {
             // step 1
             if (url.scheme !== "file"
              || !isASCIIAlpha(c)
-             || ![58, 124].includes(encodedInput[pointer+1]) // :, |
-             || encodedInput.length - (pointer+1) === 1 // remaining.length = 1
-             || ![47, 92, 63, 35].includes(encodedInput[pointer+2]) // /, \, ?, #
+             || ![58, 124].includes(encodedInput[pointer + 1]) // :, |
+             || encodedInput.length - (pointer + 1) === 1 // remaining.length = 1
+             || ![47, 92, 63, 35].includes(encodedInput[pointer + 2]) // /, \, ?, #
             ) {
               url.host = base.host;
               url.port = base.port;
@@ -1904,8 +1939,8 @@ class jURL implements IURL {
 
             // step 1-3-3
             if (cp === 37 // %
-             && isASCIIHexDigits(buffer[i+1])
-             && isASCIIHexDigits(buffer[i+2])
+             && isASCIIHexDigits(buffer[i + 1])
+             && isASCIIHexDigits(buffer[i + 2])
             ) {
                 console.error("parse error");
             }
@@ -2080,7 +2115,8 @@ class jURL implements IURL {
 
           // step 2-1
           function trimZero(s: CodePoint[]): CodePoint[] {
-            while(true) {
+            "use strict";
+            while (true) {
               if (s[0] === 48 && s.length > 1) { // 0
                 s.shift();
               } else {
@@ -2152,12 +2188,12 @@ class jURL implements IURL {
             console.error("parse error");
           }
 
-          var table: { [index:string]: CodePoint[] } = {
+          var table: { [index: string]: CodePoint[] } = {
             "%2e":    [46], // .
             ".%2e":   [46, 46], // ..
             "%2e.":   [46, 46], // ..
             "%2e%2e": [46, 46]  // ..
-          }
+          };
 
           // step 1-2
           var matched: CodePoint[] = table[toString(buffer.map(toLower))];
@@ -2223,8 +2259,8 @@ class jURL implements IURL {
 
           // step 3-2
           if (c === 37 // %
-           && isASCIIHexDigits(encodedInput[pointer+1])
-           && isASCIIHexDigits(encodedInput[pointer+2])) {
+           && isASCIIHexDigits(encodedInput[pointer + 1])
+           && isASCIIHexDigits(encodedInput[pointer + 2])) {
               console.error("parse error");
           }
 
@@ -2287,8 +2323,8 @@ class jURL implements IURL {
 
           // step 3-2
           if (c === 37 // %
-           && isASCIIHexDigits(encodedInput[pointer+1])
-           && isASCIIHexDigits(encodedInput[pointer+2])) {
+           && isASCIIHexDigits(encodedInput[pointer + 1])
+           && isASCIIHexDigits(encodedInput[pointer + 2])) {
               console.error("parse error");
           }
 
@@ -2300,12 +2336,13 @@ class jURL implements IURL {
 
       // https://url.spec.whatwg.org/#fragment-state
       case State.FragmentState:
-        switch(c) {
+        switch (c) {
           case 0x0000:
           case 0x0009:
           case 0x000A:
           case 0x000D:
             console.error("parse error");
+            break;
           default:
             if (isNaN(c)) {
               // TODO: do nothing
@@ -2319,8 +2356,8 @@ class jURL implements IURL {
 
             // step 2
             if (c === 37 // %
-             && isASCIIHexDigits(encodedInput[pointer+1])
-             && isASCIIHexDigits(encodedInput[pointer+2])) {
+             && isASCIIHexDigits(encodedInput[pointer + 1])
+             && isASCIIHexDigits(encodedInput[pointer + 2])) {
                 console.error("parse error");
             }
 
@@ -2402,8 +2439,9 @@ this.jURL = jURL;
  * Testing
  */
 function assert(actual: any, expected: any): void {
-  console.log('.');
-  console.assert(actual === expected, '\nact: ' + actual + '\nexp: ' + expected);
+  "use strict";
+  console.log(".");
+  console.assert(actual === expected, "\nact: " + actual + "\nexp: " + expected);
 }
 
 assert(inRange(1, 2, 3), true);
@@ -2411,9 +2449,9 @@ assert(inRange(1, 1, 1), true);
 assert(inRange(1, 0, 1), false);
 
 
-var t = true, f = false;           [ 'a', 'f', 'z', 'A', 'F', 'Z', '0', '9', '!', '?', '' ]
-  .map((e) => e.charCodeAt(0))
-  .forEach((a, i) => {
+var t = true, f = false;           [ "a", "f", "z", "A", "F", "Z", "0", "9", "!", "?", "" ]
+  .map((e: string) => e.charCodeAt(0))
+  .forEach((a: CodePoint, i: number) => {
     assert(isASCIIDigits(a),       [  f ,  f ,  f ,  f ,  f ,  f ,  t ,  t ,  f ,  f ,  f ][i]);
     assert(isASCIIHexDigits(a),    [  t ,  t ,  f ,  t ,  t ,  f ,  t ,  t ,  f ,  f ,  f ][i]);
     assert(isASCIIAlpha(a),        [  t ,  t ,  t ,  t ,  t ,  t ,  f ,  f ,  f ,  f ,  f ][i]);
@@ -2421,7 +2459,7 @@ var t = true, f = false;           [ 'a', 'f', 'z', 'A', 'F', 'Z', '0', '9', '!'
     assert(isURLCodePoint(a),      [  t ,  t ,  t ,  t ,  t ,  t ,  t ,  t ,  t ,  t ,  f ][i]);
   });
 
-["ftp", "file", "gopher", "http", "https", "ws", "wss"].forEach((scheme) => {
+["ftp", "file", "gopher", "http", "https", "ws", "wss"].forEach((scheme: string) => {
   assert(isRelativeScheme(scheme), true);
 });
 
@@ -2431,7 +2469,8 @@ assert(isRelativeScheme(null), false);
 assert(isRelativeScheme(undefined), false);
 
 
-["!", "$", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", ":", ";", "=", "?", "@", "_", "~"].forEach(function(c) {
+["!", "$", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", ":", ";", "=", "?", "@", "_", "~"]
+.forEach(function(c: string) {
   assert(isURLCodePoint(c.charCodeAt(0)), true);
 });
 
@@ -2445,8 +2484,8 @@ assert("𠮟", toString(obtainUnicode("𠮟")));
 assert("𠮟", decode(encode(obtainUnicode("𠮟"))));
 assert("𠮟", decode(percentDecode(utf8PercentEncode(obtainUnicode("𠮟")[0], simpleEncodeSet))));
 
-assert([1,2,3].includes(2), true);
-assert([1,2,3].includes(-1), false);
+assert([1, 2, 3].includes(2), true);
+assert([1, 2, 3].includes(-1), false);
 
 // http://www.gestioip.net/docu/ipv6_address_examples.html
 // TODO: https://bitbucket.org/kwi/py2-ipaddress/src/991cf901295a14e77c795691afbec552461865f0/test_ipaddress.py?at=default
@@ -2458,8 +2497,8 @@ assert([1,2,3].includes(-1), false);
 ["3731:54:65fe:2::a7", "3731:54:65fe:2::a7"],
 ["::", "::"],
 ["::1", "::1"],
-//["::ffff:10.0.0.3", "::ffff:10.0.0.3"],
-//["::ffff:0:10.0.0.3", "::ffff:0:10.0.0.3"],
+// ["::ffff:10.0.0.3", "::ffff:10.0.0.3"],
+// ["::ffff:0:10.0.0.3", "::ffff:0:10.0.0.3"],
 ["100::", "100::"],
 ["2001:0000:6dcd:8c74:76cc:63bf:ac32:6a1", "2001:0:6dcd:8c74:76cc:63bf:ac32:6a1"],
 ["2001:0002:cd:65a:753::a1", "2001:2:cd:65a:753::a1"],
@@ -2470,11 +2509,11 @@ assert([1,2,3].includes(-1), false);
 ["fea3:c65:43ee:54:e2a:2357:4ac4:732", "fea3:c65:43ee:54:e2a:2357:4ac4:732"],
 // ["::10.0.0.3", "::10.0.0.3"],
 
-//["fe80:4:6c:8c74:0000:5efe:109.205.140.116", "fe80:4:6c:8c74:0000:5efe:109.205.140.116"],
-//["24a6:57:c:36cf:0000:5efe:109.205.140.116", "24a6:57:c:36cf:0000:5efe:109.205.140.116"],
-//["2002:5654:ef3:c:0000:5efe:109.205.140.116", "2002:5654:ef3:c:0000:5efe:109.205.140.116"],
+// ["fe80:4:6c:8c74:0000:5efe:109.205.140.116", "fe80:4:6c:8c74:0000:5efe:109.205.140.116"],
+// ["24a6:57:c:36cf:0000:5efe:109.205.140.116", "24a6:57:c:36cf:0000:5efe:109.205.140.116"],
+// ["2002:5654:ef3:c:0000:5efe:109.205.140.116", "2002:5654:ef3:c:0000:5efe:109.205.140.116"],
 
-].forEach((test) => {
+].forEach((test: string[]) => {
   assert(serializeIPv6(parseIPv6(obtainUnicode(test[0]))), test[1]);
 });
 
@@ -2494,7 +2533,7 @@ assert(u.hash,     "#yey");
 assert(u.searchParams.get("key1"), "value1");
 assert(u.searchParams.get("key2"), "value2");
 
-var href = "http://ゆーざ:パスワード@host.com:3000/ぱす/です/よ/?きー=ばりゅー&もう=いっこ#いぇーい"
+var href = "http://ゆーざ:パスワード@host.com:3000/ぱす/です/よ/?きー=ばりゅー&もう=いっこ#いぇーい";
 var u = new jURL(href);
 assert(u.href,     "http://%E3%82%86%E3%83%BC%E3%81%96:%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89@host.com:3000/%E3%81%B1%E3%81%99/%E3%81%A7%E3%81%99/%E3%82%88/?%E3%81%8D%E3%83%BC=%E3%81%B0%E3%82%8A%E3%82%85%E3%83%BC&%E3%82%82%E3%81%86=%E3%81%84%E3%81%A3%E3%81%93#いぇーい");
 assert(u.username, "%E3%82%86%E3%83%BC%E3%81%96");
