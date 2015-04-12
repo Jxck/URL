@@ -3,6 +3,28 @@
 /// <reference path="types/obtain-unicode.d.ts" />
 /// <reference path="types/utf8-encoding.d.ts" />
 
+// MEMO: code point
+// ",  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,   -,  .,  /
+// 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47
+
+//  0, ...,  9
+// 48, ..., 57
+
+//  :,  ;,  <,  =,  >,  ?,  @
+// 58, 59, 60, 61, 62, 63, 64
+
+//  A, ...,  Z
+// 65, ..., 90
+
+//  [,  \,  ],  ^,  _,  `
+// 91, 92, 93, 94, 95, 96
+
+//  a, ...,   z
+// 97, ..., 122
+
+//   {,   |,   },   ~
+// 123, 124, 125, 126
+
 // TODO: Fixme does not exist on type 'string'... ?
 interface String {
   codePoint(): number;
@@ -69,29 +91,6 @@ var decoder = new TextDecoder();
 
 // import only type info
 var URLSearchParams = require('urlsearchparams').URLSearchParams;
-
-// MEMO: code point
-// ",  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,   -,  .,  /
-// 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47
-
-//  0, ...,  9
-// 48, ..., 57
-
-//  :,  ;,  <,  =,  >,  ?,  @
-// 58, 59, 60, 61, 62, 63, 64
-
-//  A, ...,  Z
-// 65, ..., 90
-
-//  [,  \,  ],  ^,  _,  `
-// 91, 92, 93, 94, 95, 96
-
-//  a, ...,   z
-// 97, ..., 122
-
-//   {,   |,   },   ~
-// 123, 124, 125, 126
-
 
 // original type
 type CodePoint = number;
