@@ -3,7 +3,8 @@
 /// <reference path="types/obtain-unicode.d.ts" />
 /// <reference path="types/utf8-encoding.d.ts" />
 
-/** MEMO: code point
+/**
+ *  MEMO: code point
  *  ",  #,  $,  %,  &,  ',  (,  ),  *,  +,  ,   -,  .,  /
  *  34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47
  *
