@@ -493,7 +493,7 @@ function serializeIPv6(address: number[]): string {
 }
 
 // https://url.spec.whatwg.org/#concept-host-parser
-function parseHost(input: CodePoint[], unicodeFlag?: boolean): Host {
+function parseHost(input: CodePoint[], unicodeFlag: boolean=false): Host {
   "use strict";
 
   // step 1
@@ -535,7 +535,7 @@ function parseHost(input: CodePoint[], unicodeFlag?: boolean): Host {
   }
 
   // step 7
-  if (unicodeFlag) { // TODO: sent a bug to clearify default flag, so follow to update spec.
+  if (unicodeFlag) {
     return asciiDomain;
   } else {
     return jURL.domainToUnicode(asciiDomain);
