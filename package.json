@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "bower": "^1.3.12",
+    "tslint": "^2.1.1",
     "typescript": "^1.4.1"
   },
   "files": [
