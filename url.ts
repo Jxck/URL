@@ -2,6 +2,7 @@
 /// <reference path="types/array.d.ts" />
 /// <reference path="types/obtain-unicode.d.ts" />
 /// <reference path="types/utf8-encoding.d.ts" />
+/// <reference path="types/punycode.d.ts" />
 
 /**
  *  MEMO: code point
@@ -31,6 +32,8 @@
 interface String {
   codePoint(): number;
 }
+
+console.error = function(){}
 
 if (String.prototype.codePoint === undefined) {
   Object.defineProperty(String.prototype, "codePoint", {
@@ -93,6 +96,13 @@ var decoder = new TextDecoder();
 
 // import only type info
 var URLSearchParams = require("urlsearchparams").URLSearchParams;
+
+// import only type info
+import puny = require("punycode");
+var punycode: typeof puny;
+if (typeof window === "undefined") {
+  punycode = require('./punycode');
+}
 
 // original type
 type CodePoint = number;
@@ -1453,13 +1463,11 @@ class jURL implements IURL {
   }
 
   static domainToASCII(domain: string):   string {
-    // TODO: implement me
-    return domain;
+    return punycode.toASCII(domain);
   }
 
   static domainToUnicode(domain: string): string {
-    // TODO: implement me
-    return domain;
+    return punycode.toUnicode(domain);
   }
 
   // https://url.spec.whatwg.org/#constructors
