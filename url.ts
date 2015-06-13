@@ -511,6 +511,51 @@ function serializeIPv6(address: number[]): string {
 }
 this.serializeIPv6 = serializeIPv6;
 
+function UnicodeToASCII(o: any): string {
+  return '';
+}
+
+function UnicodeToUnicode(o: any): string {
+  return '';
+}
+
+function domainToASCII(domain: string): string {
+  // step 1
+  let result: string;
+  try {
+    result = UnicodeToASCII({
+      domain_name: domain,
+      UseSTD3ASCIIRules: false,
+      processing_option: "Transitional_Processing",
+      VerifyDnsLength: false,
+    });
+  } catch(err) {
+    // step 2
+    console.error(err);
+    return err;
+  }
+
+  // step 3
+  return result;
+}
+
+function domainToUnicode(domain: string): string {
+  // step 1
+  let result: string;
+  try {
+    result = UnicodeToUnicode({
+      domain_name: domain,
+      UseSTD3ASCIIRules: false
+    });
+  } catch(err) {
+    // ignoring any returned errors.
+    console.error(err);
+  }
+
+  // step 2
+  return result;
+}
+
 // https://url.spec.whatwg.org/#concept-host-parser
 function parseHost(input: CodePoint[], unicodeFlag: boolean=false): Host {
   "use strict";
@@ -539,7 +584,7 @@ function parseHost(input: CodePoint[], unicodeFlag: boolean=false): Host {
 
   try {
     // step 4
-    asciiDomain = jURL.domainToASCII(domain);
+    asciiDomain = domainToASCII(domain);
   } catch (failure) {
     // step 5
     throw failure;
@@ -557,7 +602,7 @@ function parseHost(input: CodePoint[], unicodeFlag: boolean=false): Host {
   if (unicodeFlag) {
     return asciiDomain;
   } else {
-    return jURL.domainToUnicode(asciiDomain);
+    return domainToUnicode(asciiDomain);
   }
 }
 
@@ -1463,11 +1508,43 @@ class jURL implements IURL {
   }
 
   static domainToASCII(domain: string):   string {
-    return punycode.toASCII(domain);
+    let asciiDomain: Host;
+
+    // step 1
+    try {
+      asciiDomain = parseHost(domain);
+    } catch(err) {
+      console.err(err);
+      return '';
+    }
+
+    // step 2
+    if (isIPv6(asciiDomain)) {
+      return '';
+    }
+
+    // step 3
+    return string(asciiDomain);
   }
 
   static domainToUnicode(domain: string): string {
-    return punycode.toUnicode(domain);
+    let unicodeDomain: Host;
+
+    // step 1
+    try {
+      unicodeDomain = parseHost(domain, true);
+    } catch(err) {
+      console.err(err);
+      return '';
+    }
+
+    // step 2
+    if (isIPv6(unicodeDomain)) {
+      return '';
+    }
+
+    // step 3
+    return string(unicodeDomain);
   }
 
   // https://url.spec.whatwg.org/#constructors

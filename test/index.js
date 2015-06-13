@@ -129,3 +129,8 @@ var href = "http://[2001:0db8:0a0b:12f0:0000:0000:0000:0001]";
 var u = new jURL(href);
 assert(u.origin, "http://[2001:db8:a0b:12f0::1]");
 assert(u.host, "[2001:db8:a0b:12f0::1]");
+
+
+var href = "http://ExAmPlE.CoM";
+var u = new jURL(href);
+console.log(u);
