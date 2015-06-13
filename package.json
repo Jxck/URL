@@ -12,9 +12,9 @@
     "utf8-encoding": "0.1.x"
   },
   "devDependencies": {
-    "bower": "^1.3.12",
-    "tslint": "^2.1.1",
-    "typescript": "^1.4.1"
+    "bower": "^1.4.1",
+    "tslint": "^2.2.0-beta",
+    "typescript": "^1.5.0-beta"
   },
   "files": [
     "test",
